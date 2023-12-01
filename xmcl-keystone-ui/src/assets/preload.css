@@ -1,0 +1,12 @@
+body {
+  background: black;
+}
+
+/* only apply on dark theme by media query */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: black;
+  }
+}
+
+

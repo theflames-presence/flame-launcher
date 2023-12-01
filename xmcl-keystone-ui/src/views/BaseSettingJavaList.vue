@@ -1,0 +1,80 @@
+<template>
+  <v-list
+    two-line
+    class="overflow-y-auto bg-transparent"
+  >
+    <v-list-item
+      key="DEFAULT"
+      :class="{ primary: value.path === '' }"
+      @click="emit('input', { path: '', version: '', majorVersion: 0, valid: false })"
+    >
+      <v-list-item-avatar>
+        <v-icon>close</v-icon>
+      </v-list-item-avatar>
+      <v-list-item-content>
+        <v-list-item-title>
+          {{ t("java.allocatedLong") }}
+        </v-list-item-title>
+        <v-list-item-subtitle>{{ t("java.allocatedLong") }}</v-list-item-subtitle>
+      </v-list-item-content>
+    </v-list-item>
+    <v-list-item
+      v-for="item in items"
+      :key="item.path"
+      :class="{ primary: item.path === value.path && item.valid, error: item.path === value.path && !item.valid }"
+      @click="emit('input', item)"
+    >
+      <v-list-item-avatar>
+        <v-chip
+          label
+          small
+          :color="item.path === value.path && item.valid ? 'white' : item.valid ? 'orange' : 'grey'"
+          outlined
+        >
+          {{ item.majorVersion }}
+        </v-chip>
+      </v-list-item-avatar>
+      <v-list-item-content>
+        <v-list-item-title v-if="item.valid">
+          Java {{ item.version }}
+        </v-list-item-title>
+        <v-list-item-title v-else>
+          {{ t('java.invalid') }}
+        </v-list-item-title>
+        <v-list-item-subtitle>{{ item.path }}</v-list-item-subtitle>
+      </v-list-item-content>
+      <v-list-item-action>
+        <v-btn
+          v-if="item.valid"
+          icon
+          @click.stop="showItemInDirectory(item.path)"
+        >
+          <v-icon>folder</v-icon>
+        </v-btn>
+      </v-list-item-action>
+      <v-list-item-action>
+        <v-btn
+          icon
+          @click.stop="remove(item)"
+        >
+          <v-icon>delete</v-icon>
+        </v-btn>
+      </v-list-item-action>
+    </v-list-item>
+  </v-list>
+</template>
+
+<script lang=ts setup>
+import { JavaRecord, BaseServiceKey } from '@xmcl/runtime-api'
+import { useService } from '@/composables'
+
+defineProps<{
+  items:JavaRecord[]
+  value:JavaRecord
+  remove(java: JavaRecord): void
+}>()
+
+const emit = defineEmits(['input'])
+const { t } = useI18n()
+const { showItemInDirectory } = useService(BaseServiceKey)
+</script>
