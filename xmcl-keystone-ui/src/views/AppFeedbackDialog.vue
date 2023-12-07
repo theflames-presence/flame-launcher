@@ -1,0 +1,100 @@
+<template>
+  <v-dialog
+    v-model="isShown"
+    hide-overlay
+    transition="dialog-bottom-transition"
+    width="500"
+  >
+    <v-toolbar color="warning">
+      <v-toolbar-title>{{ t('feedback.name') }}</v-toolbar-title>
+      <v-spacer />
+      <v-btn
+        icon
+        @click="hide"
+      >
+        <v-icon>close</v-icon>
+      </v-btn>
+    </v-toolbar>
+    <v-list
+      three-line
+      subheader
+    >
+      <v-subheader>{{ t('feedback.description') }}</v-subheader>
+
+      <FeedbackCard />
+      <v-subheader> {{ t('feedback.channel') }} </v-subheader>
+      <v-list-item>
+        <v-list-item-content>
+          <v-list-item-title>{{ t('feedback.github') }}</v-list-item-title>
+          <v-list-item-subtitle>{{ t('feedback.githubDescription') }}</v-list-item-subtitle>
+        </v-list-item-content>
+        <v-list-item-action>
+          <v-btn
+            text
+            target="browser"
+            href="https://github.com/aislxflames/flame-launcher/issues/new"
+          >
+            {{ t('feedback.githubOpenIssue') }}
+          </v-btn>
+        </v-list-item-action>
+      </v-list-item>
+      <v-list-item>
+        <v-list-item-content>
+          <v-list-item-title>{{ t('feedback.youtube') }}</v-list-item-title>
+          <v-list-item-subtitle
+            style="max-width: 80%"
+          >
+            {{ t('feedback.youtubeDescription') }}
+          </v-list-item-subtitle>
+        </v-list-item-content>
+
+        <v-list-item-action>
+          <v-btn
+            text
+            target="browser"
+            href="https://www.youtube.com/@Aislx"
+          >
+            {{ t('feedback.qqEnterGroup') }}
+          </v-btn>
+        </v-list-item-action>
+      </v-list-item>
+
+      <v-list-item>
+        <v-list-item-content>
+          <v-list-item-title>{{ t('feedback.discord') }}</v-list-item-title>
+          <v-list-item-subtitle
+            style="max-width: 80%"
+          >
+            {{ t('feedback.discordDescription') }}
+          </v-list-item-subtitle>
+        </v-list-item-content>
+
+        <v-list-item-action>
+          <v-btn
+            text
+            target="browser"
+            href="https://dsc.gg/flame-universe"
+          >
+            {{ t('feedback.discordJoin') }}
+          </v-btn>
+        </v-list-item-action>
+      </v-list-item>
+    </v-list>
+  </v-dialog>
+</template>
+
+<script lang=ts setup>
+import FeedbackCard from '../components/FeedbackCard.vue'
+import { useDialog } from '../composables/dialog'
+
+const { hide, isShown } = useDialog('feedback')
+const { t } = useI18n()
+
+</script>
+
+<style>
+.diff {
+  color: rgb(255, 0, 0);
+  font-style: italic;
+}
+</style>

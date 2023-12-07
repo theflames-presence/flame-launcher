@@ -1,0 +1,330 @@
+<template>
+  <v-list-item
+    v-context-menu="getContextMenuItems"
+    v-shared-tooltip="[tooltip, hasUpdate ? 'primary' : 'black']"
+    :style="{
+      minHeight: height ? height + 'px' : undefined,
+      maxHeight: height ? height + 'px' : undefined
+    }"
+    style="pointer-events: initial;"
+    :draggable="draggable"
+    :class="{
+      'v-list-item--disabled': item.disabled,
+      'dragged-over': dragover > 0,
+    }"
+    :input-value="selected"
+    link
+    @dragenter="onDragEnter"
+    @dragover="onDragOver"
+    @dragleave="onDragLeave"
+    @dragstart="onDragStart"
+    @dragend="onDragEnd"
+    @drop="onDrop"
+    @click="emit('click')"
+  >
+    <v-list-item-avatar v-if="!selectionMode">
+      <img
+        ref="iconImage"
+        :src="icon || item.icon || unknownServer"
+      >
+    </v-list-item-avatar>
+    <v-list-item-action v-else>
+      <v-checkbox
+        v-model="isChecked"
+        hide-details
+        @click.stop
+      />
+    </v-list-item-action>
+    <v-list-item-content>
+      <v-badge
+        class="w-full"
+        color="red"
+        dot
+        inline
+        :value="hasUpdate"
+        :offset-y="5"
+      >
+        <v-list-item-title class="flex overflow-hidden">
+          <span class="max-w-full overflow-hidden overflow-ellipsis">
+            {{ title || item.title }}
+          </span>
+          <template
+            v-if="item.installed.length > 0 && getContextMenuItems"
+          >
+            <div class="flex-grow" />
+            <v-btn
+              x-small
+              icon
+              @click.stop="onSettingClick"
+            >
+              <v-icon
+                class="v-list-item__subtitle"
+                size="15"
+              >
+                settings
+              </v-icon>
+            </v-btn>
+          </template>
+        </v-list-item-title>
+      </v-badge>
+      <v-list-item-subtitle>
+        <template v-if="description">
+          {{ description }}
+        </template>
+        <template v-else-if="item.description.includes('§')">
+          <TextComponent :source="item.description" />
+        </template>
+        <template v-else>
+          {{ item.description }}
+        </template>
+      </v-list-item-subtitle>
+      <v-list-item-subtitle class="invisible-scroll flex flex-grow-0 gap-2">
+        <slot
+          v-if="slots.labels"
+          name="labels"
+        />
+        <template v-else>
+          <template
+            v-for="(tag, i) of tags"
+          >
+            <v-divider
+              v-if="i > 0"
+              :key="i + 'divider'"
+              vertical
+            />
+            <div
+              :key="i"
+              class="flex flex-grow-0"
+            >
+              <v-icon
+                v-if="tag.icon"
+                class="material-icons-outlined"
+                :left="!!tag.text"
+                :color="tag.color"
+                small
+              >
+                {{ tag.icon }}
+              </v-icon>
+              <span class="pt-[2px]">
+                {{ tag.text }}
+              </span>
+            </div>
+          </template>
+        </template>
+      </v-list-item-subtitle>
+    </v-list-item-content>
+    <v-list-item-action
+      v-if="!item.installed"
+      class="flex flex-grow-0 flex-row self-center"
+    >
+      <v-avatar
+        v-if="item.forge"
+        size="30px"
+      >
+        <v-img
+          width="28"
+          :src="'image://builtin/forge'"
+        />
+      </v-avatar>
+      <v-avatar
+        v-if="item.fabric"
+        size="30px"
+      >
+        <v-img
+          width="28"
+          :src="'image://builtin/fabric'"
+        />
+      </v-avatar>
+      <v-avatar
+        v-if="item.quilt"
+        size="30px"
+      >
+        <v-img
+          width="28"
+          :src="'image://builtin/quilt'"
+        />
+      </v-avatar>
+      <v-avatar
+        size="30px"
+      >
+        <v-icon class="pt-2">
+          {{ item.modrinth ? '$vuetify.icons.modrinth' : item.curseforge ? '$vuetify.icons.curseforge' : 'inventory_2' }}
+        </v-icon>
+      </v-avatar>
+    </v-list-item-action>
+  </v-list-item>
+</template>
+
+<script lang="ts" setup>
+import unknownServer from '@/assets/unknown_server.png'
+import { ContextMenuItem, useContextMenu } from '@/composables/contextMenu'
+import { kSWRVConfig } from '@/composables/swrvConfig'
+import { vContextMenu } from '@/directives/contextMenu'
+import { vSharedTooltip } from '@/directives/sharedTooltip'
+import { clientCurseforgeV1, clientModrinthV2 } from '@/util/clients'
+import { injection } from '@/util/inject'
+import { getModrinthProjectKey } from '@/util/modrinth'
+import { ProjectEntry, ProjectFile } from '@/util/search'
+import { getExpectedSize } from '@/util/size'
+import { swrvGet } from '@/util/swrvGet'
+import { Ref } from 'vue'
+import TextComponent from './TextComponent'
+
+const props = defineProps<{
+  item: ProjectEntry<ProjectFile>
+  selectionMode: boolean
+  checked: boolean
+  selected: boolean
+  hasUpdate?: boolean
+  height?: number
+  draggable?: boolean
+  getContextMenuItems?: () => ContextMenuItem[]
+}>()
+const slots = useSlots()
+const emit = defineEmits(['click', 'checked', 'drop'])
+
+const isChecked = computed({
+  get() {
+    return props.checked
+  },
+  set(v) {
+    emit('checked', v)
+  },
+})
+
+const config = injection(kSWRVConfig)
+const icon = ref(undefined as undefined | string)
+const title = ref(undefined as undefined | string)
+const description = ref(undefined as undefined | string)
+const downloadCount = ref(undefined as undefined | number)
+const followerCount = ref(undefined as undefined | number)
+const { open } = useContextMenu()
+
+const dragover = ref(0)
+const onDragEnter = (e: DragEvent) => {
+  if (props.draggable) {
+    dragover.value += 1
+  }
+}
+const onDragLeave = () => {
+  if (props.draggable) {
+    dragover.value += -1
+  }
+}
+
+const iconImage: Ref<any> = ref(null)
+function onDragStart(e: DragEvent) {
+  e.dataTransfer!.effectAllowed = 'move'
+  e.dataTransfer?.setData('id', props.item.id)
+  e.dataTransfer!.setDragImage(iconImage.value, 0, 0)
+}
+function onDragEnd(e: DragEvent) {
+}
+function onDrop(e: DragEvent) {
+  dragover.value = 0
+  emit('drop', e.dataTransfer?.getData('id'))
+}
+function onDragOver(e: DragEvent) {
+  if (props.draggable) {
+    e.preventDefault()
+  }
+}
+
+watch(() => props.item, (newMod) => {
+  if (newMod) {
+    icon.value = undefined
+    title.value = undefined
+    description.value = undefined
+    downloadCount.value = undefined
+    followerCount.value = undefined
+
+    if (!newMod.curseforge && !newMod.modrinth) {
+      const { curseforgeProjectId, modrinthProjectId } = newMod
+      if (modrinthProjectId) {
+        swrvGet(getModrinthProjectKey(modrinthProjectId), () => clientModrinthV2.getProject(modrinthProjectId),
+          config.cache,
+          config.dedupingInterval, { ttl: config.ttl })
+          .then((project) => {
+            icon.value = project.icon_url
+            title.value = project.title
+            description.value = project.description
+            downloadCount.value = project.downloads
+            followerCount.value = project.followers
+          })
+      } else if (curseforgeProjectId) {
+        swrvGet(`/curseforge/${curseforgeProjectId}`, () => clientCurseforgeV1.getMod(curseforgeProjectId),
+          config.cache,
+          config.dedupingInterval, { ttl: config.ttl })
+          .then((project) => {
+            icon.value = project.logo?.url
+            title.value = project.name
+            description.value = project.summary
+            downloadCount.value = project.downloadCount
+            followerCount.value = project.thumbsUpCount
+          })
+      }
+    }
+  }
+}, { immediate: true })
+const { t } = useI18n()
+const tooltip = computed(() => props.hasUpdate ? t('mod.hasUpdate') : props.item.description || props.item.title)
+const onSettingClick = (event: MouseEvent) => {
+  const button = event.target as any // Get the button element
+  const rect = button.getBoundingClientRect() // Get the position of the button
+  const bottomLeftX = rect.left // X-coordinate of the bottom-left corner
+  const bottomLeftY = rect.bottom // Y-coordinate of the bottom-left corner
+
+  if (props.getContextMenuItems) {
+    open(bottomLeftX, bottomLeftY, props.getContextMenuItems())
+  }
+}
+
+const tags = computed(() => {
+  const tags: { icon?: string; text?: string; color?: string }[] = []
+
+  if (props.item.author) {
+    tags.push({
+      icon: 'person',
+      text: props.item.author,
+    })
+  }
+  if (downloadCount.value || props.item.downloadCount) {
+    tags.push({
+      icon: 'file_download',
+      text: getExpectedSize(downloadCount.value || props.item.downloadCount || 0, ''),
+    })
+  }
+  if (followerCount.value || props.item.followerCount) {
+    tags.push({
+      icon: 'star_rate',
+      color: 'orange',
+      text: (followerCount.value || props.item.followerCount || 0).toString(),
+    })
+  }
+  if (props.item.modrinth || props.item.modrinthProjectId) {
+    tags.push({
+      icon: '$vuetify.icons.modrinth',
+    })
+  }
+  if (props.item.curseforge || props.item.curseforgeProjectId) {
+    tags.push({
+      icon: '$vuetify.icons.curseforge',
+    })
+  }
+  if (props.item.files && props.item.files.length > 0 && props.item.files[0].resource.size) {
+    tags.push({
+      icon: 'storage',
+      text: getExpectedSize(props.item.files[0].resource.size),
+    })
+  }
+
+  return tags
+})
+</script>
+
+<style scoped>
+.dragged-over {
+  @apply border border-dashed border-transparent border-yellow-400;
+}
+
+</style>
