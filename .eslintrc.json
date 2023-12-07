@@ -1,0 +1,9 @@
+{
+    "root": true,
+    "globals": {
+        "ErrorOptions": true
+    },
+    "extends": [
+        "./xmcl/packages/eslint-config/.eslintrc.json"
+    ]
+}
