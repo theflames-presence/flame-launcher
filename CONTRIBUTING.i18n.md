@@ -17,7 +17,7 @@ You need to fork & clone the project using git.
 Suppose you already fork the project in Github to your repo:
 
 ```bash
-git clone --recurse-submodules https://github.com/your-id/x-minecraft-launcher
+git clone --recurse-submodules https://github.com/your-id/flame-launcher
 ```
 
 ### Install

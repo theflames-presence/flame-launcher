@@ -27,7 +27,7 @@ For renderer side, which is the pure front-end
 ![diagram](/assets/diagram.svg)
 
 - xmcl
-  - The linked git repo [launcher-core](https://github.com/voxelum/minecraft-launcher-core-node) is a git submodule in this project.
+  - The linked git repo [launcher-core](https://github.com/aislxflames/flame-launcher-core) is a git submodule in this project.
   - Implements the core Minecraft install & launch logic, and expose them as a library.
 - xmcl-electron-app
   - Use Electron to implement the runtime.
