@@ -3,6 +3,7 @@ This Launcher is made by Aislx FlamEs
 
 # **Advance Layout have mods and many features**
 ![image](https://github.com/aislxflames/flame-launcher/assets/120901302/9982698c-4169-4154-a615-b3cf4306401f)
+- We have here many mods platform like modrinth curseforge ftb etc
 
 
 # Modpack Market you can install modpacks directly here
@@ -10,6 +11,7 @@ This Launcher is made by Aislx FlamEs
 
 # **Download From [Here](https://github.com/aislxflames/flame-launcher/releases)**
 ![image](https://github.com/aislxflames/flame-launcher/assets/120901302/b7885e86-6881-4201-a98f-b307f8b9d99f)
+- 1 click install mods
 
 
 # Letest Features
