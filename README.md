@@ -14,7 +14,7 @@ This Launcher is made by Aislx FlamEs
 - 1 click install mods
 
 
-# **Turn on developer mode to acess cracked versions
+# **Turn on developer mode to acess cracked versions**
 ![image](https://github.com/aislxflames/flame-launcher/assets/120901302/2f208a69-063c-4db0-9ed6-5ec09121029b)
 
 **Ely.by is a online cracked skin service and offline support**
