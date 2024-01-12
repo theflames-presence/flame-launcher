@@ -8,7 +8,7 @@ This Launcher is made by Aislx FlamEs
 # Modpack Market you can install modpacks directly here
 ![image](https://github.com/aislxflames/flame-launcher/assets/120901302/8e7ee429-99ef-4c24-9da6-779d9a095436)
 
-# **Download From [Here](https://github.com/aislxflames/flame-launcher/releases) **
+# **Download From [Here](https://github.com/aislxflames/flame-launcher/releases)**
 
 # Letest Features
 **🐛Bug Fixes**
