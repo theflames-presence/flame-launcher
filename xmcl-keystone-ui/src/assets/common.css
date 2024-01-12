@@ -8,8 +8,8 @@ input::-webkit-inner-spin-button {
     --primary-color: #ff3300;
     --warning-color: #e65100;
     --warning-color-decent: #c45920;
-    --common-color: #030303;
-    --border-dark: hsla(0, 0%, 0%, 0.12);
+    --common-color: #424242;
+    --border-dark: hsla(0, 0%, 100%, .12);
     --border-light: hsla(0, 0%, 100%, .12);
 }
 
@@ -256,7 +256,7 @@ a {
 }
 
 .v-text-field input {
-    @apply z-10;
+    @apply z-7;
 }
 
 .theme--dark.v-card .v-card__subtitle,
@@ -515,4 +515,14 @@ a {
 
 .dragover {
     @apply border-4 border-dashed border-yellow-400;
+}
+
+
+.hide-underline .theme--.v-text-field>.v-input__control>.v-input__slot:before {
+    border: none;
+}
+
+.hide-underline .v-text-field>.v-input__control>.v-input__slot:before {
+    border: none;
+    border-width: 0px;
 }

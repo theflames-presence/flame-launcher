@@ -105,6 +105,11 @@ function onException(e: LaunchExceptions) {
     description.value = t('launchBlocked.launchNoVersionInstalled.description', { version: e.options?.version })
     unexpected.value = true
     extraText.value = ''
+  } else if (e.type === 'launchBadVersion') {
+    title.value = t('launchBlocked.launchBadVersion.title')
+    description.value = t('launchBlocked.launchBadVersion.description', { version: e.version })
+    unexpected.value = true
+    extraText.value = ''
   } else if (e.type === 'launchUserStatusRefreshFailed') {
     title.value = t('launchBlocked.launchUserStatusRefreshFailed.title')
     description.value = t('launchBlocked.launchUserStatusRefreshFailed.description') + '<br>'
@@ -117,6 +122,9 @@ function onException(e: LaunchExceptions) {
     } else if (e.userException.type === 'userLoginMinecraftByXboxFailed') {
       description.value += t('launchBlocked.userLoginMinecraftByXboxFailed')
     }
+  } else if (e.type === 'launchSpawnProcessFailed') {
+    title.value = t('launchBlocked.launchSpawnProcessFailed.title')
+    description.value = t('launchBlocked.launchSpawnProcessFailed.description')
   }
   isShown.value = true
 }

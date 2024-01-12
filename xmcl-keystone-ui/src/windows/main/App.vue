@@ -1,6 +1,6 @@
 <template>
   <v-app
-    v-if="!shouldSetup"
+    v-if="!showSetup"
     class="h-full max-h-[100vh] overflow-auto overflow-x-hidden"
     :class="{ 'dark': vuetify.theme.dark }"
     :style="cssVars"
@@ -29,7 +29,6 @@
     <AppFeedbackDialog />
     <AppTaskDialog />
     <AppAddInstanceDialog />
-    <AppAddServerDialog />
     <AppExportDialog />
     <AppShareInstanceDialog />
     <AppInstanceDeleteDialog />
@@ -51,7 +50,7 @@
     <div
       class="relative flex h-full overflow-auto"
     >
-      <Setup @ready="shouldSetup = false" />
+      <Setup @ready="onReady" />
     </div>
     <AppFeedbackDialog />
   </v-app>
@@ -66,11 +65,12 @@ import { kBackground } from '@/composables/background'
 import { kColorTheme } from '@/composables/colorTheme'
 import { useDefaultErrorHandler } from '@/composables/errorHandler'
 import { useNotifier } from '@/composables/notifier'
+import { kSettingsState } from '@/composables/setting'
+import { kTutorial } from '@/composables/tutorial'
 import { kVuetify } from '@/composables/vuetify'
 import { useVuetifyColorTheme } from '@/composables/vuetifyColorTheme'
 import { injection } from '@/util/inject'
 import AppAddInstanceDialog from '@/views/AppAddInstanceDialog.vue'
-import AppAddServerDialog from '@/views/AppAddServerDialog.vue'
 import AppBackground from '@/views/AppBackground.vue'
 import AppContextMenu from '@/views/AppContextMenu.vue'
 import AppDropDialog from '@/views/AppDropDialog.vue'
@@ -86,7 +86,28 @@ import AppSystemBar from '@/views/AppSystemBar.vue'
 import AppTaskDialog from '@/views/AppTaskDialog.vue'
 import Setup from '@/views/Setup.vue'
 
-const shouldSetup = ref(location.search.indexOf('setup') !== -1)
+const isFirstLaunch = computed(() => location.search.indexOf('setup') !== -1)
+const showSetup = ref(isFirstLaunch.value)
+const { state } = injection(kSettingsState)
+
+const tutor = injection(kTutorial)
+// Set theme and start tutorial
+const onReady = async (data: any) => {
+  await nextTick()
+  showSetup.value = false
+  await nextTick()
+  if (state.value) {
+    state.value.themeSet(data.theme)
+  } else {
+    const unwatch = watch(state, (state) => {
+      if (state) {
+        state.themeSet(data.theme)
+      }
+      unwatch()
+    })
+  }
+  tutor.start()
+}
 
 const { cssVars, ...colorTheme } = injection(kColorTheme)
 

@@ -54,9 +54,14 @@ export async function * range(
     },
   })
 
+  let nextUrl = url
   while (true) {
+    if (segment.start >= segment.end) {
+      // the segment is finished, just ignore it
+      return
+    }
     try {
-      await stream(url, {
+      const { opaque } = await stream(nextUrl, {
         method: 'GET',
         dispatcher,
         headers: {
@@ -66,14 +71,36 @@ export async function * range(
         throwOnError: true,
         maxRedirections: 2,
         signal: abortSignal,
-        opaque: fileStream,
-        onInfo({ headers }) {
-          if (typeof headers['content-length'] === 'string') {
-            contentLength = Number.parseInt(headers['content-length'] ?? '0')
-            segment.end = contentLength
+        opaque: { fileStream },
+      }, ({ opaque, headers: responseHeaders, statusCode }) => {
+        if (statusCode >= 300) {
+          if (typeof responseHeaders.location === 'string') {
+            nextUrl = new URL(responseHeaders.location)
+            Object.assign(opaque as any, { continue: true })
+          } else {
+            (opaque as any).error = Object.assign(new Error(`Unexpected status code ${statusCode} from ${url}`), {
+              name: 'UnexpectedStatusCodeError',
+              range: segment.end < 0 ? undefined : `bytes=${segment.start}-${(segment.end) ?? ''}`,
+            })
+            // return a run-away writable
+            return new Writable({ write(chunk, en, cb) { cb() } })
           }
-        },
-      }, ({ opaque }) => opaque as Writable)
+        }
+        if (typeof responseHeaders['content-length'] === 'string') {
+          contentLength = Number.parseInt(responseHeaders['content-length'] ?? '0')
+          const end = segment.start + contentLength - 1
+          if (end !== segment.end) {
+            segment.end = segment.start + contentLength
+          }
+        }
+        return (opaque as any).fileStream as Writable
+      })
+      if ((opaque as any).continue) {
+        continue
+      }
+      if ((opaque as any).error) {
+        throw (opaque as any).error
+      }
       return
     } catch (e) {
       yield e

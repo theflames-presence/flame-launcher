@@ -4,9 +4,9 @@ import { LocalVersions } from './entities/version'
 import { InstanceModsState } from './services/InstanceModsService'
 import { GameOptionsState } from './services/InstanceOptionsService'
 import { InstanceState } from './services/InstanceService'
-import { InstanceVersionState } from './services/InstanceVersionService'
 import { JavaState } from './services/JavaService'
 import { NatState } from './services/NatService'
+import { PeerGroupState } from './services/PeerGroupService'
 import { PeerState } from './services/PeerService'
 import { UserState } from './services/UserService'
 
@@ -25,5 +25,5 @@ export const AllStates = [
   LocalVersions,
   NatState,
   PeerState,
-  InstanceVersionState,
+  PeerGroupState,
 ]

@@ -1,29 +1,32 @@
-import { clientModrinthV2 } from '@/util/clients'
+import { clientModrinthV2, clientModrinchV2Locale } from '@/util/clients'
 import useSWRV from 'swrv'
 import { Ref } from 'vue'
 import { kSWRVConfig } from './swrvConfig'
 import { getModrinthProjectKey } from '@/util/modrinth'
+import { kFlights } from './flights'
 
 export function useModrinthProject(id: Ref<string>) {
   const config = inject(kSWRVConfig)
-  const {
-    data: project,
-    isValidating: refreshing,
-    error: refreshError,
-    mutate: refresh,
-  } = useSWRV(computed(() => getModrinthProjectKey(id.value)), async () => {
-    // const localePromise = localeClient.getProject(id.value).then((v) => [v, false] as const)
-    const [proj, needWait] = await Promise.race([
-      clientModrinthV2.getProject(id.value).then((v) => [v, true] as const),
-      // localePromise,
-    ])
-    if (needWait) {
-      // localePromise.then((p) => { refresh(() => p[0]) })
-    }
-    return proj
-  }, inject(kSWRVConfig))
 
-  watch(project, () => {
+  const {
+    data,
+    isValidating,
+    error,
+    mutate,
+  } = useSWRV(computed(() => getModrinthProjectKey(id.value)),
+    async (key) => {
+      const cacheKey = getModrinthProjectKey(id.value)
+      if (cacheKey === key) {
+        return clientModrinthV2.getProject(id.value)
+      } else {
+        const realId = key.split('/')[2]
+        return clientModrinthV2.getProject(realId)
+      }
+    }, inject(kSWRVConfig))
+
+  const flights = inject(kFlights, {})
+
+  watch(data, () => {
     const _id = id.value
     const key = getModrinthProjectKey(_id)
     const item = config?.cache.get(key)
@@ -31,11 +34,61 @@ export function useModrinthProject(id: Ref<string>) {
       config?.cache.delete(key)
     }
   })
+  if (flights.i18nSearch) {
+    const { locale } = useI18n()
+
+    const {
+      data: iProject,
+      isValidating: iRefreshing,
+      error: iError,
+      mutate: iMutate,
+    } = useSWRV(computed(() => getModrinthProjectKey(id.value) + '?locale=' + locale.value),
+      () => clientModrinchV2Locale.getProject(id.value), inject(kSWRVConfig))
+
+    const project = computed(() => (!iRefreshing.value ? iProject.value : undefined) ?? data.value)
+    const refreshing = computed(() => isValidating.value)
+    const refreshError = computed(() => iError.value || error.value)
+    const refresh = () => {
+      iMutate()
+      mutate()
+    }
+
+    watch(data, () => {
+      const _id = id.value
+      const key = getModrinthProjectKey(_id)
+      const item = config?.cache.get(key)
+      if (item?.data.data.id !== _id) {
+        config?.cache.delete(key)
+      }
+    })
+    watch(iProject, () => {
+      const _id = id.value
+      const key = getModrinthProjectKey(_id) + '?locale=' + locale.value
+      const item = config?.cache.get(key)
+      if (item?.data.data.id !== _id) {
+        config?.cache.delete(key)
+      }
+    })
+
+    return {
+      project,
+      refreshing,
+      refreshError,
+      refresh,
+    }
+  }
 
   return {
-    project,
-    refreshing,
-    refreshError,
-    refresh,
+    project: data,
+    refreshing: isValidating,
+    refreshError: error,
+    refresh: mutate,
+  }
+}
+
+export function getModrinthProjectModel(id: Ref<string>) {
+  return {
+    key: computed(() => getModrinthProjectKey(id.value)),
+    fetcher: async () => clientModrinthV2.getProject(id.value),
   }
 }

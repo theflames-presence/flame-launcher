@@ -1,4 +1,4 @@
-import { InstallServiceKey, InstanceVersionServiceKey, LocalVersionHeader, RuntimeVersions, getExpectVersion } from '@xmcl/runtime-api'
+import { DiagnoseServiceKey, InstallServiceKey, InstanceServiceKey, LocalVersionHeader, ReadWriteLock, RuntimeVersions, getExpectVersion } from '@xmcl/runtime-api'
 import { InjectionKey, Ref } from 'vue'
 import { InstanceResolveVersion } from './instanceVersion'
 import { useInstanceVersionInstall } from './instanceVersionInstall'
@@ -7,14 +7,19 @@ import { useService } from './service'
 
 export const kInstanceVersionDiagnose: InjectionKey<ReturnType<typeof useInstanceVersionDiagnose>> = Symbol('InstanceVersionDiagnose')
 
-export function useInstanceVersionDiagnose(runtime: Ref<RuntimeVersions>, resolvedVersion: Ref<InstanceResolveVersion | undefined>, versions: Ref<LocalVersionHeader[]>) {
-  const { diagnoseAssetIndex, diagnoseAssets, diagnoseJar, diagnoseLibraries, diagnoseProfile } = useService(InstanceVersionServiceKey)
+export function useInstanceVersionDiagnose(path: Ref<string>, runtime: Ref<RuntimeVersions>, resolvedVersion: Ref<InstanceResolveVersion | undefined>, versions: Ref<LocalVersionHeader[]>) {
+  const { diagnoseAssetIndex, diagnoseAssets, diagnoseJar, diagnoseLibraries, diagnoseProfile } = useService(DiagnoseServiceKey)
   const issueItems = ref([] as LaunchMenuItem[])
-  let operation = undefined as undefined | (() => Promise<void>)
   const { t } = useI18n()
   const { install } = useInstanceVersionInstall(versions)
-  const { installAssetsForVersion, installAssets, installLibraries, installDependencies, installByProfile } = useService(InstallServiceKey)
+  const { installAssetsForVersion, installForge, installAssets, installLibraries, installDependencies, installByProfile } = useService(InstallServiceKey)
+  const { editInstance } = useService(InstanceServiceKey)
+
+  let operation = undefined as undefined | (() => Promise<void>)
   let abortController = new AbortController()
+  let pendingFix = false
+
+  const lock = new ReadWriteLock()
 
   const loading = ref(false)
 
@@ -24,7 +29,7 @@ export function useInstanceVersionDiagnose(runtime: Ref<RuntimeVersions>, resolv
     abortController = new AbortController()
     loading.value = true
     try {
-      await update(version)
+      await lock.read(() => update(version))
     } finally {
       loading.value = false
     }
@@ -33,6 +38,8 @@ export function useInstanceVersionDiagnose(runtime: Ref<RuntimeVersions>, resolv
     console.log('update version diagnose')
 
     const abortSignal = abortController.signal
+    // invalidate operation
+    operation = () => Promise.resolve()
 
     if ('requirements' in version) {
       const runtime = version.requirements
@@ -41,7 +48,10 @@ export function useInstanceVersionDiagnose(runtime: Ref<RuntimeVersions>, resolv
         if (version) {
           await installDependencies(version)
         }
-        await _update(resolvedVersion.value)
+        await editInstance({
+          instancePath: path.value,
+          version,
+        })
       }
       issueItems.value = [reactive({
         title: computed(() => t('diagnosis.missingVersion.name', { version: getExpectVersion(runtime) })),
@@ -51,13 +61,13 @@ export function useInstanceVersionDiagnose(runtime: Ref<RuntimeVersions>, resolv
     }
 
     const items: LaunchMenuItem[] = []
-    const ops: Array<() => Promise<void>> = []
+    const operations: Array<() => Promise<void>> = []
     const jarIssue = await diagnoseJar(version)
     if (abortSignal.aborted) { return }
 
     if (jarIssue) {
       const options = { version: jarIssue.version }
-      ops.push(async () => {
+      operations.push(async () => {
         const version = await install(runtime.value)
         if (version) {
           await installDependencies(version)
@@ -74,11 +84,48 @@ export function useInstanceVersionDiagnose(runtime: Ref<RuntimeVersions>, resolv
         }))
     }
 
+    const profileIssue = await diagnoseProfile(version.id)
+    if (abortSignal.aborted) { return }
+    if (profileIssue) {
+      operations.push(async () => {
+        await installForge({
+          mcversion: version.minecraftVersion,
+          version: runtime.value.forge!,
+        })
+      })
+      items.push(reactive({
+        title: computed(() => t('diagnosis.badInstall.name', { version: version.id })),
+        description: computed(() => t('diagnosis.badInstall.message')),
+      }))
+    }
+
+    if (!profileIssue) {
+      const librariesIssue = await diagnoseLibraries(version)
+      if (abortSignal.aborted) { return }
+
+      if (librariesIssue.length > 0) {
+        const options = { named: { count: librariesIssue.length } }
+        console.log(librariesIssue)
+        operations.push(async () => {
+          await installLibraries(librariesIssue.map(v => v.library), version.id, librariesIssue.length < 15)
+        })
+        items.push(librariesIssue.some(v => v.type === 'corrupted')
+          ? reactive({
+            title: computed(() => t('diagnosis.corruptedLibraries.name', options, { plural: 3 })),
+            description: computed(() => t('diagnosis.corruptedLibraries.message')),
+          })
+          : reactive({
+            title: computed(() => t('diagnosis.missingLibraries.name', options, { plural: 3 })),
+            description: computed(() => t('diagnosis.missingLibraries.message')),
+          }))
+      }
+    }
+
     const assetIndexIssue = await diagnoseAssetIndex(version)
     if (abortSignal.aborted) { return }
 
     if (assetIndexIssue) {
-      ops.push(async () => {
+      operations.push(async () => {
         await installAssetsForVersion(version.id)
       })
       items.push(assetIndexIssue.type === 'corrupted'
@@ -92,31 +139,12 @@ export function useInstanceVersionDiagnose(runtime: Ref<RuntimeVersions>, resolv
         }))
     }
 
-    const librariesIssue = await diagnoseLibraries(version)
-    if (abortSignal.aborted) { return }
-
-    if (librariesIssue.length > 0) {
-      const options = { named: { count: librariesIssue.length } }
-      ops.push(async () => {
-        await installLibraries(librariesIssue.map(v => v.library), version.id, librariesIssue.length < 15)
-      })
-      items.push(librariesIssue.some(v => v.type === 'corrupted')
-        ? reactive({
-          title: computed(() => t('diagnosis.corruptedLibraries.name', 2, options)),
-          description: computed(() => t('diagnosis.corruptedLibraries.message')),
-        })
-        : reactive({
-          title: computed(() => t('diagnosis.missingLibraries.name', 2, options)),
-          description: computed(() => t('diagnosis.missingLibraries.message')),
-        }))
-    }
-
     if (!assetIndexIssue) {
       const assetsIssue = await diagnoseAssets(version)
       if (abortSignal.aborted) { return }
       if (assetsIssue.length > 0) {
         const options = { named: { count: assetsIssue.length } }
-        ops.push(async () => {
+        operations.push(async () => {
           await installAssets(assetsIssue.map(v => v.asset), version.id, assetsIssue.length < 15)
         })
         items.push(assetsIssue.some(v => v.type === 'corrupted')
@@ -132,32 +160,27 @@ export function useInstanceVersionDiagnose(runtime: Ref<RuntimeVersions>, resolv
       }
     }
 
-    const profileIssue = await diagnoseProfile(version.id)
-    if (abortSignal.aborted) { return }
-    if (profileIssue) {
-      ops.push(async () => {
-        await installByProfile(profileIssue.installProfile)
-      })
-      items.push(reactive({
-        title: computed(() => t('diagnosis.badInstall.name', { version: version.id })),
-        description: computed(() => t('diagnosis.badInstall.message')),
-      }))
-    }
     // TODO: handle error
     issueItems.value = items
-    if (ops.length > 0) {
+    if (operations.length > 0) {
       operation = async () => {
-        for (const op of ops) {
-          await op()
+        pendingFix = false
+        for (const o of operations) {
+          await o()
         }
-        await _update(resolvedVersion.value)
+      }
+      if (pendingFix) {
+        operation()
       }
     }
   }
 
-  function fix() {
+  async function fix() {
     if (operation) {
-      operation()
+      await lock.write(operation)
+      await _update(resolvedVersion.value)
+    } else {
+      pendingFix = true
     }
   }
 

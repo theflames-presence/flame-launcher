@@ -1,14 +1,14 @@
 import { isNoModLoader } from '@/util/isNoModloader'
 import { ModFile, getModFileFromResource } from '@/util/mod'
+import { ProjectEntry } from '@/util/search'
 import { InstanceData, Resource, ResourceDomain, ResourceServiceKey } from '@xmcl/runtime-api'
 import { InjectionKey, Ref } from 'vue'
+import { CurseforgeBuiltinClassId, useCurseforgeSearch } from './curseforgeSearch'
+import { useMarketSort } from './marketSort'
 import { useModrinthSearch } from './modrinthSearch'
 import { useResourceEffect } from './resources'
 import { useService } from './service'
 import { useAggregateProjects, useProjectsFilterSearch } from './useAggregateProjects'
-import { CurseforgeBuiltinClassId, useCurseforgeSearch } from './curseforgeSearch'
-import { ProjectEntry } from '@/util/search'
-import { useTabMarketFilter } from './tab'
 
 export const kModsSearch: InjectionKey<ReturnType<typeof useModsSearch>> = Symbol('ModsSearch')
 
@@ -163,7 +163,7 @@ export function useLocalModsSearch(keyword: Ref<string>, modLoaderFilters: Ref<M
 const getOptifineAsMod = (f?: ModFile) => {
   const result: ProjectEntry<ModFile> = {
     id: 'OptiFine',
-    icon: 'image://builtin/optifine',
+    icon: 'http://launcher/icons/optifine',
     title: 'Optifine',
     author: 'sp614x',
     description: 'Optifine is a Minecraft optimization mod. It allows Minecraft to run faster and look better with full support for HD textures and many configuration options.',
@@ -179,7 +179,9 @@ export function useModsSearch(runtime: Ref<InstanceData['runtime']>, instanceMod
   const curseforgeCategory = ref(undefined as number | undefined)
   const modrinthCategories = ref([] as string[])
   const keyword: Ref<string> = ref('')
-  const { tab, disableCurseforge, disableLocal, disableModrinth } = useTabMarketFilter()
+  const isModrinthActive = ref(true)
+  const isCurseforgeActive = ref(true)
+  const { sort, modrinthSort, curseforgeSort } = useMarketSort(0)
 
   watch(runtime, (version) => {
     const items = [] as ModLoaderFilter[]
@@ -200,22 +202,24 @@ export function useModsSearch(runtime: Ref<InstanceData['runtime']>, instanceMod
     modLoaderFilters.value = items
   }, { immediate: true, deep: true })
 
-  const { loadMoreModrinth, loadingModrinth, canModrinthLoadMore, modrinth, modrinthError } = useModrinthSearch('mod', keyword, modLoaderFilters, modrinthCategories, runtime)
-  const { loadMoreCurseforge, loadingCurseforge, canCurseforgeLoadMore, curseforge, curseforgeError } = useCurseforgeSearch<ProjectEntry<ModFile>>(CurseforgeBuiltinClassId.mod, keyword, modLoaderFilters, curseforgeCategory, runtime)
+  const { loadMoreModrinth, loadingModrinth, modrinth, modrinthError } = useModrinthSearch('mod', keyword, modLoaderFilters, modrinthCategories, modrinthSort, runtime)
+  const { loadMoreCurseforge, loadingCurseforge, curseforge, curseforgeError } = useCurseforgeSearch<ProjectEntry<ModFile>>(CurseforgeBuiltinClassId.mod, keyword, modLoaderFilters, curseforgeCategory, curseforgeSort, runtime)
   const { cached: cachedMods, instances, loadingCached } = useLocalModsSearch(keyword, modLoaderFilters, runtime, instanceMods)
   const loading = computed(() => loadingModrinth.value || loadingCurseforge.value || loadingCached.value)
 
   const all = useAggregateProjects<ProjectEntry<ModFile>>(
-    computed(() => disableModrinth.value ? [] : modrinth.value ?? []),
-    computed(() => disableCurseforge.value ? [] : curseforge.value ?? []),
-    computed(() => disableLocal.value ? [] : cachedMods.value ?? []),
+    modrinth,
+    curseforge,
+    cachedMods,
     instances,
   )
 
   const items = useProjectsFilterSearch(
     keyword,
     all,
-    computed(() => !keyword.value && (modrinthCategories.value.length > 0 || curseforgeCategory.value !== undefined)),
+    computed(() => keyword.value.length > 0 || modrinthCategories.value.length > 0 || curseforgeCategory.value !== undefined),
+    isCurseforgeActive,
+    isModrinthActive,
   )
 
   return {
@@ -224,8 +228,6 @@ export function useModsSearch(runtime: Ref<InstanceData['runtime']>, instanceMod
     modrinthCategories,
     loadMoreCurseforge,
     loadMoreModrinth,
-    canCurseforgeLoadMore,
-    canModrinthLoadMore,
     modrinthError,
     loadingModrinth,
     curseforgeError,
@@ -239,6 +241,8 @@ export function useModsSearch(runtime: Ref<InstanceData['runtime']>, instanceMod
     loading,
     items,
     all,
-    tab,
+    isModrinthActive,
+    isCurseforgeActive,
+    sort,
   }
 }

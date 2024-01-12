@@ -23,153 +23,94 @@
       </v-list-item>
       <v-list-group
         v-model="expanding"
+        v-shared-tooltip.right="_ => t('myStuff')"
         active-class="v-list-item--link"
         class="non-moveable avatar"
       >
         <template #activator>
-          <v-tooltip
-            color="black"
-            transition="scroll-x-transition"
-            :close-delay="0"
-            right
-          >
-            <template #activator="{ on: tooltip }">
-              <v-list-item-icon v-on="tooltip">
-                <v-icon> widgets </v-icon>
-              </v-list-item-icon>
-            </template>
-            {{ t('myStuff') }}
-          </v-tooltip>
+          <v-list-item-icon>
+            <v-icon> widgets </v-icon>
+          </v-list-item-icon>
         </template>
 
-        <v-tooltip
-          color="black"
-          transition="scroll-x-transition"
-          :close-delay="0"
-          right
+        <v-list-item
+          v-shared-tooltip.right="_ => t('modpack.name', 2) + ' & ' + t('localVersion.title')"
+          link
+          push
+          to="/local-resources"
+          class="non-moveable"
         >
-          <template #activator="{ on: tooltip }">
-            <v-list-item
-              link
-              push
-              to="/version-setting"
-              class="non-moveable"
-              v-on="tooltip"
-            >
-              <v-list-item-icon>
-                <v-icon
-                  :size="28"
-                >
-                  power
-                </v-icon>
-              </v-list-item-icon>
-              <v-list-item-title v-text="'Text'" />
-            </v-list-item>
-          </template>
-          {{ t('localVersion.title') }}
-        </v-tooltip>
+          <v-list-item-icon>
+            <v-icon> inventory </v-icon>
+          </v-list-item-icon>
+          <v-list-item-title v-text="'Text'" />
+        </v-list-item>
 
-        <v-tooltip
-          color="black"
-          transition="scroll-x-transition"
-          :close-delay="0"
-          right
-        >
-          <template #activator="{ on: tooltip }">
-            <v-list-item
-              link
-              push
-              to="/modpack-setting"
-              class="non-moveable"
-              v-on="tooltip"
-            >
-              <v-list-item-icon>
-                <v-icon> inventory </v-icon>
-              </v-list-item-icon>
-              <v-list-item-title v-text="'Text'" />
-            </v-list-item>
-          </template>
-          {{ t('modpack.name', 2) }}
-        </v-tooltip>
-
-        <v-tooltip
+        <v-list-item
           v-if="sideBarShowCurseforge"
-          color="black"
-          transition="scroll-x-transition"
-          :close-delay="0"
-          right
+          v-shared-tooltip.right="'Curseforge'"
+          link
+          class="non-moveable"
+          @click="goToCurseforge()"
         >
-          <template #activator="{ on: tooltip }">
-            <v-list-item
-              link
-              class="non-moveable"
-              @click="goToCurseforge()"
-              v-on="tooltip"
+          <v-list-item-icon>
+            <v-icon
+              :size="28"
+              class="mr-0.5"
             >
-              <v-list-item-icon>
-                <v-icon
-                  :size="28"
-                  class="mr-0.5"
-                >
-                  $vuetify.icons.curseforge
-                </v-icon>
-              </v-list-item-icon>
-              <v-list-item-title>Curseforge</v-list-item-title>
-            </v-list-item>
-          </template>
-          Curseforge
-        </v-tooltip>
+              $vuetify.icons.curseforge
+            </v-icon>
+          </v-list-item-icon>
+          <v-list-item-title>Curseforge</v-list-item-title>
+        </v-list-item>
 
-        <v-tooltip
+        <v-list-item
           v-if="sideBarShowModrinth"
-          color="black"
-          transition="scroll-x-transition"
-          :close-delay="0"
-          right
+          v-shared-tooltip.right="'Modrinth'"
+          link
+          class="non-moveable"
+          @click="goToModrinth()"
         >
-          <template #activator="{ on: tooltip }">
-            <v-list-item
-              link
-              class="non-moveable"
-              @click="goToModrinth()"
-              v-on="tooltip"
-            >
-              <v-list-item-icon>
-                <v-icon>
-                  $vuetify.icons.modrinth
-                </v-icon>
-              </v-list-item-icon>
-              <v-list-item-title>Modrinth</v-list-item-title>
-            </v-list-item>
-          </template>
-          Modrinth
-        </v-tooltip>
+          <v-list-item-icon>
+            <v-icon>
+              $vuetify.icons.modrinth
+            </v-icon>
+          </v-list-item-icon>
+          <v-list-item-title>Modrinth</v-list-item-title>
+        </v-list-item>
 
-        <v-tooltip
+        <v-list-item
           v-if="sideBarShowFtb"
-          color="black"
-          transition="scroll-x-transition"
-          :close-delay="0"
-          right
+          v-shared-tooltip.right="'FTB'"
+          link
+          class="non-moveable"
+          @click="goToFtb()"
         >
-          <template #activator="{ on: tooltip }">
-            <v-list-item
-              link
-              class="non-moveable"
-              @click="goToFtb()"
-              v-on="tooltip"
-            >
-              <v-list-item-icon>
-                <v-icon>
-                  $vuetify.icons.ftb
-                </v-icon>
-              </v-list-item-icon>
-              <v-list-item-title>FTB</v-list-item-title>
-            </v-list-item>
-          </template>
-          Feed the Beast
-        </v-tooltip>
+          <v-list-item-icon>
+            <v-icon>
+              $vuetify.icons.ftb
+            </v-icon>
+          </v-list-item-icon>
+          <v-list-item-title>FTB</v-list-item-title>
+        </v-list-item>
       </v-list-group>
+      <v-list-item
+        v-if="true"
+        v-shared-tooltip.right="_ => t('store.name', 2)"
+        link
+        push
+        to="/store"
+        class="non-moveable"
+      >
+        <v-list-item-icon>
+          <v-icon
+            :size="28"
+          >
+            store
+          </v-icon>
+        </v-list-item-icon>
+        <v-list-item-title v-text="'Text'" />
+      </v-list-item>
       <v-divider />
     </v-list>
 
@@ -182,69 +123,50 @@
       class="ml-1 px-2"
       style=""
     >
-      <v-tooltip
-        :close-delay="0"
-        right
-        color="black"
-        transition="scroll-x-transition"
+      <v-list-item
+        v-shared-tooltip.right="_ => t('multiplayer.name')"
+        push
+        link
+        class="non-moveable"
+        to="/multiplayer"
       >
-        <template #activator="{ on: tooltip }">
-          <v-list-item
-            push
-            link
-            class="non-moveable"
-            to="/multiplayer"
-            v-on="tooltip"
+        <v-list-item-icon>
+          <v-icon
+            :size="23"
           >
-            <v-list-item-icon>
-              <v-icon
-                :size="23"
-              >
-                hub
-              </v-icon>
-            </v-list-item-icon>
-            <v-list-item-title>Multiplayer</v-list-item-title>
-          </v-list-item>
-        </template>
-        {{ t('multiplayer.name') }}
-      </v-tooltip>
+            hub
+          </v-icon>
+        </v-list-item-icon>
+        <v-list-item-title>Multiplayer</v-list-item-title>
+      </v-list-item>
 
       <v-divider
         class="mx-1 block"
       />
-      <v-tooltip
-        :close-delay="0"
-        right
-        color="black"
-        transition="scroll-x-transition"
+
+      <v-list-item
+        v-shared-tooltip.right="_ => t('setting.name', 2)"
+        link
+        push
+        to="/setting"
+        class="non-moveable"
       >
-        <template #activator="{ on: tooltip }">
-          <v-list-item
-            link
-            push
-            to="/setting"
-            class="non-moveable"
-            v-on="tooltip"
+        <v-list-item-icon>
+          <v-badge
+            right
+            overlap
+            :value="state?.updateStatus !== 'none'"
           >
-            <v-list-item-icon>
-              <v-badge
-                right
-                overlap
-                :value="state?.updateStatus !== 'none'"
-              >
-                <template #badge>
-                  <span>{{ 1 }}</span>
-                </template>
-                <v-icon>
-                  settings
-                </v-icon>
-              </v-badge>
-            </v-list-item-icon>
-            <v-list-item-title>Settings</v-list-item-title>
-          </v-list-item>
-        </template>
-        {{ t('setting.name', 2) }}
-      </v-tooltip>
+            <template #badge>
+              <span>{{ 1 }}</span>
+            </template>
+            <v-icon>
+              settings
+            </v-icon>
+          </v-badge>
+        </v-list-item-icon>
+        <v-list-item-title>Settings</v-list-item-title>
+      </v-list-item>
     </v-list>
   </v-navigation-drawer>
 </template>
@@ -259,6 +181,7 @@ import { kColorTheme } from '../composables/colorTheme'
 import { kUILayout } from '../composables/uiLayout'
 import AppSideBarContentFocus from './AppSideBarContentFocus.vue'
 import AppSideBarContentNext from './AppSideBarContentNext.vue'
+import { vSharedTooltip } from '@/directives/sharedTooltip'
 
 const { blurSidebar } = useBarBlur()
 const layout = injection(kUILayout)

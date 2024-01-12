@@ -1,11 +1,15 @@
 <template>
   <div class="mx-6">
     <BaseSettingGeneral />
+    <v-divider />
     <BaseSettingSync />
+    <v-divider />
+    <BaseSettingJava />
+    <v-divider />
+    <BaseSettingLaunch />
+    <v-divider />
     <BaseSettingModpack v-if="!isServer" />
     <BaseSettingServer v-else />
-    <BaseSettingJava />
-    <BaseSettingLaunch />
 
     <v-snackbar
       :color="snackbarColor"
@@ -14,7 +18,7 @@
       :value="edit.isModified"
     >
       <div class="text-button mr-4">
-        {{ t('instance.setting.unsaved') }}
+        {{ t('modified.unsaved') }}
       </div>
 
       <template #action="{ attrs }">
@@ -26,14 +30,13 @@
             text
             @click="onReset"
           >
-            {{ t('instance.setting.reset') }}
+            {{ t('modified.reset') }}
           </v-btn>
-
           <v-btn
-            color="primary"
+            color="red"
             @click="edit.save"
           >
-            {{ t('instance.setting.save') }}
+            {{ t('modified.save') }}
           </v-btn>
         </div>
       </template>
@@ -55,6 +58,7 @@ import BaseSettingLaunch from './BaseSettingLaunch.vue'
 import BaseSettingModpack from './BaseSettingModpack.vue'
 import BaseSettingServer from './BaseSettingServer.vue'
 import BaseSettingSync from './BaseSettingSync.vue'
+import { useTutorial } from '@/composables/tutorial'
 
 const { isServer, name, instance } = injection(kInstance)
 const { edit: _edit } = injection(kInstances)
@@ -87,6 +91,17 @@ useBeforeLeave(() => {
 })
 
 usePresence(computed(() => t('presence.instanceSetting', { instance: name.value })))
+
+useTutorial(computed(() => [{
+  element: '#instance-icon',
+  popover: { title: t('tutorial.instance.iconTitle'), description: t('tutorial.instance.iconDescription') },
+}, {
+  element: '#java-list',
+  popover: { title: t('tutorial.instance.javaTitle'), description: t('tutorial.instance.javaDescription') },
+}, {
+  element: '#java-import',
+  popover: { title: t('tutorial.instance.javaImportTitle'), description: t('tutorial.instance.javaImportDescription') },
+}]))
 
 </script>
 

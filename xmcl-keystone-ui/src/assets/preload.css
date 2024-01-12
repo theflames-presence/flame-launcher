@@ -1,11 +1,11 @@
 body {
-  background: black;
+  background: transparent;
 }
 
 /* only apply on dark theme by media query */
 @media (prefers-color-scheme: dark) {
   body {
-    background: black;
+    background: #121212;
   }
 }
 

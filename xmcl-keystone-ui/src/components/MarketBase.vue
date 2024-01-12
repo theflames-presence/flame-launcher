@@ -16,10 +16,17 @@
       class="flex h-full w-full overflow-auto py-0"
     >
       <template #left>
-        <div class="flex flex-grow-0 items-center px-4">
-          <slot name="actions" />
+        <div
+          class="flex flex-grow-0 items-center px-4"
+        >
+          <slot
+            v-if="items.length > 0"
+            name="actions"
+          />
         </div>
         <v-virtual-scroll
+          v-if="items.length > 0"
+          id="left-pane"
           :bench="2"
           class="visible-scroll h-full max-h-full w-full overflow-auto"
           :items="items"
@@ -42,9 +49,16 @@
           v-if="error"
           :error="error"
         />
+        <slot
+          v-else-if="items.length === 0"
+          name="placeholder"
+        />
       </template>
       <template #right>
-        <div class="flex h-full flex-grow-0 overflow-y-auto overflow-x-hidden">
+        <div
+          id="right-pane"
+          class="flex h-full flex-grow-0 overflow-y-auto overflow-x-hidden"
+        >
           <slot
             name="content"
             :selected-item="selectedItem"
@@ -56,6 +70,7 @@
         </div>
       </template>
     </SplitPane>
+    <slot />
   </div>
 </template>
 

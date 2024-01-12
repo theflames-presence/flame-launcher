@@ -17,7 +17,7 @@ It's the next generation Minecraft launcher core written in C# providing the fre
 
 ### Featured Launcher
 
-- [flame-launcher]([https://github.com/voxelum/x-minecraft-launcher](https://github.com/aislxflames/flame-launcher): An launcher provides general electron api related to minecraft launching (in renderer side), making other developers can easily create new launcher view.
+- [x-minecraft-launcher](https://github.com/voxelum/x-minecraft-launcher): An launcher provides general electron api related to minecraft launching (in renderer side), making other developers can easily create new launcher view.
 - [PureLauncher](https://github.com/Apisium/PureLauncher): An awesome Minecraft Launcher using React to build beautiful UI.
 
 
@@ -25,7 +25,7 @@ It's the next generation Minecraft launcher core written in C# providing the fre
 
 You can see [Active Packages](#active-packages) section to quickly find a package you need.
 
-Go [our document website](https://docs.xmcl.app/core) to find more detail usage.
+Go [our document website](https://docs.xmcl.app/en/core) to find more detail usage.
 
 ### Active Packages
 

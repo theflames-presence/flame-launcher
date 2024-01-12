@@ -4,7 +4,7 @@ const colors = [
   'pink lighten-3',
   'deep-orange',
   'purple lighten-1',
-  'red',
+  'lime',
 ]
 
 export function getColor(name: string) {

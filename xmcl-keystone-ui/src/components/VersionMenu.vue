@@ -4,7 +4,6 @@
     bottom
     :close-on-content-click="false"
     :disabled="disabled"
-    style="background-color: #303030; overflow-y: hidden;"
   >
     <template #activator="{ on }">
       <slot :on="on" />
@@ -43,10 +42,18 @@
     <v-skeleton-loader
       v-if="refreshing"
       type="list-item-avatar-two-line, list-item-avatar-two-line, list-item-avatar-two-line, list-item-avatar-two-line, list-item-avatar-two-line, list-item-avatar-two-line"
+      class="w-100"
+    />
+    <ErrorView
+      v-else-if="error"
+      type="error"
+      :error="error"
+      class="w-100 dark:bg-dark-300 bg-light-500"
+      @refresh="emit('refresh')"
     />
     <v-list
       v-else
-      class="flex h-full flex-col overflow-auto p-0"
+      class="w-100 flex h-full flex-col overflow-auto p-0"
     >
       <v-list-item
         v-if="isClearable"
@@ -59,14 +66,30 @@
         {{ clearText }}
         <div class="flex-grow" />
       </v-list-item>
-      <virtual-list
-        class="h-full max-h-[300px] overflow-y-auto"
-        :data-sources="filteredItems"
-        :data-key="'name'"
-        :data-component="VersionMenuListTile"
-        :keep="16"
-        :extra-props="{ select: onSelect }"
-      />
+      <v-virtual-scroll
+        class="box-content h-full max-h-[300px] w-full overflow-y-auto"
+        :items="filteredItems"
+        :item-height="48"
+        :bench="10"
+      >
+        <template #default="{ item }">
+          <v-list-item
+            :key="item.name"
+            ripple
+            @click="onSelect(item.name)"
+          >
+            {{ item.name }}
+            <div class="flex-grow" />
+            <v-chip
+              v-if="item.tag"
+              label
+              :color="item.tagColor"
+            >
+              {{ item.tag }}
+            </v-chip>
+          </v-list-item>
+        </template>
+      </v-virtual-scroll>
       <v-list-item v-if="filteredItems.length === 0">
         {{ emptyText }}
       </v-list-item>
@@ -75,11 +98,17 @@
 </template>
 
 <script lang=ts setup>
-import { VersionMenuItem } from '../composables/versionList'
-import VersionMenuListTile from './VersionMenuListTile.vue'
+import ErrorView from './ErrorView.vue'
+
+export interface VersionItem {
+  tag?: string
+  tagColor?: string
+  name: string
+  description?: string
+}
 
 const props = defineProps<{
-  items: VersionMenuItem[]
+  items: VersionItem[]
   refreshing?: boolean
   disabled?: boolean
   isClearable?: boolean
@@ -88,9 +117,10 @@ const props = defineProps<{
   hasSnapshot?: boolean
   snapshot?: boolean
   snapshotTooltip?: string
+  error?: any
 }>()
 
-const emit = defineEmits(['update:snapshot', 'select'])
+const emit = defineEmits(['update:snapshot', 'select', 'refresh'])
 const { t } = useI18n()
 
 const data = reactive({

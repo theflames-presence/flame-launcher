@@ -17,10 +17,16 @@ interface LaunchServiceEventMap {
   'minecraft-exit': LaunchOptions & { pid: number; code?: number; signal?: string; duration: number; crashReport?: string; crashReportLocation?: string; errorLog: string }
   'minecraft-stdout': { pid: number; stdout: string }
   'minecraft-stderr': { pid: number; stdout: string }
+  'launch-performance-pre': { id: string; name: string }
+  'launch-performance': { id: string; name: string; duration: number }
   'error': LaunchException
 }
 
 export interface LaunchOptions {
+  /**
+   * The operation id for telemery
+   */
+  operationId?: string
   /**
    * Override selected version for current instance
    */
@@ -107,6 +113,20 @@ export interface GameProcess {
   options: LaunchOptions
 }
 
+export interface ReportOperationPayload {
+  operationId: string
+  /**
+   * Name of the operation
+   */
+  name: string
+  /**
+   * The duration of the operation. If empty, it means the operation is just started
+   */
+  duration?: number
+
+  success?: boolean
+}
+
 export interface LaunchService extends GenericEventEmitter<LaunchServiceEventMap> {
   /**
    * Generate useable launch arguments for current profile
@@ -131,6 +151,10 @@ export interface LaunchService extends GenericEventEmitter<LaunchServiceEventMap
    * Get all game processes
    */
   getGameProcesses(): Promise<GameProcess[]>
+  /**
+   * Only used for telemetry
+   */
+  reportOperation(options: ReportOperationPayload): Promise<void>
 }
 
 export type LaunchExceptions = {
@@ -142,6 +166,11 @@ export type LaunchExceptions = {
    */
   type: 'launchGeneralException'
   error: unknown
+} | {
+  /**
+   * Spawn process failed
+   */
+  type: 'launchSpawnProcessFailed'
 } | {
   /**
    * Unknown java error. Might be empty java path
@@ -166,6 +195,9 @@ export type LaunchExceptions = {
    */
   type: 'launchUserStatusRefreshFailed'
   userException: UserExceptions
+} | {
+  type: 'launchBadVersion'
+  version: string
 }
 
 export class LaunchException extends Exception<LaunchExceptions> { }

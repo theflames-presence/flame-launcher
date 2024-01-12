@@ -24,7 +24,7 @@
           >
             <v-img
               width="28"
-              :src="'image://builtin/forge'"
+              :src="'http://launcher/icons/forge'"
             />
           </v-btn>
 
@@ -35,7 +35,7 @@
           >
             <v-img
               width="28"
-              :src="'image://builtin/fabric'"
+              :src="'http://launcher/icons/fabric'"
             />
           </v-btn>
 
@@ -46,7 +46,7 @@
           >
             <v-img
               width="28"
-              :src="'image://builtin/quilt'"
+              :src="'http://launcher/icons/quilt'"
             />
           </v-btn>
         </v-btn-toggle>
@@ -57,11 +57,13 @@
           :modrinth-categories.sync="modrinthCategories"
           curseforge-category-filter="mc-mods"
           modrinth-category-filter="mod"
+          :enable-curseforge.sync="isCurseforgeActive"
+          :enable-modrinth.sync="isModrinthActive"
+          :sort.sync="sort"
         />
       </div>
     </div>
     <MarketExtensions
-      :tab.sync="tab"
       :modrinth="modrinthCount"
       :curseforge="curseforgeCount"
       :local="cachedMods.length"
@@ -77,34 +79,18 @@ import { kInstance } from '@/composables/instance'
 import { kModsSearch } from '@/composables/modSearch'
 import { getExtensionItemsFromRuntime } from '@/util/extensionItems'
 import { injection } from '@/util/inject'
-import debounce from 'lodash.debounce'
 
 const { runtime: version } = injection(kInstance)
-const { tab, modrinth, curseforge, instanceMods, cachedMods, modLoaderFilters, curseforgeCategory, modrinthCategories } = injection(kModsSearch)
+const { modrinth, curseforge, instanceMods, cachedMods, modLoaderFilters, curseforgeCategory, modrinthCategories, isCurseforgeActive, isModrinthActive, sort } = injection(kModsSearch)
 const curseforgeCount = computed(() => curseforge.value ? curseforge.value.length : 0)
 const modrinthCount = computed(() => modrinth.value ? modrinth.value.length : 0)
 const { t } = useI18n()
 
-watch(curseforgeCategory, (v) => {
-  if (v) {
-    tab.value = 2
-  } else {
-    tab.value = 0
-  }
-})
-watch(modrinthCategories, (v) => {
-  if (v.length > 0) {
-    tab.value = 3
-  } else {
-    tab.value = 0
-  }
-})
-
-const search = debounce((v: string | undefined) => {
+const search = (v: string | undefined) => {
   if (v !== route.query.keyword) {
     replace({ query: { ...route.query, keyword: v } })
   }
-}, 800)
+}
 const { replace } = useRouter()
 const route = useRoute()
 const _keyword = computed({

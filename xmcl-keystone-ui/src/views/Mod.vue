@@ -1,7 +1,7 @@
 <template>
   <MarketBase
     :plans="plans"
-    :items="items"
+    :items="groupedItems"
     :item-height="91"
     :loading="loading"
     :error="error"
@@ -11,7 +11,10 @@
     @load="onLoad"
   >
     <template #actions>
-      <v-subheader class="responsive-header py-2 pl-0">
+      <v-subheader
+        v-if="isLocalView"
+        class="responsive-header py-2 pl-0"
+      >
         <v-btn
           text
           small
@@ -56,25 +59,48 @@
           </span>
         </v-btn>
       </v-subheader>
+      <v-subheader
+        v-else
+        class="responsive-header px-0 py-2"
+      >
+        <div class="flex-grow" />
+        <v-checkbox
+          v-model="groupInstalled"
+          :label="t('mod.groupInstalled')"
+        />
+      </v-subheader>
     </template>
     <template #item="{ item, hasUpdate, checked, selectionMode, selected, on }">
       <ModItem
+        v-if="(typeof item === 'object')"
         :item="item"
         :has-update="hasUpdate"
         :checked="checked"
         :selection-mode="selectionMode"
         :selected="selected"
+        :install="onInstallProject"
         @click="on.click"
       />
+      <v-subheader
+        v-if="typeof item === 'string'"
+        class="h-[91px]"
+      >
+        <v-divider class="mr-4" />
+        {{ t("modInstall.search") }}
+        <v-divider class="ml-4" />
+      </v-subheader>
     </template>
-    <template
-      #content="{ selectedItem, selectedModrinthId, selectedCurseforgeId, updating }"
-    >
+    <template #placeholder>
+      <Hint
+        :text="t('modInstall.searchHint')"
+        icon="playlist_add"
+      />
+    </template>
+    <template #content="{ selectedItem, selectedModrinthId, selectedCurseforgeId, updating }">
       <Hint
         v-if="dragover"
         icon="save_alt"
-        :text="
-          t('mod.dropHint')"
+        :text="t('mod.dropHint')"
         class="h-full"
       />
       <MarketProjectDetailModrinth
@@ -138,15 +164,20 @@ import MarketBase from '@/components/MarketBase.vue'
 import MarketProjectDetailCurseforge from '@/components/MarketProjectDetailCurseforge.vue'
 import MarketProjectDetailModrinth from '@/components/MarketProjectDetailModrinth.vue'
 import { useService } from '@/composables'
+import { useLocalStorageCacheBool } from '@/composables/cache'
+import { kCurseforgeInstaller, useCurseforgeInstaller } from '@/composables/curseforgeInstaller'
 import { useDrop } from '@/composables/dropHandler'
 import { kInstance } from '@/composables/instance'
 import { kInstanceDefaultSource } from '@/composables/instanceDefaultSource'
 import { kInstanceModsContext } from '@/composables/instanceMods'
 import { kModsSearch } from '@/composables/modSearch'
 import { kModUpgrade } from '@/composables/modUpgrade'
+import { kModrinthInstaller, useModrinthInstaller } from '@/composables/modrinthInstaller'
+import { usePresence } from '@/composables/presence'
+import { useProjectInstall } from '@/composables/projectInstall'
 import { kCompact } from '@/composables/scrollTop'
 import { useToggleCategories } from '@/composables/toggleCategories'
-import { vDragover } from '@/directives/dragover'
+import { useTutorial } from '@/composables/tutorial'
 import { injection } from '@/util/inject'
 import { ModFile } from '@/util/mod'
 import { ProjectEntry, ProjectFile } from '@/util/search'
@@ -167,13 +198,36 @@ const {
   curseforgeCategory,
   modLoaderFilters,
   keyword,
-  tab,
   items,
 } = injection(kModsSearch)
 
 const error = computed(() => {
-  if (tab.value === 2) return curseforgeError.value
-  if (tab.value === 3) return modrinthError.value
+  return curseforgeError.value || modrinthError.value
+})
+
+const groupInstalled = useLocalStorageCacheBool('mod-group-installed', true)
+
+const groupedItems = computed(() => {
+  const result = items.value
+
+  if (isLocalView.value) return result
+
+  if (!groupInstalled.value) return result
+
+  const installed = result.filter((i) => i.installed.length > 0)
+
+  if (installed.length === 0) return result
+
+  const notInstalled = result.filter((i) => i.installed.length === 0)
+  return [
+    ...installed,
+    'search' as string,
+    ...notInstalled,
+  ]
+})
+
+const isLocalView = computed(() => {
+  return !keyword.value && modrinthCategories.value.length === 0 && curseforgeCategory.value === undefined
 })
 
 const isModProject = (v: ProjectEntry<ProjectFile> | undefined): v is (ProjectEntry<ModFile> & { files: ModFile[] }) =>
@@ -217,11 +271,8 @@ watch(computed(() => route.fullPath), () => {
 }, { immediate: true })
 
 const onLoad = () => {
-  if (tab.value === 2) {
-    loadMoreCurseforge()
-  } else if (tab.value === 3) {
-    loadMoreModrinth()
-  }
+  loadMoreCurseforge()
+  loadMoreModrinth()
 }
 
 // install / uninstall / enable / disable
@@ -258,14 +309,70 @@ onUnmounted(() => {
 
 // Drop
 const { resolveResources } = useService(ResourceServiceKey)
-const { dragover } = useDrop(() => {}, async (t) => {
+const { dragover } = useDrop(() => { }, async (t) => {
   const paths = [] as string[]
   for (const f of t.files) {
     paths.push(f.path)
   }
   const resources = await resolveResources(paths.map(p => ({ path: p, domain: ResourceDomain.Mods })))
   await install({ path: path.value, mods: resources })
-}, () => {})
+}, () => { })
+
+// modrinth installer
+const modrinthInstaller = useModrinthInstaller(
+  path,
+  runtime,
+  mods,
+  onInstall,
+  onUninstall,
+)
+provide(kModrinthInstaller, modrinthInstaller)
+
+// curseforge installer
+const curseforgeInstaller = useCurseforgeInstaller(
+  path,
+  runtime,
+  mods,
+  onInstall,
+  onUninstall,
+  'mc-mods',
+)
+provide(kCurseforgeInstaller, curseforgeInstaller)
+
+const onInstallProject = useProjectInstall(
+  runtime,
+  modLoaderFilters,
+  curseforgeInstaller,
+  modrinthInstaller,
+)
+
+useTutorial(computed(() => [{
+  element: '#search-text-field',
+  popover: {
+    title: t('tutorial.mod.searchTitle') + ' (ctrl + f)',
+    description: t('tutorial.mod.searchDescription'),
+  },
+}, {
+  element: '#left-pane',
+  popover: {
+    title: t('tutorial.mod.listTitle'),
+    description: t('tutorial.mod.listDescription'),
+  },
+}, {
+  element: '#right-pane',
+  popover: {
+    title: t('tutorial.mod.detailTitle'),
+    description: t('tutorial.mod.detailDescription'),
+  },
+}, {
+  element: '#default-source-button',
+  popover: {
+    title: t('tutorial.mod.defaultSourceTitle'),
+    description: t('tutorial.mod.defaultSourceDescription'),
+  },
+}]))
+// Presense
+usePresence(computed(() => t('presence.mod')))
 
 </script>
 

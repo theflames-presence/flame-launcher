@@ -5,7 +5,14 @@
   >
     <div class="flex flex-grow gap-4 p-4">
       <div class="self-center">
+        <v-skeleton-loader
+          v-if="loading"
+          width="128"
+          height="128"
+          type="card"
+        />
         <v-img
+          v-else
           width="128"
           height="128"
           class="rounded-xl"
@@ -13,59 +20,94 @@
         />
       </div>
       <div class="flex flex-col">
+        <v-skeleton-loader
+          v-if="loading"
+          type="heading"
+          class="mb-2"
+        />
         <span
-          v-if="detail.url"
+          v-else
+          class="inline-flex gap-2 text-2xl font-bold"
         >
           <a
-            class="text-2xl font-bold"
+            v-if="detail.url"
             target="browser"
             :href="detail.url"
           >
             {{ detail.title }}
           </a>
-        </span>
-        <span
-          v-else
-          class="text-2xl font-bold"
-        >
-          {{ detail.title }}
-        </span>
-        <div class="flex flex-grow-0 items-center gap-2">
-          {{ detail.author }}
-          <v-divider
-            v-if="detail.author"
-            vertical
-          />
-          <div
-            v-if="detail.downloadCount"
-            class="flex flex-grow-0"
+          <template v-else>
+            {{ detail.title }}
+          </template>
+
+          <v-btn
+            icon
+            small
+            :loading="loading"
+            color="grey"
+            @click="emit('refresh')"
           >
-            <v-icon
-              class="material-icons-outlined pb-0.5"
-              :size="22"
-              left
-            >
-              file_download
+            <v-icon size="20">
+              sync
             </v-icon>
-            {{ getExpectedSize(detail.downloadCount, '') }}
-          </div>
-          <v-divider vertical />
-          <div
-            v-if="detail.follows"
-            class="flex flex-grow-0"
-          >
-            <v-icon
-              color="orange"
-              left
-              class="material-icons-outlined text-gray-300"
+          </v-btn>
+        </span>
+        <div class="ml-1 flex flex-grow-0 items-center gap-2 pt-1">
+          <template v-if="loading">
+            <v-skeleton-loader
+              width="100"
+              type="text"
+            />
+            <v-skeleton-loader
+              width="100"
+              type="text"
+            />
+            <v-skeleton-loader
+              width="100"
+              type="text"
+            />
+          </template>
+          <template v-else>
+            {{ detail.author }}
+            <v-divider
+              v-if="detail.author"
+              vertical
+            />
+            <div
+              v-if="detail.downloadCount"
+              class="flex flex-grow-0"
             >
-              star_rate
-            </v-icon>
-            {{ detail.follows }}
-          </div>
+              <v-icon
+                class="material-icons-outlined pb-0.5"
+                :size="22"
+                left
+              >
+                file_download
+              </v-icon>
+              {{ getExpectedSize(detail.downloadCount, '') }}
+            </div>
+            <v-divider vertical />
+            <div
+              v-if="detail.follows"
+              class="flex flex-grow-0"
+            >
+              <v-icon
+                color="orange"
+                left
+                class="material-icons-outlined text-gray-300"
+              >
+                star_rate
+              </v-icon>
+              {{ detail.follows }}
+            </div>
+          </template>
         </div>
-        <div class="my-1">
-          <template v-if="detail.description.includes('§')">
+        <div class="my-1 ml-1">
+          <v-skeleton-loader
+            v-if="loading"
+            type="text, text"
+          />
+          <template v-else-if="detail.description.includes('§')">
             <TextComponent :source="detail.description" />
           </template>
           <template v-else>
@@ -79,6 +121,7 @@
             <v-btn
               v-if="selectedInstalled && !noEnabled"
               :disabled="updating"
+              :loading="loadingVersions"
               small
               plain
               outlined
@@ -141,20 +184,29 @@
           <div class="text-center">
             <v-menu
               open-on-hover
+              :disabled="loadingVersions"
               offset-y
             >
               <template #activator="{ on, attrs }">
                 <div
                   class="cursor-pointer text-gray-600 dark:text-gray-400"
                   :class="{ flex: versions.length > 0, hidden: versions.length === 0 }"
-                  :loading="loadingVersions"
                   v-bind="attrs"
                   v-on="on"
                 >
                   <span class="mr-2 whitespace-nowrap">
                     {{ t('modInstall.currentVersion') }}:
                   </span>
-                  <span class="max-w-40 xl:max-w-50 block overflow-hidden overflow-ellipsis whitespace-nowrap underline 2xl:max-w-full">
+                  <v-skeleton-loader
+                    v-if="loadingVersions"
+                    width="100"
+                    type="text"
+                    class="self-center"
+                  />
+                  <span
+                    v-else
+                    class="max-w-40 xl:max-w-50 block overflow-hidden overflow-ellipsis whitespace-nowrap underline 2xl:max-w-full"
+                  >
                     {{ selectedVersion?.name }}
                   </span>
                   <v-icon
@@ -345,7 +397,7 @@
               v-for="g of detail.galleries"
               :key="g.url + g.title"
               hover
-              @click="emit('show-image', g)"
+              @click="onShowImage(g)"
             >
               <v-img
                 :src="g.url"
@@ -357,7 +409,7 @@
               <v-card-subtitle>
                 {{ g.description }}
                 <div v-if="g.date">
-                  {{ getLocalDateString(g.date) }}
+                  {{ getDateString(g.date) }}
                 </div>
               </v-card-subtitle>
             </v-card>
@@ -392,7 +444,15 @@
           <v-subheader>
             {{ t('modInstall.source') }}
           </v-subheader>
-          <span class="flex flex-wrap gap-2 px-2">
+          <template v-if="loading">
+            <v-skeleton-loader
+              type="avatar"
+            />
+          </template>
+          <span
+            v-else
+            class="flex flex-wrap gap-2 px-2"
+          >
             <v-btn
               v-if="modrinth"
               text
@@ -427,32 +487,45 @@
           {{ t('modrinth.categories.categories') }}
         </v-subheader>
         <span class="flex flex-wrap gap-2">
-          <v-chip
-            v-for="item of detail.categories"
-            :key="item.id"
-            label
-            outlined
-            class="mr-2"
-            @mousedown.prevent
-            @click="emit('select:category', item.id)"
-          >
-            <v-avatar
-              v-if="item.iconHTML"
-              left
-              v-html="item.iconHTML"
+          <template v-if="loading">
+            <v-skeleton-loader
+              type="chip"
             />
-            <v-icon
-              v-else-if="item.icon"
-              left
-            >{{ item.icon }}</v-icon>
-            <v-avatar
-              v-else-if="item.iconUrl"
-              left
+            <v-skeleton-loader
+              type="chip"
+            />
+            <v-skeleton-loader
+              type="chip"
+            />
+          </template>
+          <template v-else>
+            <v-chip
+              v-for="item of detail.categories"
+              :key="item.id"
+              label
+              outlined
+              class="mr-2"
+              @mousedown.prevent
+              @click="emit('select:category', item.id)"
             >
-              <v-img :src="item.iconUrl" />
-            </v-avatar>
-            {{ item.name }}
-          </v-chip>
+              <v-avatar
+                v-if="item.iconHTML"
+                left
+                v-html="item.iconHTML"
+              />
+              <v-icon
+                v-else-if="item.icon"
+                left
+              >{{ item.icon }}</v-icon>
+              <v-avatar
+                v-else-if="item.iconUrl"
+                left
+              >
+                <v-img :src="item.iconUrl" />
+              </v-avatar>
+              {{ item.name }}
+            </v-chip>
+          </template>
         </span>
 
         <v-divider
@@ -464,17 +537,26 @@
           {{ t('modrinth.externalResources') }}
         </v-subheader>
         <div class="px-1">
-          <a
-            v-for="item of detail.externals"
-            :key="item.name + item.url"
-            :href="item.url"
-            class="flex flex-grow-0 items-center gap-1"
+          <template v-if="loading">
+            <v-skeleton-loader
+              type="sentences, sentences"
+            />
+          </template>
+          <template
+            v-else
           >
-            <v-icon>{{ item.icon }}</v-icon>
-            <span class="hover:underline">
-              {{ item.name }}
-            </span>
-          </a>
+            <a
+              v-for="item of detail.externals"
+              :key="item.name + item.url"
+              :href="item.url"
+              class="flex flex-grow-0 items-center gap-1"
+            >
+              <v-icon>{{ item.icon }}</v-icon>
+              <span class="hover:underline">
+                {{ item.name }}
+              </span>
+            </a>
+          </template>
         </div>
 
         <v-divider
@@ -490,43 +572,39 @@
             {{ t('modrinth.technicalInformation') }}
           </v-subheader>
           <div class="grid grid-cols-1 gap-1 gap-y-3 overflow-auto overflow-y-hidden pr-2">
-            <div
-              v-for="item of detail.info"
-              :key="item.name"
-              class="item"
-            >
-              <v-icon>{{ item.icon }}</v-icon>
-              <div class="overflow-x-auto overflow-y-hidden">
-                <span>{{ item.name }}</span>
-                <a
-                  v-if="item.url"
-                  :href="item.url"
-                >
-                  {{ item.value }}
-                </a>
-                <v-chip
-                  v-else
-                  v-shared-tooltip="item.value"
-                  v-ripple
-                  color="grey darken-4"
-                  class="cursor-pointer"
-                  small
-                  @click="onInfoClicked(item.value)"
-                >
-                  <span
-                    class=" select-text overflow-hidden overflow-ellipsis"
+            <template v-if="loading">
+              <v-skeleton-loader
+                type="chip"
+              />
+              <v-skeleton-loader
+                type="chip"
+              />
+              <v-skeleton-loader
+                type="chip"
+              />
+              <v-skeleton-loader
+                type="chip"
+              />
+            </template>
+            <template v-else>
+              <div
+                v-for="item of detail.info"
+                :key="item.name"
+                class="item"
+              >
+                <v-icon>{{ item.icon }}</v-icon>
+                <div class="overflow-x-auto overflow-y-hidden">
+                  <span>{{ item.name }}</span>
+                  <a
+                    v-if="item.url"
+                    :href="item.url"
                   >
                     {{ item.value }}
-                  </span>
-                  <v-icon
-                    x-small
-                    right
-                  >
-                    content_copy
-                  </v-icon>
-                </v-chip>
+                  </a>
+                  <AppCopyChip :value="item.value" />
+                </div>
               </div>
-            </div>
+            </template>
           </div>
         </div>
       </aside>
@@ -537,12 +615,13 @@
 import unknownServer from '@/assets/unknown_server.png'
 import Hint from '@/components/Hint.vue'
 import { kVuetify } from '@/composables/vuetify'
-import { vSharedTooltip } from '@/directives/sharedTooltip'
-import { getLocalDateString } from '@/util/date'
 import { injection } from '@/util/inject'
 import { getExpectedSize } from '@/util/size'
 import ModDetailVersion, { ProjectVersion } from './MarketProjectDetailVersion.vue'
 import { useMarketRoute } from '@/composables/useMarketRoute'
+import AppCopyChip from './AppCopyChip.vue'
+import { kImageDialog } from '@/composables/imageDialog'
+import { useDateString } from '@/composables/date'
 
 const props = defineProps<{
   detail: ProjectDetail
@@ -563,7 +642,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (event: 'load-changelog', version: ProjectVersion): void
-  (event: 'show-image', img: ModGallery): void
   (event: 'load-more'): void
   (event: 'install', version: ProjectVersion): void
   (event: 'install-dependency', dep: ProjectDependency): void
@@ -571,6 +649,7 @@ const emit = defineEmits<{
   (event: 'enable', value: boolean): void
   (event: 'open-dependency', dep: ProjectDependency): void
   (event: 'select:category', category: string): void
+  (event: 'refresh'): void
 }>()
 
 export interface ProjectDependency {
@@ -654,6 +733,7 @@ const _enabled = computed({
   },
 })
 
+const { getDateString } = useDateString()
 const hasInstalledVersion = computed(() => props.versions.some(v => v.installed))
 
 const { goCurseforgeProject, goModrinthProject } = useMarketRoute()
@@ -678,11 +758,17 @@ watch(() => props.detail, (d, o) => {
     tab.value = 0
   }
 })
+
+let dirty = false
+watch([() => props.detail, () => props.loading], () => {
+  dirty = true
+}, { immediate: true })
 watch(() => props.versions, (vers) => {
-  if (!selectedVersion.value) {
+  if (dirty || !selectedVersion.value) {
+    dirty = false
     selectedVersion.value = props.versions.find(v => v.installed) || vers[0]
   }
-})
+}, { immediate: true })
 
 const showDependencies = ref(false)
 
@@ -698,15 +784,17 @@ const onInstall = () => {
   }
 }
 
-const onInfoClicked = (value: string) => {
-  navigator.clipboard.writeText(value)
-}
-
 const onScroll = (e: Event) => {
   const t = e.target as HTMLElement
   if (t.scrollTop + t.clientHeight >= t.scrollHeight && tab.value === 3) {
     emit('load-more')
   }
+}
+
+// Image
+const imageDialog = injection(kImageDialog)
+const onShowImage = (img: ModGallery) => {
+  imageDialog.show(img.url, { description: img.description, date: img.date })
 }
 </script>
 
