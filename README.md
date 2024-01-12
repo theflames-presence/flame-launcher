@@ -9,6 +9,8 @@ This Launcher is made by Aislx FlamEs
 ![image](https://github.com/aislxflames/flame-launcher/assets/120901302/8e7ee429-99ef-4c24-9da6-779d9a095436)
 
 # **Download From [Here](https://github.com/aislxflames/flame-launcher/releases)**
+![image](https://github.com/aislxflames/flame-launcher/assets/120901302/b7885e86-6881-4201-a98f-b307f8b9d99f)
+
 
 # Letest Features
 **🐛Bug Fixes**
