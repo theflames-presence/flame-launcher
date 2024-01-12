@@ -1,15 +1,22 @@
 import { clientCurseforgeV1 } from '@/util/clients'
-import { File, FileIndex } from '@xmcl/curseforge'
-import { CurseForgeServiceKey, InstanceModsServiceKey, ProjectType, Resource, ResourceServiceKey, getCurseforgeFileUri } from '@xmcl/runtime-api'
+import { injection } from '@/util/inject'
+import { generateDistinctName } from '@/util/instanceName'
+import { resolveModpackInstanceConfig } from '@/util/modpackFilesResolver'
+import { File, FileIndex, HashAlgo } from '@xmcl/curseforge'
+import { CurseForgeServiceKey, CurseforgeUpstream, InstanceInstallServiceKey, InstanceServiceKey, ModpackServiceKey, ProjectType, Resource, ResourceServiceKey, getCurseforgeFileUri } from '@xmcl/runtime-api'
 import { InjectionKey, Ref } from 'vue'
-import { useCurseforgeProject } from './curseforge'
+import { getCurseforgeProjectModel } from './curseforge'
 import { useDialog } from './dialog'
-import { kInstallList } from './installList'
 import { AddInstanceDialogKey } from './instanceTemplates'
 import { InstanceInstallDialog } from './instanceUpdate'
+import { kInstanceVersionDiagnose } from './instanceVersionDiagnose'
+import { kInstances } from './instances'
 import { useNotifier } from './notifier'
 import { useResourceUrisDiscovery } from './resources'
 import { useService } from './service'
+import { useSWRVModel } from './swrv'
+import { kInstanceFiles } from './instanceFiles'
+import { kModpackNotification } from './modpackNotification'
 
 export const kCurseforgeInstall: InjectionKey<ReturnType<typeof useCurseforgeInstall>> = Symbol('CurseforgeInstall')
 
@@ -28,6 +35,40 @@ export function useCurseforgeInstallModFile(path: Ref<string>, install: (r: Reso
   return installCurseforgeFile
 }
 
+export function useCurseforgeInstanceResource() {
+  const { getResourceByHash, getResourcesByUris } = useService(ResourceServiceKey)
+  async function getResourceByUpstream(upstream: CurseforgeUpstream) {
+    let resource: Resource | undefined
+    if (upstream.sha1) {
+      resource = await getResourceByHash(upstream.sha1)
+    }
+    if (!resource) {
+      const arr = await getResourcesByUris([getCurseforgeFileUri({
+        modId: upstream.modId,
+        id: upstream.fileId,
+      })])
+      resource = arr[0]
+    }
+    return resource
+  }
+  async function getResourceByFile(file: File) {
+    let resource: Resource | undefined
+    const sha1 = file.hashes.find(f => f.algo === HashAlgo.Sha1)?.value
+    if (file && sha1) {
+      resource = await getResourceByHash(sha1)
+    }
+    if (!resource) {
+      const arr = await getResourcesByUris([getCurseforgeFileUri(file)])
+      resource = arr[0]
+    }
+    return resource
+  }
+  return {
+    getResourceByUpstream,
+    getResourceByFile,
+  }
+}
+
 export function useCurseforgeInstall(modId: Ref<number>, files: Ref<Pick<File, 'modId' | 'id'>[]>, from: Ref<string | undefined>, type: Ref<ProjectType>, currentFileResource: Ref<Resource | undefined>) {
   const { install: installResource } = useService(ResourceServiceKey)
   const { t } = useI18n()
@@ -40,7 +81,7 @@ export function useCurseforgeInstall(modId: Ref<number>, files: Ref<Pick<File, '
   const isDownloaded = (file: Pick<File, 'modId' | 'id'>) => {
     return !!resources.value[getCurseforgeFileUri(file)]
   }
-  const { project } = useCurseforgeProject(modId)
+  const { data: project } = useSWRVModel(getCurseforgeProjectModel(modId))
   async function install(input: File | FileIndex) {
     const file = 'modId' in input ? input : await clientCurseforgeV1.getModFile(modId.value, input.fileId)
     const resource = resources.value[getCurseforgeFileUri(file)]
@@ -74,4 +115,46 @@ export function useCurseforgeInstall(modId: Ref<number>, files: Ref<Pick<File, '
     resources,
     isDownloaded,
   }
+}
+
+export function useCurseforgeInstallModpack(icon: Ref<string | undefined>) {
+  const { instances, selectedInstance } = injection(kInstances)
+  const { getModpackInstallFiles } = useService(ModpackServiceKey)
+  const { installInstanceFiles } = useService(InstanceInstallServiceKey)
+  const { createInstance } = useService(InstanceServiceKey)
+  const { installFile } = useService(CurseForgeServiceKey)
+  const { install, mutate } = injection(kInstanceFiles)
+  const { fix } = injection(kInstanceVersionDiagnose)
+  const { ignore } = injection(kModpackNotification)
+  const { currentRoute, push } = useRouter()
+  const installModpack = async (f: File) => {
+    const result = await installFile({ file: f, type: 'modpacks', icon: icon.value })
+    const resource = result.resource
+    ignore(resource.path)
+    const config = resolveModpackInstanceConfig(resource)
+
+    if (!config) return
+    const name = generateDistinctName(config.name, instances.value.map(i => i.name))
+    const path = await createInstance({
+      ...config,
+      name,
+    })
+    selectedInstance.value = path
+    if (currentRoute.path !== '/') {
+      push('/')
+    }
+    const files = await getModpackInstallFiles(resource.path)
+    await installInstanceFiles({
+      path,
+      files,
+    }).catch(() => {
+      if (selectedInstance.value === path) {
+        return install()
+      }
+    }).finally(() => {
+      mutate()
+    })
+    await fix()
+  }
+  return installModpack
 }

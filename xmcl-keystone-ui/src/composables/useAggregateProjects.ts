@@ -17,12 +17,17 @@ export function useProjectsFilterSearch<T extends ProjectEntry>(
   keyword: Ref<string>,
   items: Ref<T[]>,
   networkOnly: Ref<boolean>,
+  isCurseforgeActive: Ref<boolean>,
+  isModrinthActive: Ref<boolean>,
 ) {
   const filterSorted = computed(() => {
-    const filtered =
-      !networkOnly.value
-        ? items.value
-        : items.value.filter(p => p.modrinth || p.curseforge)
+    const filtered = networkOnly.value
+      ? items.value.filter(p => {
+        if (!isCurseforgeActive.value && p.curseforge) return false
+        if (!isModrinthActive.value && p.modrinth) return false
+        return p.curseforge || p.modrinth || p.id === 'OptiFine'
+      })
+      : items.value
 
     if (!keyword.value) return filtered
 
@@ -79,7 +84,11 @@ export function useAggregateProjects<T extends ProjectEntry>(
 
     for (const mod of modrinth.value) visit(mod)
     for (const mod of curseforge.value) visit(mod)
-    for (const mod of cached.value) visit(mod)
+    for (const mod of cached.value) {
+      mod.curseforge = undefined
+      mod.modrinth = undefined
+      visit(mod)
+    }
 
     return all
   })

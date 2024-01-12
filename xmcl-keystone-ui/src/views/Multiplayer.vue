@@ -23,6 +23,7 @@
           />
           {{ tGroupState[groupState] }}
           <v-text-field
+            id="group-input"
             v-model="groupId"
             class="max-w-40"
             hide-details
@@ -64,6 +65,7 @@
 
           <div class="flex-grow" />
           <v-btn
+            id="join-group-button"
             text
             :loading="joiningGroup"
             @click="onJoin()"
@@ -115,6 +117,7 @@
               >
                 <template #activator="{ on: onTooltip }">
                   <v-btn
+                    id="manual-connect-button"
                     text
                     icon
                     v-on="{ ...on, ...onTooltip }"
@@ -296,14 +299,14 @@
         <Hint
           v-if="connections.length === 0"
           icon="sports_kabaddi"
-          class="h-full"
+          class="multiplayer-content h-full"
           :size="120"
           :text="t('multiplayer.placeholder')"
         />
         <v-list-item
           v-for="c of connections"
           :key="c.id"
-          class="flex-1 flex-grow-0"
+          class="multiplayer-content flex-1 flex-grow-0"
         >
           <v-progress-linear
             v-if="c.sharing"
@@ -459,6 +462,11 @@
 import Hint from '@/components/Hint.vue'
 import { useBusy, useService, useServiceBusy } from '@/composables'
 import { kColorTheme } from '@/composables/colorTheme'
+import { useNatState } from '@/composables/nat'
+import { kPeerState } from '@/composables/peers'
+import { kSettingsState } from '@/composables/setting'
+import { useTutorial } from '@/composables/tutorial'
+import { kUserContext } from '@/composables/user'
 import { injection } from '@/util/inject'
 import { AUTHORITY_MICROSOFT, BaseServiceKey, MappingInfo, NatServiceKey, PeerServiceKey } from '@xmcl/runtime-api'
 import DeleteDialog from '../components/DeleteDialog.vue'
@@ -466,17 +474,13 @@ import PlayerAvatar from '../components/PlayerAvatar.vue'
 import { useDialog } from '../composables/dialog'
 import MultiplayerDialogInitiate from './MultiplayerDialogInitiate.vue'
 import MultiplayerDialogReceive from './MultiplayerDialogReceive.vue'
-import { kUserContext } from '@/composables/user'
-import { kPeerState, usePeerState } from '@/composables/peers'
-import { useNatState } from '@/composables/nat'
-import { kSettingsState } from '@/composables/setting'
 
 const { show } = useDialog('peer-initiate')
 const { show: showShareInstance } = useDialog('share-instance')
 const { show: showReceive } = useDialog('peer-receive')
 const { show: showDelete } = useDialog('deletion')
-const { joinGroup, leaveGroup, drop } = useService(PeerServiceKey)
-const { connections, group, groupState } = injection(kPeerState)
+const { drop } = useService(PeerServiceKey)
+const { connections, group, groupState, joinGroup, leaveGroup } = injection(kPeerState)
 const { t } = useI18n()
 const { handleUrl } = useService(BaseServiceKey)
 const isLoadingNetwork = useServiceBusy(NatServiceKey, 'refreshNatType')
@@ -549,7 +553,7 @@ const deleting = ref('')
 const deletingName = computed(() => connections.value.find(c => c.id === deleting.value)?.userInfo.name)
 const copied = ref(false)
 
-const joiningGroup = useBusy('joinGroup')
+const joiningGroup = computed(() => groupState.value === 'connecting')
 
 watch(group, (newVal) => {
   groupId.value = newVal
@@ -609,15 +613,18 @@ const onCopy = (val: string) => {
   }
 }
 
-const { gameProfile } = injection(kUserContext)
 const onJoin = () => {
   if (!group.value) {
-    const buf = new Uint16Array(1)
-    window.crypto.getRandomValues(buf)
-    joinGroup(groupId.value || (gameProfile.value.name + '@' + buf[0]), gameProfile.value)
+    joinGroup(groupId.value)
   } else {
     leaveGroup()
   }
 }
 
+useTutorial(computed(() => [
+  { element: '#group-input', popover: { title: t('tutorial.multiplayer.groupTitle'), description: t('tutorial.multiplayer.groupDescription') } },
+  { element: '#join-group-button', popover: { title: t('tutorial.multiplayer.groupTitle'), description: t('tutorial.multiplayer.joinDescription') } },
+  { element: '.multiplayer-content', popover: { title: t('tutorial.multiplayer.contentTitle'), description: t('tutorial.multiplayer.contentDescription') } },
+  { element: '#manual-connect-button', popover: { title: t('multiplayer.manualConnect'), description: t('tutorial.multiplayer.manualDescription') } },
+]))
 </script>

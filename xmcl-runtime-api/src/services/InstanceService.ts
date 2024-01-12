@@ -133,6 +133,7 @@ export class InstanceState {
     inst.upstream = settings.upstream ?? inst.upstream
     inst.playtime = settings.playtime ?? inst.playtime
     inst.lastPlayedDate = settings.lastPlayedDate ?? inst.lastPlayedDate
+    inst.lastAccessDate = settings.lastAccessDate ?? inst.lastAccessDate
     inst.icon = settings.icon ?? inst.icon
 
     if ('showLog' in settings) {
@@ -187,6 +188,8 @@ export interface InstanceService {
    * @returns The instance path
    */
   acquireInstanceById(id: string): Promise<string>
+
+  validateInstancePath(path: string): Promise<'bad' | 'nondictionary' | 'noperm' | 'exists' | undefined>
 }
 
 export const InstanceServiceKey: ServiceKey<InstanceService> = 'InstanceService'
@@ -197,6 +200,13 @@ export type InstanceExceptions = {
   name: string
 } | {
   type: 'instanceNameRequired'
+} | {
+  type: 'instanceNotFound'
+  path: string
+} | {
+  type: 'instancePathInvalid'
+  path: string
+  reason: string
 }
 
 export class InstanceException extends Exception<InstanceExceptions> {

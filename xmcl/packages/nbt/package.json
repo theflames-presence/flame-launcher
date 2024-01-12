@@ -1,6 +1,6 @@
 {
   "name": "@xmcl/nbt",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "main": "./index.ts",
   "browser": "./dist/index.browser.mjs",
   "description": "NBT serialization and deserialization",
@@ -11,7 +11,7 @@
     "build:type": "tsc",
     "build:cjs": "esbuild --target=node16 --platform=node --sourcemap --format=cjs --bundle --outfile=dist/index.js index.ts",
     "build:esm": "esbuild --target=node16 --platform=node --sourcemap --format=esm --bundle --outfile=dist/index.mjs index.ts",
-    "build:browser": "esbuild --target=es2020 --external:pako --sourcemap --format=esm --bundle --outfile=dist/index.browser.mjs index.ts"
+    "build:browser": "esbuild --target=es2020 --external:@xmcl/* --external:pako --sourcemap --format=esm --bundle --outfile=dist/index.browser.mjs index.ts"
   },
   "publishConfig": {
     "access": "public",

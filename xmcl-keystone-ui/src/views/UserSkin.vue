@@ -34,6 +34,7 @@
       <v-fab-transition>
         <v-btn
           v-show="!inspect && modified"
+          v-shared-tooltip="_ => t('userSkin.reset')"
           color="secondary"
           fab
           small
@@ -77,12 +78,13 @@
 </template>
 
 <script lang=ts setup>
+import SkinView from '@/components/SkinView.vue'
+import { vSharedTooltip } from '@/directives/sharedTooltip'
 import { GameProfileAndTexture, UserProfile } from '@xmcl/runtime-api'
 import { useNotifier } from '../composables/notifier'
-import { PlayerNameModel, usePlayerName, UserSkinModel, UserSkinRenderPaused, useUserSkin } from '../composables/userSkin'
+import { PlayerNameModel, UserSkinModel, UserSkinRenderPaused, usePlayerName, useUserSkin } from '../composables/userSkin'
 import ImportSkinUrlForm from './UserImportSkinUrlForm.vue'
 import SpeedDial from './UserSkinSpeedDial.vue'
-import SkinView from '@/components/SkinView.vue'
 
 const props = withDefaults(defineProps<{
   user: UserProfile
@@ -115,7 +117,7 @@ async function loadSkin() {
   if (!canUploadSkin.value) return
   const { filePaths } = await showOpenDialog({ title: t('userSkin.importFile'), filters: [{ extensions: ['png'], name: 'PNG Images' }] })
   if (filePaths && filePaths[0]) {
-    skin.value = `image://${filePaths[0]}`
+    skin.value = `http://launcher/media?path=${filePaths[0]}`
     inferModelType.value = true
   }
 }
@@ -134,7 +136,7 @@ async function dropSkin(e: DragEvent) {
   if (e.dataTransfer) {
     const length = e.dataTransfer.files.length
     if (length > 0) {
-      skin.value = `image://${e.dataTransfer!.files[0].path}`
+      skin.value = `http://launcher/media?path=${e.dataTransfer!.files[0].path}`
       inferModelType.value = true
     }
   }

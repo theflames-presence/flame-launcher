@@ -18,6 +18,7 @@
     >
       <template #activator="{ attrs }">
         <v-btn
+          id="launch-button"
           :color="color"
           :x-large="!compact"
           :large="compact"
@@ -74,6 +75,7 @@ const showMenu = ref(false)
 
 function onMouseEnter() {
   if (handle) clearTimeout(handle)
+  if (loading.value) return
   showMenu.value = true
 }
 

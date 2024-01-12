@@ -1,10 +1,10 @@
 <template>
   <div
     v-if="!isFocus"
-    class=""
+    class="grid grid-cols-4 gap-1"
   >
     <v-btn
-      v-shared-tooltip="t('modpack.export')"
+      v-shared-tooltip="_ => t('modpack.export')"
       text
       icon
       :loading="refreshing"
@@ -16,8 +16,7 @@
     </v-btn>
 
     <v-btn
-      v-shared-tooltip="t('logsCrashes.title')"
-      class="ml-1.5"
+      v-shared-tooltip="_ => t('logsCrashes.title')"
       text
       icon
       @click="showLogDialog()"
@@ -28,8 +27,7 @@
     </v-btn>
 
     <v-btn
-      v-shared-tooltip="t('instance.showInstance')"
-      class="ml-1.5"
+      v-shared-tooltip="_ => t('instance.showInstance')"
       text
       icon
       @click="showInstanceFolder"
@@ -40,14 +38,13 @@
     </v-btn>
 
     <v-btn
-      v-shared-tooltip="t('baseSetting.title', 2)"
-      class="ml-1.5"
+      v-shared-tooltip="_ => t('baseSetting.title', 2)"
       text
       icon
       to="/base-setting"
     >
       <v-icon>
-        settings
+        tune
       </v-icon>
     </v-btn>
   </div>
@@ -78,7 +75,7 @@ function showInstanceFolder() {
 </script>
 <style scoped>
 .compact {
-  background: rgba(255, 0, 0, 0.288);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 </style>

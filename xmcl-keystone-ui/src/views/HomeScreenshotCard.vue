@@ -3,55 +3,75 @@
     class="w-full"
     :color="cardColor"
   >
+    <v-btn
+      v-shared-tooltip="_ => randomPlayScreenshot ? t('screenshots.playRandom') : t('screenshots.playSequence')"
+      text
+      icon
+      class="z-6 absolute bottom-2 right-2"
+      @click="randomPlayScreenshot = !randomPlayScreenshot"
+    >
+      <v-icon>
+        {{ randomPlayScreenshot ? 'shuffle' : 'repeat' }}
+      </v-icon>
+    </v-btn>
     <v-carousel
       hide-delimiters
       :height="height"
       show-arrows-on-hover
+      :show-arrows="urls.length > 0"
       cycle
       interval="5000"
       class="h-full rounded"
     >
-      <v-carousel-item
-        v-for="i of urls"
-        :key="i"
-        :src="i"
-        class="cursor-pointer"
-        @click="show(i)"
-      >
-        <v-sheet
-          v-if="i === ''"
-          color="transparent"
-          class="flex h-full items-center justify-center"
+      <template v-if="urls.length > 0">
+        <v-carousel-item
+          v-for="i of display"
+          :key="i"
+          :src="i"
+          class="cursor-pointer"
+          @click="show(i)"
         >
-          <v-icon left>
-            image
-          </v-icon>
-          {{ t('screenshots.empty') }}
-        </v-sheet>
-        <div
-          v-else
-          class="flex h-full items-end justify-center pb-4 opacity-0 transition-opacity hover:opacity-100"
-        >
-          <v-btn
-            text
-            icon
-            @click.stop="onOpen(i)"
+          <div
+            class="flex h-full items-end justify-center pb-4 opacity-0 transition-opacity hover:opacity-100"
           >
-            <v-icon>
-              folder
+            <v-btn
+              text
+              icon
+              @click.stop="onOpen(i)"
+            >
+              <v-icon>
+                folder
+              </v-icon>
+              <!-- {{ t('screenshots.goto') }} -->
+            </v-btn>
+          </div>
+        </v-carousel-item>
+      </template>
+      <template v-else>
+        <v-carousel-item
+          :key="-1"
+        >
+          <v-sheet
+            color="transparent"
+            class="flex h-full items-center justify-center"
+          >
+            <v-icon left>
+              image
             </v-icon>
-          <!-- {{ t('screenshots.goto') }} -->
-          </v-btn>
-        </div>
-      </v-carousel-item>
+            {{ t('screenshots.empty') }}
+          </v-sheet>
+        </v-carousel-item>
+      </template>
     </v-carousel>
     <div class="v-card__title min-h-4 z-100 absolute top-0 w-full" />
   </v-card>
 </template>
 <script lang="ts" setup>
 import { useRefreshable, useService } from '@/composables'
+import { useLocalStorageCacheBool } from '@/composables/cache'
 import { kColorTheme } from '@/composables/colorTheme'
 import { kImageDialog } from '@/composables/imageDialog'
+import { vSharedTooltip } from '@/directives/sharedTooltip'
 import { injection } from '@/util/inject'
 import { Instance, InstanceScreenshotServiceKey, LaunchServiceKey } from '@xmcl/runtime-api'
 
@@ -61,12 +81,15 @@ const { cardColor } = injection(kColorTheme)
 
 const { getScreenshots, showScreenshot } = useService(InstanceScreenshotServiceKey)
 const { on } = useService(LaunchServiceKey)
+const randomPlayScreenshot = useLocalStorageCacheBool('randomPlayScreenshot', false)
 
 const urls = ref([] as string[])
+const shuffled = computed(() => urls.value.sort(() => Math.random() - 0.5))
+const display = computed(() => (randomPlayScreenshot.value ? shuffled.value : urls.value))
 const { refresh, refreshing } = useRefreshable(async () => {
   const result = await getScreenshots(props.instance.path)
   if (result.length === 0) {
-    urls.value = ['']
+    urls.value = []
   } else {
     urls.value = result
   }

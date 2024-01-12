@@ -1,14 +1,16 @@
 import { AZURE_CDN, AZURE_MS_CDN, HAS_DEV_SERVER } from '@/constant'
-import { ChecksumNotMatchError, download } from '@xmcl/file-transfer'
+import { ChecksumNotMatchError } from '@xmcl/file-transfer'
 import { DownloadTask } from '@xmcl/installer'
-import { BaseService } from '@xmcl/runtime'
 import { ReleaseInfo } from '@xmcl/runtime-api'
-import { LauncherAppUpdater } from '@xmcl/runtime/lib/app/LauncherAppUpdater'
-import { Logger } from '@xmcl/runtime/lib/util/log'
+import { LauncherAppUpdater } from '@xmcl/runtime/app'
+import { BaseService } from '@xmcl/runtime/base'
+import { GFW } from '@xmcl/runtime/gfw'
+import { Logger } from '@xmcl/runtime/logger'
 import { BaseTask, Task, task } from '@xmcl/task'
 import { spawn } from 'child_process'
+import { shell } from 'electron'
 import { CancellationToken, Provider, UpdateInfo, UpdaterSignal, autoUpdater } from 'electron-updater'
-import { stat, writeFile } from 'fs/promises'
+import { stat, writeFile } from 'fs-extra'
 import { closeSync, existsSync, open, rename, unlink } from 'original-fs'
 import { platform } from 'os'
 import { basename, dirname, join } from 'path'
@@ -18,10 +20,8 @@ import { URL } from 'url'
 import { promisify } from 'util'
 import ElectronLauncherApp from '../ElectronLauncherApp'
 import { DownloadAppInstallerTask } from './appinstaller'
-import { checksum } from './fs'
-import { GFW } from '@xmcl/runtime/lib/entities/gfw'
 import { ensureElevateExe } from './elevate'
-import { shell } from 'electron'
+import { checksum } from './fs'
 
 /**
  * Only download asar file update.
@@ -104,7 +104,7 @@ export class DownloadFullUpdateTask extends BaseTask<void> {
 
   protected cancelTask(): Promise<void> {
     this.cancellationToken.cancel()
-    return new Promise((resolve) => {
+    return new Promise<any>((resolve) => {
       autoUpdater.once('update-cancelled', resolve)
     })
   }
@@ -131,14 +131,14 @@ export class ElectronUpdater implements LauncherAppUpdater {
     this.logger.log('Try get update from selfhost')
     const baseService = await app.registry.get(BaseService)
     const { allowPrerelease, locale } = await baseService.getSettings()
-    const url = `https://api.fmcl.app/latest?version=v${app.version}&prerelease=${allowPrerelease || false}`
+    const url = `https://api.xmcl.app/latest?version=v${app.version}&prerelease=${allowPrerelease || false}`
     const response = await request(url, {
       headers: {
         'Accept-Language': locale,
       },
       throwOnError: true,
-    }).catch(() => request('https://fmcl.blob.core.windows.net/releases/latest_version.json'))
-    const result = await response.body.json()
+    }).catch(() => request('https://xmcl.blob.core.windows.net/releases/latest_version.json'))
+    const result = await response.body.json() as any
     const updateInfo: ReleaseInfo = {
       name: result.tag_name,
       body: result.body,
@@ -249,6 +249,7 @@ export class ElectronUpdater implements LauncherAppUpdater {
         this.logger.log(`Check update via ${autoUpdater.getFeedURL()}`)
         const gfw = await this.app.registry.get(GFW)
         const info = await autoUpdater.checkForUpdates()
+        if (!info) throw new Error('No update info found')
         if (await gfw.signal && !injectedUpdate) {
           injectedUpdate = true
           const provider: Provider<UpdateInfo> = (await (autoUpdater as any).clientPromise)

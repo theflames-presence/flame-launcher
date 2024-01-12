@@ -32,7 +32,7 @@
           <v-btn
             text
             target="browser"
-            href="https://github.com/aislxflames/flame-launcher/issues/new"
+            href="https://github.com/aislxflames/flame-launcher"
           >
             {{ t('feedback.githubOpenIssue') }}
           </v-btn>
@@ -40,11 +40,11 @@
       </v-list-item>
       <v-list-item>
         <v-list-item-content>
-          <v-list-item-title>{{ t('feedback.youtube') }}</v-list-item-title>
+          <v-list-item-title>{{ t('feedback.kook') }}</v-list-item-title>
           <v-list-item-subtitle
             style="max-width: 80%"
           >
-            {{ t('feedback.youtubeDescription') }}
+            {{ t('feedback.kookDescription') }}
           </v-list-item-subtitle>
         </v-list-item-content>
 
@@ -52,7 +52,7 @@
           <v-btn
             text
             target="browser"
-            href="https://www.youtube.com/@Aislx"
+            href="https://www.youtube.com/@Aislx/featured"
           >
             {{ t('feedback.qqEnterGroup') }}
           </v-btn>
@@ -89,12 +89,17 @@ import { useDialog } from '../composables/dialog'
 
 const { hide, isShown } = useDialog('feedback')
 const { t } = useI18n()
+watch(isShown, (v) => {
+  if (v) {
+    windowController.focus()
+  }
+})
 
 </script>
 
 <style>
 .diff {
-  color: rgb(255, 0, 0);
+  color: #81c784;
   font-style: italic;
 }
 </style>

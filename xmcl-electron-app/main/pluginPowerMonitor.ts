@@ -1,7 +1,10 @@
-import { LaunchService, LauncherApp, LauncherAppPlugin } from '@xmcl/runtime'
+import { LauncherApp, LauncherAppPlugin } from '@xmcl/runtime/app'
+import { LaunchService } from '@xmcl/runtime/launch'
+
 import { exec } from 'child_process'
 import { powerMonitor, app as elec } from 'electron'
 import { ensureElevateExe } from './utils/elevate'
+import { AnyError } from '~/util/error'
 
 const enum PerformanceType {
   AUTO = 0,
@@ -25,6 +28,7 @@ export const pluginPowerMonitor: LauncherAppPlugin = async (app) => {
 
   app.registry.get(LaunchService).then((servi) => {
     servi.registerMiddleware({
+      name: 'gpu-optimization',
       async onBeforeLaunch(input, output) {
         const javaPath = output.javaPath
         try {
@@ -37,7 +41,11 @@ export const pluginPowerMonitor: LauncherAppPlugin = async (app) => {
             await addRegistryKey(app, javaPath, powerMonitor.onBatteryPower ? PerformanceType.POWER_SAVING : PerformanceType.HIGH_PERFORMANCE)
             log('Assigned Minecraft JVM to high performance GPU')
           } catch (e) {
-            error(new Error('Failed to assign Minecraft JVM to high performance GPU', { cause: e }))
+            if (e instanceof Error) {
+              e.name = 'GPUOptimizationError'
+            } else {
+              error(new AnyError('GPUOptimizationError', 'Failed to assign Minecraft JVM to high performance GPU', { cause: e }))
+            }
           }
         }
       },

@@ -92,7 +92,7 @@ export function installJreFromMojangTask(options: InstallJavaOptions) {
     const info: { [system: string]: { [arch: string]: { jre: DownloadInfo } } } =
             await this.yield(task('fetchInfo', async () => {
               const response = await request('https://launchermeta.mojang.com/mc/launcher.json', { dispatcher: options.dispatcher, throwOnError: true })
-              return response.body.json()
+              return response.body.json() as any
             }))
     const system = platform.name
     function resolveArch() {
@@ -207,13 +207,15 @@ export async function getPotentialJavaLocations(): Promise<string[]> {
 
   const which = () => new Promise<string>((resolve) => {
     exec('which java', (_error, stdout) => {
-      resolve(stdout.replace('\n', ''))
-    })
+      if (!_error) resolve(stdout.replace('\n', ''))
+      else resolve('')
+    }).once('error', () => resolve(''))
   })
   const where = () => new Promise<string[]>((resolve) => {
     exec('where java', (_error, stdout) => {
-      resolve(stdout.split('\r\n'))
-    })
+      if (!_error) resolve(stdout.split('\r\n'))
+      else resolve([])
+    }).once('error', () => resolve([]))
   })
 
   if (currentPlatform === 'win32') {
