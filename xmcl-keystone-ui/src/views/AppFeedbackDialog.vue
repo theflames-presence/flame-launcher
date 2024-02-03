@@ -73,7 +73,7 @@
           <v-btn
             text
             target="browser"
-            href="https://dsc.gg/flame-universe"
+            href="https://discord.gg/CsaBbjjaPv"
           >
             {{ t('feedback.discordJoin') }}
           </v-btn>
