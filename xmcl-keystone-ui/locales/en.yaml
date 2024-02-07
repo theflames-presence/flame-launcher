@@ -133,6 +133,9 @@ dataMigration:
   migrationDestinationIsNotEmptyDirectory: >-
     Migration destination is not an empty directory! Please make sure you select
     an empty directory!
+  migrationNoPermission: >-
+    No permission to rename the old directory to new directory! Please make sure
+    the launcher has access to both places!
   placeholder: Please click here to select directory
   setRootCause: >-
     You will loose your data (Maps, Resource Packs, Mods) if you close the
@@ -263,14 +266,14 @@ fabricVersion:
 feedback:
   channel: Channels
   description: I found a Bug or I want to make a suggestion
-  discord: Discord
+  discord: Discord (Flame Launcher)
   discordDescription: Join Discord Channel
   discordJoin: Join
   github: Github Issue
   githubDescription: Open an Github Issue to tell your thought
   githubOpenIssue: Github
   kook: Youtube
-  kookDescription: Youtube is the best place for uploading video
+  kookDescription: This is my youtube channel :)).
   name: Feedback
   qq: QQ Group
   qqDescription: >-
@@ -1123,10 +1126,10 @@ setting:
     warningColor: Warning Color
   darkTheme: Theme
   darkThemeDescription: Choose the dark or light theme
-  developerMode: Developer Mode
-  developerModeDescription: Developer Mode is targeting to test your own written mod
+  developerMode: Cracked Mode
+  developerModeDescription: Cracked Mode is use to login in cracked account.
   disableTelemetry: Disable Telemetry
-  disableTelemetryDescription: XMCL will collect the game launch and user login events.
+  disableTelemetryDescription: FMCL will collect the game launch and user login events.
   enableDiscord: Enable Discord Presence
   enableDiscordDescription: This will keep update your launcher status to discord
   general: General
@@ -1143,6 +1146,8 @@ setting:
     focus: Focus Layout
   layoutDescription: The launcher layout reprensenting different UI logic
   layoutTitle: Layout
+  linuxEnableDedicatedGPUOptimization: Assign Dedicated GPU
+  linuxEnableDedicatedGPUOptimizationDescription: This option will assign dedicated GPU to Minecraft process.
   linuxTitlebar: Native title bar
   linuxTitlebarDescription: Use native linux title bar for launcher
   location: Store Location
@@ -1155,6 +1160,7 @@ setting:
     total. 0 means no limit.
   maxSocketsTitle: Max HTTP sockets
   name: Global Setting | Global Settings
+  network: Network Settings
   officialWebsite: Official Website
   particleMode:
     bubble: Bubble
@@ -1186,7 +1192,7 @@ setup:
     name: '@:setting.appearance'
   dataRoot:
     description: >-
-      The data root is not a common .minecraft directory. Since XMCL data
+      The data root is not a common .minecraft directory. Since FMCL data
       directory structure is different from vanilla, we do not recommend to use
       the common .minecraft directory as a data root.
     drives: Recommend Locations
@@ -1210,7 +1216,8 @@ setup:
     to be used with a single instance or few instances.
   game:
     description: >-
-      Choose existing game directory (.minecraft) to import existing resources.
+     Choose existing game directory (.minecraft) to import existing resources.
+
       So you can quickly identify the mods, resource packs, etc.
     name: Import Existed Game
   locale:
@@ -1221,7 +1228,7 @@ setup:
     language: Language
     name: Set Language
   path: Current Path
-  title: 'Welcome to Flame Launcher. Before start, we need you to '
+  title: 'Welcome to X Minecraft Launcher. Before start, we need you to '
 shaderPack:
   deletion: Delete Shader Pack
   deletionHint: This will delete the shader pack file {path} and cannot reverted.
@@ -1256,7 +1263,7 @@ task:
   nTaskRunning: '{count} tasks is running'
   name: Task | Tasks
   pause: Pause
-title: Flame Launcher
+title: X Minecraft Launcher
 transportType:
   host: Host Candidate
   prflx: Peer Reflexive Candidate

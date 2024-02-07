@@ -3,11 +3,11 @@
     v-if="!data.fetching"
     class="setup flex flex-col overflow-auto"
   >
-    <v-card-title
+    <!-- <v-card-title
       class="elevation-3 text-lg font-bold"
     >
       <h2>{{ t('setup.title') }}{{ currentTitle }}</h2>
-    </v-card-title>
+    </v-card-title> -->
     <v-stepper
       v-model="data.step"
       class="non-moveable visible-scroll flex h-full flex-col overflow-auto bg-transparent"

@@ -1,0 +1,3 @@
+[submodule "flame-launcher-core"]
+	path = xmcl
+	url = https://github.com/aislxflames/flame-launcher-core

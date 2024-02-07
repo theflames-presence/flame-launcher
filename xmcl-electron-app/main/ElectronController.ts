@@ -319,7 +319,7 @@ export class ElectronController implements LauncherAppController {
 
   async createBrowseWindow() {
     const browser = new BrowserWindow({
-      title: 'XMCL Launcher Browser',
+      title: 'FMCL Launcher Browser',
       frame: false,
       transparent: true,
       resizable: false,
@@ -425,6 +425,13 @@ export class ElectronController implements LauncherAppController {
     this.mainWin = browser
 
     this.app.emit('app-booted', man)
+  }
+
+  getLoggerWindow() {
+    if (this.loggerWin?.isDestroyed()) {
+      this.loggerWin = undefined
+    }
+    return this.loggerWin
   }
 
   createMonitorWindow() {

@@ -174,6 +174,9 @@ dataMigration:
   directoryCriteriaHint: 请确保你选择的新的文件夹是一个<span class="font-bold text-lg mx-1">空</span>文件夹。
   migrationDestinationIsFile: 迁移目标地址是个文件而不是文件夹！请重新选择一个空的文件夹！
   migrationDestinationIsNotEmptyDirectory: 迁移目标不是一个空的文件夹！请确保你选择了一个空的文件夹！
+  migrationNoPermission: |-
+    没有权限将旧目录重命名为新目录！
+    请确保启动器可以访问这两个地方！
   placeholder: 点击来选择新的根目录
   setRootCause: 请确保启动器在此过程中不被中断，不然您的数据可能丢失
   setRootDescription: 这将改变启动器的存储根目录。
@@ -1098,6 +1101,8 @@ setting:
     focus: 聚焦布局
   layoutDescription: 不同的布局有不同的UI交互逻辑
   layoutTitle: 布局
+  linuxEnableDedicatedGPUOptimization: 分配专用 GPU
+  linuxEnableDedicatedGPUOptimizationDescription: 此选项将为 Minecraft 进程分配专用 GPU。
   linuxTitlebar: 原生顶端栏
   linuxTitlebarDescription: 使用 Linux 系统原生的顶端栏
   location: 数据存储位置
@@ -1108,6 +1113,7 @@ setting:
   maxSocketsDescription: 控制最大的并发 HTTP 链接数量。0 代表不限制数量。
   maxSocketsTitle: 最大 HTTP 连接数量
   name: 设置
+  network: 网络设置
   officialWebsite: 官网地址
   particleMode:
     bubble: 气泡

@@ -137,7 +137,7 @@ export default class ElectronLauncherApp extends LauncherApp {
       this.protocol.handle({ url })
     }).on('second-instance', (e, argv) => {
       const last = argv[argv.length - 1]
-      if (last.startsWith('xmcl://')) {
+      if (last.startsWith('fmcl://')) {
         this.protocol.handle({ url: last })
       }
     })
