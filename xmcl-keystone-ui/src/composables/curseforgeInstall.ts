@@ -7,6 +7,7 @@ import { CurseForgeServiceKey, CurseforgeUpstream, InstanceInstallServiceKey, In
 import { InjectionKey, Ref } from 'vue'
 import { getCurseforgeProjectModel } from './curseforge'
 import { useDialog } from './dialog'
+import { kInstanceFiles } from './instanceFiles'
 import { AddInstanceDialogKey } from './instanceTemplates'
 import { InstanceInstallDialog } from './instanceUpdate'
 import { kInstanceVersionDiagnose } from './instanceVersionDiagnose'
@@ -15,8 +16,6 @@ import { useNotifier } from './notifier'
 import { useResourceUrisDiscovery } from './resources'
 import { useService } from './service'
 import { useSWRVModel } from './swrv'
-import { kInstanceFiles } from './instanceFiles'
-import { kModpackNotification } from './modpackNotification'
 
 export const kCurseforgeInstall: InjectionKey<ReturnType<typeof useCurseforgeInstall>> = Symbol('CurseforgeInstall')
 
@@ -93,7 +92,7 @@ export function useCurseforgeInstall(modId: Ref<number>, files: Ref<Pick<File, '
           resource,
         })
       } else if (type.value === 'modpacks') {
-        showAddInstanceDialog(resource.path)
+        showAddInstanceDialog({ type: 'resource', resource })
       } else if (from.value) {
         installResource({ instancePath: from.value, resource }).then(() => {
           notify({ title: t('installResource.success', { file: resource.fileName }), level: 'success', full: true })
@@ -125,12 +124,10 @@ export function useCurseforgeInstallModpack(icon: Ref<string | undefined>) {
   const { installFile } = useService(CurseForgeServiceKey)
   const { install, mutate } = injection(kInstanceFiles)
   const { fix } = injection(kInstanceVersionDiagnose)
-  const { ignore } = injection(kModpackNotification)
   const { currentRoute, push } = useRouter()
   const installModpack = async (f: File) => {
     const result = await installFile({ file: f, type: 'modpacks', icon: icon.value })
     const resource = result.resource
-    ignore(resource.path)
     const config = resolveModpackInstanceConfig(resource)
 
     if (!config) return

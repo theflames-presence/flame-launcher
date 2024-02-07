@@ -110,8 +110,8 @@ const versions = computed(() => {
       id: v.id.toString(),
       name: v.displayName,
       version_type: v.releaseType === 1 ? 'release' : v.releaseType === 2 ? 'beta' : 'alpha',
-      game_versions: getCursforgeFileModLoaders(v),
-      loaders: getCurseforgeFileGameVersions(v),
+      game_versions: getCurseforgeFileGameVersions(v),
+      loaders: getCursforgeFileModLoaders(v),
     }
     result.push(x)
   }
@@ -135,7 +135,7 @@ const members = computed(() => {
 const _installing = ref(false)
 const onInstall = (v: StoreProjectVersion) => {
   if (!proj.value) return
-  const files = proj.value.latestFiles
+  const files = (allVersions.data.value?.data || proj.value.latestFiles)
   const file = files.find(f => f.id.toString() === v.id)
   if (!file) return
   _installing.value = true

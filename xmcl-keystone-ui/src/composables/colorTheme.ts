@@ -10,7 +10,7 @@ export function useColorTheme(darkTheme: Ref<boolean>) {
   const darkAppBarColor = useLocalStorageCacheStringValue<string>('darkAppBarColor', '#111111FF')
   const darkSideBarColor = useLocalStorageCacheStringValue<string>('darkSideBarColor', '#111111FF')
 
-  const darkPrimaryColor = useLocalStorageCacheStringValue<string>('darkPrimaryColor', '#ff1e00')
+  const darkPrimaryColor = useLocalStorageCacheStringValue<string>('darkPrimaryColor', '#ff0000')
   const darkBackground = useLocalStorageCacheStringValue<string>('darkBackground', '#121212')
   const darkInfoColor = useLocalStorageCacheStringValue<string>('darkInfoColor', '#2196F3')
   const darkErrorColor = useLocalStorageCacheStringValue<string>('darkErrorColor', '#FF5252')
@@ -19,7 +19,7 @@ export function useColorTheme(darkTheme: Ref<boolean>) {
   const darkAccentColor = useLocalStorageCacheStringValue<string>('darkAccentColor', '#00e676')
   const darkCardColor = useLocalStorageCacheStringValue<string>('darkCardColor', '#0c0c0ccc')
 
-  const lightPrimaryColor = useLocalStorageCacheStringValue<string>('lightPrimaryColor', '#1976D2')
+  const lightPrimaryColor = useLocalStorageCacheStringValue<string>('lightPrimaryColor', '#9003fc')
   const lightBackground = useLocalStorageCacheStringValue<string>('lightBackground', '#FFFFFF')
   const lightInfoColor = useLocalStorageCacheStringValue<string>('lightInfoColor', '#2196F3')
   const lightErrorColor = useLocalStorageCacheStringValue<string>('lightErrorColor', '#FF5252')
@@ -137,10 +137,10 @@ export function useColorTheme(darkTheme: Ref<boolean>) {
 
   function resetDarkToDefault() {
     darkAppBarColor.value = '#111111FF'
-    darkSideBarColor.value = '#111111FF'
-    darkPrimaryColor.value = '#4caf50'
+    darkSideBarColor.value = '#111111FF'  
+    darkPrimaryColor.value = '#ff0000'
     darkBackground.value = '#121212'
-    darkInfoColor.value = '#2196F3'
+    darkInfoColor.value = '#2196F3' 
     darkErrorColor.value = '#FF5252'
     darkWarningColor.value = '#FB8C00'
     darkSuccessColor.value = '#4CAF50'
@@ -151,7 +151,7 @@ export function useColorTheme(darkTheme: Ref<boolean>) {
   function resetLightToDefault() {
     lightAppBarColor.value = '#e0e0e0FF'
     lightSideBarColor.value = '#FFFFFFFF'
-    lightPrimaryColor.value = '#1976D2'
+    lightPrimaryColor.value = '#9003fc'
     lightBackground.value = '#FFFFFF'
     lightInfoColor.value = '#2196F3'
     lightErrorColor.value = '#FF5252'

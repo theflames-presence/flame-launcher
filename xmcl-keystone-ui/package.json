@@ -2,7 +2,7 @@
     "name": "@xmcl/keystone-ui",
     "private": true,
     "productName": "fmcl",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "author": "aislx <proarghaop@gmail.com>",
     "description": "A great minecraft launcher in the future",
     "license": "MIT",
@@ -11,7 +11,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/aislxflames/Flame-Launcher"
+        "url": "    "
     },
     "scripts": {
         "build": "vite build --emptyOutDir",

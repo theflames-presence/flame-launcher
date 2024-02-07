@@ -1,6 +1,6 @@
 {
     "name": "@xmcl/runtime-api",
-    "version": "1.0.2",
+    "version": "0.23.7",
     "author": "aislx <proarghaop@gmail.com>",
     "description": "Shared API for between launcher renderer & main process",
     "license": "MIT",
@@ -14,7 +14,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/aislxflames/Flame-Launcher"
+        "url": "https://github.com/aislxflames/flame-launcher"
     },
     "scripts": {
         "build": "pnpm run build:cjs && pnpm run build:esm && pnpm run build:type",

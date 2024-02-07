@@ -127,19 +127,21 @@
 </template>
 
 <script lang="ts" setup>
+import ErrorView from '@/components/ErrorView.vue'
 import InstanceManifestFileTree from '@/components/InstanceManifestFileTree.vue'
-import { useRefreshable, useService, useServiceBusy } from '@/composables'
-import { kInstances } from '@/composables/instances'
+import { useRefreshable, useService } from '@/composables'
+import { kInstance } from '@/composables/instance'
 import { InstanceFileNode, provideFileNodes } from '@/composables/instanceFileNodeData'
 import { InstanceInstallDialog } from '@/composables/instanceUpdate'
+import { kInstances } from '@/composables/instances'
+import { kJavaContext } from '@/composables/java'
 import { useVuetifyColor } from '@/composables/vuetify'
 import { basename } from '@/util/basename'
+import { getFTBTemplateAndFile } from '@/util/ftb'
 import { injection } from '@/util/inject'
 import { getUpstreamFromResource } from '@/util/upstream'
-import { EditInstanceOptions, InstanceFileOperation, InstanceFileUpdate, InstanceInstallServiceKey, InstanceServiceKey, InstanceUpdateServiceKey } from '@xmcl/runtime-api'
+import { EditInstanceOptions, InstanceData, InstanceFileOperation, InstanceFileUpdate, InstanceInstallServiceKey, InstanceUpdateServiceKey, Resource } from '@xmcl/runtime-api'
 import { useDialog } from '../composables/dialog'
-import { kInstance } from '@/composables/instance'
-import ErrorView from '@/components/ErrorView.vue'
 
 const selected = ref([] as string[])
 
@@ -148,9 +150,11 @@ const { isShown, dialog } = useDialog(InstanceInstallDialog, () => {
 }, () => {
   upgrade.value = undefined
 })
-const oldResource = computed(() => dialog.value.parameter?.currentResource)
-const newResource = computed(() => dialog.value.parameter?.resource)
-const { getInstanceUpdateProfile } = useService(InstanceUpdateServiceKey)
+const oldResource = computed(() => dialog.value.parameter?.type !== 'ftb' ? dialog.value.parameter?.currentResource as Resource : undefined)
+const newResource = computed(() => dialog.value.parameter?.type !== 'ftb' ? dialog.value.parameter?.resource : undefined)
+const oldManifest = computed(() => dialog.value.parameter?.type === 'ftb' ? dialog.value.parameter?.oldManifest : undefined)
+const newManifest = computed(() => dialog.value.parameter?.type === 'ftb' ? dialog.value.parameter?.newManifest : undefined)
+const { getInstanceUpdateProfile, getInstanceUpdateProfileRaw } = useService(InstanceUpdateServiceKey)
 const { installInstanceFiles } = useService(InstanceInstallServiceKey)
 
 const { edit } = injection(kInstances)
@@ -159,6 +163,7 @@ const { t } = useI18n()
 const upgrade = ref(undefined as undefined | {
   instance: EditInstanceOptions
   files: InstanceFileUpdate[]
+  upstream: InstanceData['upstream']
 })
 
 const tOperations = computed(() => ({
@@ -219,21 +224,42 @@ const { leaves } = provideFileNodes(result)
 
 const { runtime: oldRuntime, path: instancePath } = injection(kInstance)
 
+const { all: javas } = injection(kJavaContext)
 const { refresh, refreshing, error } = useRefreshable(async () => {
+  if (newManifest.value && oldManifest.value) {
+    const [config, newVersionFiles] = getFTBTemplateAndFile(newManifest.value, javas.value)
+    const [_, oldVersionFiles] = getFTBTemplateAndFile(oldManifest.value, javas.value)
+    upgrade.value = {
+      instance: config,
+      files: markRaw(await getInstanceUpdateProfileRaw({
+        instancePath: instancePath.value,
+        oldVersionFiles,
+        newVersionFiles,
+      })),
+      upstream: {
+        type: 'ftb-modpack',
+        id: newManifest.value.parent,
+        versionId: newManifest.value.id,
+      },
+    }
+    return
+  }
   const path = newResource.value?.path
   if (path) {
-    upgrade.value = await getInstanceUpdateProfile({
-      instancePath: instancePath.value,
-      oldModpack: oldResource.value && 'path' in oldResource.value ? oldResource.value.path : undefined,
-      newModpack: newResource.value.path,
-    })
+    upgrade.value = {
+      ...await getInstanceUpdateProfile({
+        instancePath: instancePath.value,
+        oldModpack: oldResource.value && 'path' in oldResource.value ? oldResource.value.path : undefined,
+        newModpack: newResource.value.path,
+      }),
+      upstream: getUpstreamFromResource(newResource.value),
+    }
   }
 })
 
 const confirm = async () => {
   if (upgrade.value) {
-    const { instance, files } = upgrade.value
-    const upstream = newResource.value
+    const { instance, files, upstream } = upgrade.value
     isShown.value = false
     await installInstanceFiles({
       path: instancePath.value,
@@ -249,7 +275,7 @@ const confirm = async () => {
         neoForged: instance.runtime?.neoForged,
       },
       modpackVersion: instance.modpackVersion,
-      upstream: getUpstreamFromResource(upstream!),
+      upstream,
     })
   }
 }

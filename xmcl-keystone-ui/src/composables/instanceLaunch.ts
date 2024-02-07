@@ -144,6 +144,7 @@ export function useInstanceLaunch(instance: Ref<Instance>, resolvedVersion: Ref<
       vmOptions,
       mcOptions,
       yggdrasilAgent,
+      server: inst.server ?? undefined,
     }
     return options
   }
@@ -176,6 +177,7 @@ export function useInstanceLaunch(instance: Ref<Instance>, resolvedVersion: Ref<
     } catch (e) {
       console.error(e)
       error.value = e as any
+      throw e
     } finally {
       launchingStatus.value = ''
     }

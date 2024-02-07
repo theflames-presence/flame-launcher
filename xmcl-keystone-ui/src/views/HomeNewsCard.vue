@@ -66,7 +66,7 @@ const nav = () => {
 }
 
 .container.on-hover {
-  background-color: rgba(107, 26, 26, 0.5) !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
 }
 
 </style>

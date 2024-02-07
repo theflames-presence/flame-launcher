@@ -33,7 +33,7 @@
             {{ t('modified.reset') }}
           </v-btn>
           <v-btn
-            color="red"
+            color="primary"
             @click="edit.save"
           >
             {{ t('modified.save') }}

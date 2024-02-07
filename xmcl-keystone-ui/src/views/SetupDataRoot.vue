@@ -31,7 +31,7 @@
       <v-list-item-action class="self-center">
         <v-btn
           outlined
-          color="primary"
+          color="purple"
           text
           style="margin-right: 10px;"
           @click="browse"

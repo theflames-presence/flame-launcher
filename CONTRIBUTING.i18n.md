@@ -17,14 +17,14 @@ You need to fork & clone the project using git.
 Suppose you already fork the project in Github to your repo:
 
 ```bash
-git clone --recurse-submodules https://github.com/your-id/flame-launcher
+git clone --recurse-submodules https://github.com/your-id/x-minecraft-launcher
 ```
 
 ### Install
 
 **Optional**, install the project using [pnpm](https://pnpm.io):
 
-Under the folder you cloned, e.g. `flame-launcher`, run command
+Under the folder you cloned, e.g. `x-minecraft-launcher`, run command
 
 ```
 pnpm install
