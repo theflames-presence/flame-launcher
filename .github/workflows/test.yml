@@ -1,6 +1,7 @@
 name: Build
 on: 
   push:
+
 jobs:
   my-job:
     runs-on: ${{ matrix.os }}
@@ -11,12 +12,12 @@ jobs:
       - name: Check Python version
         run: python --version
 
-      - name: Install Python development headers
-        if: matrix.os == 'ubuntu-latest'  # Only install on Ubuntu
-        run: sudo apt-get install python3-dev
+      - name: Install Python 3
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install python3
 
       - name: Install better-sqlite3
-        run: npm install better-sqlite3 --python=python3
+        run: npm install better-sqlite3 --build-from-source
 
       - name: Checkout code
         uses: actions/checkout@v2
