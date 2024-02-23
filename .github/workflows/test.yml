@@ -13,9 +13,9 @@ on:
       - 'pnpm-lock.yaml'
       - '.github/**'
 
-# env:
-#   ELECTRON_CACHE: ~/.cache/electron
-#   ELECTRON_BUILDER_CACHE: ~/.cache/electron-builder
+ env:
+   ELECTRON_CACHE: ~/.cache/electron
+   ELECTRON_BUILDER_CACHE: ~/.cache/electron-builder
 
 jobs:
 
@@ -52,14 +52,14 @@ jobs:
       with:
         node-version: 16
         cache: 'pnpm'
-    # - name: Restore cached Electron
-    #   id: cache-electron
-    #   uses: actions/cache/restore@v3
-    #   with:
-    #     path: |
-    #       ~/.cache/electron
-    #       ~/.cache/electron-builder
-    #     key: ${{ runner.os }}-electron
+     - name: Restore cached Electron
+       id: cache-electron
+       uses: actions/cache/restore@v3
+       with:
+         path: |
+           ~/.cache/electron
+           ~/.cache/electron-builder
+         key: ${{ runner.os }}-electron
     - name: Install
       run: pnpm install
     - name: Build
@@ -70,13 +70,13 @@ jobs:
         BUILD_NUMBER: ${{ github.run_number }}
         NODE_ENV: production
         CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_TOKEN }}
-    # - name: Save cached Electron
-    #   uses: actions/cache/save@v3
-    #   with:
-    #     path: |
-    #       ~/.cache/electron
-    #       ~/.cache/electron-builder
-    #     key: ${{ runner.os }}-electron
+    - name: Save cached Electron
+      uses: actions/cache/save@v3
+       with:
+         path: |
+           ~/.cache/electron
+           ~/.cache/electron-builder
+         key: ${{ runner.os }}-electron
     - name: Upload Source Maps
       if: ${{ runner.os == 'Windows' }} 
       uses: actions/upload-artifact@v4
