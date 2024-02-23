@@ -3,7 +3,10 @@ on:
   push:
 jobs:
   my-job:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - name: my-step
         run: echo "Hello World!"
