@@ -1,9 +1,21 @@
-name: Build & Deploy
+name: Build
 
 on:
   push:
     branches:
       - master
+    paths:
+      - 'xmcl-runtime/**'
+      - 'xmcl-runtime-api/**'
+      - 'xmcl-keystone-ui/**'
+      - 'xmcl-electron-app/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/**'
+
+# env:
+#   ELECTRON_CACHE: ~/.cache/electron
+#   ELECTRON_BUILDER_CACHE: ~/.cache/electron-builder
 
 jobs:
   build:
@@ -11,12 +23,228 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        
     steps:
-      - name: Install
-        run: pnpm install
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - uses: pnpm/action-setup@v2.0.1
+      with:
+        version: 8.3.0
+    - name: Fix node-gyp and Python
+      run: python3 -m pip install packaging setuptools
+    - name: Use Node.js 16
+      uses: actions/setup-node@v2
+      with:
+        node-version: 16
+        cache: 'pnpm'
+    # - name: Restore cached Electron
+    #   id: cache-electron
+    #   uses: actions/cache/restore@v3
+    #   with:
+    #     path: |
+    #       ~/.cache/electron
+    #       ~/.cache/electron-builder
+    #     key: ${{ runner.os }}-electron
+    - name: Install
+      run: pnpm install
+    - name: Build
+      run: |
+        pnpm run --prefix xmcl-keystone-ui build
+        pnpm run --prefix xmcl-electron-app build:all
+      env:
+        BUILD_NUMBER: ${{ github.run_number }}
+        NODE_ENV: production
+        CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_TOKEN }}
+    # - name: Save cached Electron
+    #   uses: actions/cache/save@v3
+    #   with:
+    #     path: |
+    #       ~/.cache/electron
+    #       ~/.cache/electron-builder
+    #     key: ${{ runner.os }}-electron
+    - name: Upload Source Maps
+      if: ${{ runner.os == 'Windows' }} 
+      uses: actions/upload-artifact@v4
+      with:
+        name: sourcemap
+        path: |
+          xmcl-electron-app/dist/*.js.map
+    - name: Upload Build
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-${{ runner.os }}
+        path: |
+          xmcl-electron-app/build/output/
+    - name: Upload Windows Zip Build
+      if: ${{ runner.os == 'Windows' }} 
+      uses: actions/upload-artifact@v4
+      with:
+        name: win-b${{ github.run_number }}
+        path: |
+          xmcl-electron-app/build/output/win-unpacked/
+    - name: Upload Linux x64 Zip Build
+      if: ${{ runner.os == 'Linux' }} 
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux-b${{ github.run_number }}-x64
+        path: |
+          xmcl-electron-app/build/output/linux-unpacked/
+    - name: Upload Linux arm64 Zip Build
+      if: ${{ runner.os == 'Linux' }} 
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux-b${{ github.run_number }}-arm64
+        path: |
+          xmcl-electron-app/build/output/linux-arm64-unpacked/
+    - name: Upload Mac x64 Zip Build
+      if: ${{ runner.os == 'macOS' }} 
+      uses: actions/upload-artifact@v4
+      with:
+        name: mac-b${{ github.run_number }}-x64
+        path: |
+          xmcl-electron-app/build/output/mac/
+    - name: Upload Mac arm64 Zip Build
+      if: ${{ runner.os == 'macOS' }} 
+      uses: actions/upload-artifact@v4
+      with:
+        name: mac-b${{ github.run_number }}-arm64
+        path: |
+          xmcl-electron-app/build/output/mac-arm64/
 
-      - name: Build
-        run: |
-          pnpm run --prefix xmcl-keystone-ui build
-          pnpm run --prefix xmcl-electron-app build:all
+  prepare-release:
+    runs-on: ubuntu-latest
+    needs: 
+      - build
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore(release)') }}
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+        fetch-depth: 0
+    - uses: pnpm/action-setup@v2.0.1
+      with:
+        version: 8.3.0
+    - name: Use Node.js 16
+      uses: actions/setup-node@v2
+      with:
+        node-version: 16
+    - name: Install
+      run: |
+        pnpm install --filter ./.github/actions
+    - name: Bump Version
+      id: version
+      uses: Voxelum/semantic-version-bump-action@xmcl
+      with:
+        packages: |
+          ./xmcl-keystone-ui
+          ./xmcl-runtime
+          ./xmcl-runtime-api
+        root: '.'
+        stage: 'prepare'
+    - name: Update Sponsor
+      uses: Voxelum/afdian-sponsor-action@master
+      with:
+        user-id: ${{ secrets.AFDIAN_USER_ID }}
+        token: ${{ secrets.AFDIAN_TOKEN }}
+        markdown: |
+          README.md
+          README.zh.md
+    - name: Update Lock File
+      if: ${{ steps.version.outputs.release == 'true' }}
+      run: pnpm i --lockfile-only
+    - name: Create Pull Request
+      if: ${{ steps.version.outputs.release == 'true' }}
+      uses: peter-evans/create-pull-request@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "chore(release): version ${{ steps.version.outputs.version }}"
+        title: Prepare Release ${{ steps.version.outputs.version }}
+        body: ${{ steps.version.outputs.changelog }}
+        reviewers: ci010
+        assignees: ci010
+        branch: prepare-release
+
+  upload-sourcemap:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+    - name: Download Source Map
+      uses: actions/download-artifact@v4
+      with:
+        name: sourcemap
+        path: sourcemap/${{github.run_number}}
+    - name: Upload Source Map to Azure
+      uses: ci010/upload-blob-to-azure@master
+      env:
+        AZURE_ACCOUNT_KEY: ${{ secrets.AZURE_ACCOUNT_KEY }}
+      with:
+        account: xmcl
+        container: sourcemap
+        directory: ./sourcemap
+
+  release:
+    if: startsWith(github.event.head_commit.message, 'chore(release)')
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        submodules: recursive
+    - uses: pnpm/action-setup@v2.0.1
+      with:
+        version: 8.3.0
+    - name: Use Node.js 16
+      uses: actions/setup-node@v2
+      with:
+        node-version: 16
+        cache: 'pnpm'
+    - name: Install
+      run: |
+        pnpm install --filter ./.github/actions
+    - name: Download Build
+      uses: actions/download-artifact@v4
+      with:
+        pattern: build-*
+        merge-multiple: true
+        path: build
+    - name: Prepare Release
+      id: prepare_release
+      uses: Voxelum/semantic-version-bump-action@xmcl
+      with:
+        packages: |
+          ./xmcl-keystone-ui
+          ./xmcl-runtime
+          ./xmcl-runtime-api
+        root: '.'
+        stage: 'release'
+    - name: Create Tag
+      run: |
+        git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/aislxflames/flame-launcher.git"
+        git config user.name aislx
+        git config user.email proarghaop@gmail.com
+        git tag -f ${{ steps.prepare_release.outputs.tag }}
+        git push origin tag ${{ steps.prepare_release.outputs.tag }} -f
+    - name: Emit Version File
+      run: |
+        echo ${{ steps.prepare_release.outputs.version }}.${{ github.run_number }} > ./build/version
+    - name: Draft Release
+      id: create_release
+      uses: voxelum/create-release@xmcl
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.prepare_release.outputs.tag }}
+        release_name: ${{ steps.prepare_release.outputs.tag }}
+        draft: true
+        prerelease: false
+        body: ${{ steps.prepare_release.outputs.changelog }}
+        asset_dir_path: ./build
+    - name: Create Release Note
+      uses: ./.github/actions/generate-release-note
+      with:
+        body: ${{ steps.prepare_release.outputs.changelog }}
+        version: ${{ steps.prepare_release.outputs.version }}
