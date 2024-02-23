@@ -63,9 +63,13 @@ export class UserService extends StatefulService<UserState> implements IUserServ
 
       // Refresh all users
       Promise.all(Object.values(userData.users as Record<string, UserProfile>).map((user) => {
-        return this.refreshUser(user.id).catch((e) => {
-          this.log(`Failed to refresh user ${user.id}`, e)
-        })
+        if (user.username) {
+          return this.refreshUser(user.id, true).catch((e) => {
+            this.log(`Failed to refresh user ${user.id}`, e)
+          })
+        } else {
+          return this.removeUser(user)
+        }
       }))
     })
 
@@ -151,7 +155,7 @@ export class UserService extends StatefulService<UserState> implements IUserServ
    * Refresh the current user login status
    */
   @Lock('refreshUser')
-  async refreshUser(userId: string) {
+  async refreshUser(userId: string, slientOnly = false) {
     const user = this.state.users[userId]
 
     if (!user) {
@@ -162,14 +166,17 @@ export class UserService extends StatefulService<UserState> implements IUserServ
     const system = this.accountSystems[user.authority] || this.yggdrasilAccountSystem.yggdrasilAccountSystem
     this.refreshController = new AbortController()
 
-    const newUser = await system.refresh(user, this.refreshController.signal).finally(() => {
+    const newUser = await system.refresh(user, this.refreshController.signal, slientOnly).finally(() => {
       this.refreshController = undefined
     })
 
-    this.state.userProfile(newUser)
+    // Only update the user if the user is still in the state
+    if (this.state.users[userId]) {
+      this.state.userProfile(newUser)
 
-    if (newUser.invalidated) {
-      throw new UserException({ type: 'userAccessTokenExpired' })
+      if (newUser.invalidated) {
+        throw new UserException({ type: 'userAccessTokenExpired' })
+      }
     }
   }
 

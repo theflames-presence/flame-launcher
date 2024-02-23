@@ -137,10 +137,10 @@ export function useColorTheme(darkTheme: Ref<boolean>) {
 
   function resetDarkToDefault() {
     darkAppBarColor.value = '#111111FF'
-    darkSideBarColor.value = '#111111FF'  
-    darkPrimaryColor.value = '#ff0000'
+    darkSideBarColor.value = '#111111FF'
+    darkPrimaryColor.value = '#4caf50'
     darkBackground.value = '#121212'
-    darkInfoColor.value = '#2196F3' 
+    darkInfoColor.value = '#2196F3'
     darkErrorColor.value = '#FF5252'
     darkWarningColor.value = '#FB8C00'
     darkSuccessColor.value = '#4CAF50'
@@ -151,7 +151,7 @@ export function useColorTheme(darkTheme: Ref<boolean>) {
   function resetLightToDefault() {
     lightAppBarColor.value = '#e0e0e0FF'
     lightSideBarColor.value = '#FFFFFFFF'
-    lightPrimaryColor.value = '#9003fc'
+    lightPrimaryColor.value = '#1976D2'
     lightBackground.value = '#FFFFFF'
     lightInfoColor.value = '#2196F3'
     lightErrorColor.value = '#FF5252'

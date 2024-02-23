@@ -79,7 +79,7 @@ Highly recommend to use the VSCode to open the project.
 Clone the project with submodule flag `--recurse-submodules`.
 
 ```bash
-git clone --recurse-submodules https://github.com/Voxelum/x-minecraft-launcher
+git clone --recurse-submodules https://github.com/aislxflames/flamelauncher 
 ```
 
 If you forget to add `--recurse-submodules` flag, you need to initialize & update the git submodule manually.
@@ -97,17 +97,6 @@ Install the project using [pnpm](https://pnpm.io):
 pnpm install
 ```
 
-<details>
-  <summary> 解决中国国内安装依赖（如 Electron）太慢的办法 </summary>
-
-  打开你的 git bash，在 `pnpm i` 前面加上 `registry=https://registry.npm.taobao.org electron_mirror="https://npm.taobao.org/mirrors/electron/"`。使用国内阿里提供的 npm 以及 Electron 的镜像。
-
-  最终输入的 command 也就是
-
-  ```bash
-  registry=https://registry.npm.taobao.org electron_mirror="https://npm.taobao.org/mirrors/electron/" pnpm i
-  ```
-</details>
 
 #### Set Environment Variables
 

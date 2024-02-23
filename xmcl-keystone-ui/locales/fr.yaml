@@ -441,6 +441,14 @@ instanceFileOperation:
   keep: Laisser
   remove: Retirer
 instanceSetting:
+  disableAuthlibInjector: Désactiver l'injecteur authlib
+  disableAuthlibInjectorDescription: |-
+    Si vous utilisez un système de skin tiers. 
+    L'injecteur authlib peut vous aider à afficher le skin dans le jeu.
+  disableElyByAuthlib: Désactiver le remplacement authlib d'ely.by
+  disableElyByAuthlibDescription: >-
+    Ely.by dispose d'un remplacement authlib unique pour afficher le skin de
+    manière universelle sur n'importe quel serveur.
   fastLaunch: Lancement Turbo
   fastLaunchHint: Ignorer le statut de l'utilisateur et les problèmes non résolus existants
   hideLauncher: Masquer le launcher après le lancement
@@ -484,6 +492,7 @@ instances:
   choose: Sélectionnez un jeu
   importFolder: Importer depuis un dossier
   importFolderDescription: Importer Minecraft au launcher
+  loadingFiles: Chargement des fichiers Modpack
   refreshServers: Actualiser les Serveurs
 items:
   count: '{count} éléments'
@@ -1307,7 +1316,7 @@ task:
     Tâche | 
     Tâches
   pause: Pause
-title: X Minecraft Launcher
+title: 'Flame Launcher'
 transportType:
   host: Candidat Hôte
   prflx: Candidat Peer Reflexive
