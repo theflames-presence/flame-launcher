@@ -1,7 +1,6 @@
 name: Build
 on: 
   push:
-
 jobs:
   my-job:
     runs-on: ${{ matrix.os }}
@@ -13,17 +12,14 @@ jobs:
         run: python --version
 
       - name: Install Python development headers
+        if: matrix.os == 'ubuntu-latest'  # Only install on Ubuntu
         run: sudo apt-get install python3-dev
-      - name: Install Xcode Command Line Tools
-        run: xcode-select --install
-      - name: Source Python environment
-        run: source ~/.bash_profile 
+
       - name: Install better-sqlite3
         run: npm install better-sqlite3 --python=python3
 
       - name: Checkout code
         uses: actions/checkout@v2
-    
 
       - name: Setup Node.js environment
         uses: actions/setup-node@v2
