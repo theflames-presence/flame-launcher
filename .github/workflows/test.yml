@@ -12,7 +12,7 @@ jobs:
         run: npm install pnpm
       - name: Install
         run: pnpm install
+      - name: Render
+        run: pnpm build:renderer
       - name: Build
-        run: pnpm run --prefix xmcl-keystone-ui build
-      - name: BuildAll
-        run: pnpm run --prefix xmcl-electron-app build:all
+        run: pnpm build:all
