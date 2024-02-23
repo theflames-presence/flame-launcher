@@ -1,4 +1,4 @@
-name: Build
+name: Test
 
 on:
   push:
@@ -18,12 +18,27 @@ on:
 #   ELECTRON_BUILDER_CACHE: ~/.cache/electron-builder
 
 jobs:
+
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+        # Specify 'pnpm' to install PNPM
+        # If 'true', npm is used instead
+        # Default: 'true'
+        package-manager: 'pnpm'
+      
+    - name: Install dependencies
+      run: pnpm install
     - uses: actions/checkout@v3
       with:
         submodules: recursive
