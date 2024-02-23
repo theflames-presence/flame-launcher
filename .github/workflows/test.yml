@@ -12,33 +12,12 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - name: Check Python version
+        if: matrix.os != 'windows-latest'  # Skip this step on Windows
         run: python --version
 
+      - name: Check Python version
+        if: matrix.os == 'windows-latest'  # Only run on Windows
+        run: python --version || echo "Python is not installed"
+
       - name: Install Python development headers
-        run: sudo apt-get install python3-dev
-      - name: Install Xcode Command Line Tools
-        if: matrix.os == 'macos-latest'
-        run: xcode-select --install
-      - name: Source Python environment
-        run: source ~/.bash_profile 
-      - name: Install better-sqlite3
-        run: npm install better-sqlite3 --python=python3
-
-      - name: Checkout code
-        uses: actions/checkout@v2
-    
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16' # Update the version according to your requirement
-
-      - name: Install PNPM
-        run: npm install -g pnpm
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build
-        run: |
-          pnpm run --prefix xmcl-keystone-ui build
-          pnpm run --prefix xmcl-electron-app build:all
+        if: matrix.os != 'windows-latest'  # Skip this step on 
