@@ -8,5 +8,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      - name: my-step
-        run: echo "Hello World!"
+      - name: Install
+        run: pnpm install
+      - name: Build
+        run: pnpm run --prefix xmcl-keystone-ui build
+      - name: BuildAll
+        run: pnpm run --prefix xmcl-electron-app build:all
