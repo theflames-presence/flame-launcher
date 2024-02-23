@@ -25,6 +25,7 @@
       :error-messages="errorMessage"
       @input="error = undefined"
       @keypress="error = undefined"
+      @keypress.enter="onLogin"
     />
     <v-text-field
       v-if="!isOffline"
@@ -79,6 +80,7 @@
       <v-btn
         block
         :loading="isLogining && (!hovered)"
+        :disabled="!data.username"
         color="primary"
         rounded
         large
@@ -136,7 +138,6 @@ import { Ref } from 'vue'
 import { useAccountSystemHistory, useAllowThirdparty, useAuthorityItems } from '../composables/login'
 import { kUserContext, useLoginValidation } from '../composables/user'
 import AppLoginAuthoritySelect from './AppLoginAuthoritySelect.vue'
-import { kSettingsState } from '@/composables/setting'
 import { kYggdrasilServices } from '@/composables/yggrasil'
 
 const props = defineProps<{
@@ -148,8 +149,7 @@ const emit = defineEmits(['seed', 'login'])
 
 const { t } = useI18n()
 const { select } = injection(kUserContext)
-const { login, abortLogin } = useService(UserServiceKey)
-const { on } = useService(OfficialUserServiceKey)
+const { login, abortLogin, on } = useService(UserServiceKey)
 
 // Shared data
 const data = reactive({

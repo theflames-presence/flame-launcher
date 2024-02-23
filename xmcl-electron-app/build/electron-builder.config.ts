@@ -6,15 +6,15 @@ dotenv()
 
 export const config = {
   productName: 'Flame Launcher',
-  appId: 'fml',
+  appId: 'fmcl',
   directories: {
     output: 'build/output',
     buildResources: 'build',
     app: '.',
   },
   protocols: {
-    name: 'fmcl',
-    schemes: ['fmcl'],
+    name: 'FMCL',
+    schemes: ['Fmcl'],
   },
   // assign publish for auto-updater
   // set this to your own repo!
@@ -26,25 +26,21 @@ export const config = {
   files: [{
     from: 'dist',
     to: '.',
+    filter: ['**/*.js', '**/*.ico', '**/*.png', '**/*.webp', '**/*.svg', '*.node', '**/*.html', '**/*.css', '**/*.woff2'],
   }, {
     from: '.',
     to: '.',
     filter: 'package.json',
   }],
-  asarUnpack: [
-    '**/*.worker.js',
-  ],
   artifactName: 'fmcl-${version}-${platform}-${arch}.${ext}',
   appx: {
-    artifactName: 'fmcl-${version}.${ext}',
-    displayName: 'Flame Launcher',
-    applicationId: 'AISLX.fmcl',
-    identityName: 'fmcl',
+    displayName: 'Flame Launcher (Beta)',
+    applicationId: 'AISLX.FMCL',
+    identityName: '22961CI010.XMCL',
     backgroundColor: 'transparent',
-    publisher: process.env.APPX_PUBLISHER ? Buffer.from(process.env.APPX_PUBLISHER!, 'base64').toString('utf8') : undefined,
-    publisherDisplayName: 'AISLX',
+    publisher: 'CN=DAFB9390-F5BD-4F94-828C-242F8DAA6FDE',
+    publisherDisplayName: 'Aislx',
     setBuildNumber: true,
-    languages: ['en-US'],
   },
   dmg: {
     artifactName: 'fmcl-${version}.${ext}',
@@ -97,7 +93,7 @@ export const config = {
     },
     category: 'Game',
     icon: 'icons/dark.icns',
-    artifactName: 'fmcl-${version}-${arch}.${ext}',
+    artifactName: 'xmcl-${version}-${arch}.${ext}',
     target: [
       { target: 'deb', arch: ['x64', 'arm64'] },
       { target: 'rpm', arch: ['x64', 'arm64'] },

@@ -397,6 +397,14 @@ instanceFileOperation:
   keep: Оставить
   remove: Удалить
 instanceSetting:
+  disableAuthlibInjector: Отключить инжектор authlib
+  disableAuthlibInjectorDescription: |-
+    Если вы используете стороннюю систему скинов. 
+    Инжектор authlib может помочь вам отобразить скин в игре.
+  disableElyByAuthlib: Отключить замену authlib ely.by
+  disableElyByAuthlibDescription: >-
+    Ely.by имеет уникальную замену authlib для универсального отображения скина
+    на любом сервере.
   fastLaunch: Турбозапуск
   fastLaunchHint: Игнорировать статус пользователя и существующие нерешённые проблемы
   hideLauncher: Скрыть лаунчер после запуска
@@ -438,6 +446,7 @@ instances:
   choose: Выберите игру
   importFolder: Импорт из папки
   importFolderDescription: Импорт Minecraft в лаунчер
+  loadingFiles: Загрузка файлов модпака
   refreshServers: Обновить серверы
 items:
   count: '{count} предметов'
@@ -1223,7 +1232,7 @@ task:
   nTaskRunning: 'Запущено задач: {count}'
   name: Задача | Задачи
   pause: Пауза
-title: X Minecraft Launcher
+title: ''
 transportType:
   host: Кандидат Host
   prflx: Кандидат Peer Reflexive

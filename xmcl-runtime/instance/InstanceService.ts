@@ -177,6 +177,8 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     instance.mcOptions = option.mcOptions
     instance.creationDate = option.creationDate
     instance.lastAccessDate = option.lastAccessDate
+    instance.disableAuthlibInjector = option.disableAuthlibInjector
+    instance.disableElybyAuthlib = option.disableElybyAuthlib
     if (option.resolution) {
       if (instance.resolution) {
         instance.resolution.width = option.resolution.width
@@ -436,6 +438,12 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     if ('fastLaunch' in options && options.fastLaunch !== state.fastLaunch) {
       result.fastLaunch = options.fastLaunch
     }
+    if ('disableAuthlibInjector' in options && options.disableAuthlibInjector !== state.disableAuthlibInjector) {
+      result.disableAuthlibInjector = options.disableAuthlibInjector
+    }
+    if ('disableElybyAuthlib' in options && options.disableElybyAuthlib !== state.disableElybyAuthlib) {
+      result.disableElybyAuthlib = options.disableElybyAuthlib
+    }
 
     if ('runtime' in options && options.runtime) {
       const runtime = options.runtime
@@ -487,8 +495,9 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     if ('icon' in result && result.icon) {
       try {
         const iconURL = new URL(result.icon)
-        if (iconURL.protocol === 'image:' && iconURL.host === '') {
-          result.icon = await this.imageStore.addImage(iconURL.pathname.substring(1))
+        const path = iconURL.searchParams.get('path')
+        if (iconURL.host === 'launcher' && iconURL.pathname === '/media' && path) {
+          result.icon = await this.imageStore.addImage(path)
         }
       } catch (e) {
         if (e instanceof Error) this.error(e)

@@ -398,6 +398,7 @@ instances:
   choose: Selecciona un juego
   importFolder: Importar desde Carpeta
   importFolderDescription: Importar Minecraft al Lanzador
+  loadingFiles: Cargando archivos Modpack
   refreshServers: Actualizar Servidores
 items:
   count: '{count} ítems'
@@ -962,7 +963,7 @@ task:
   nTaskRunning: '{count} tareas en ejecución'
   name: Tarea | Tareas
   pause: Pausar
-title: X Minecraft Launcher
+title: 'Flame Luancher'
 transportType:
   host: Candidato de Anfitrión
   prflx: Candidato Reflexivo de Par

@@ -79,7 +79,7 @@ Highly recommend to use the VSCode to open the project.
 Clone the project with submodule flag `--recurse-submodules`.
 
 ```bash
-git clone --recurse-submodules https://github.com/aislxflames/flame-launcher
+git clone --recurse-submodules https://github.com/aislxflames/flamelauncher 
 ```
 
 If you forget to add `--recurse-submodules` flag, you need to initialize & update the git submodule manually.
@@ -96,6 +96,7 @@ Install the project using [pnpm](https://pnpm.io):
 ```
 pnpm install
 ```
+
 
 #### Set Environment Variables
 

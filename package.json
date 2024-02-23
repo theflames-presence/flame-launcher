@@ -1,5 +1,5 @@
 {
-    "version": "1.0.3",
+    "version": "0.41.1",
     "private": true,
     "license": "MIT",
     "packageManager": "pnpm@8.2.0",
@@ -8,7 +8,7 @@
     },
     "scripts": {
         "build": "pnpm run --prefix=xmcl-electron-app build",
-        "build:all": "pnpm run --prefix=xmcl-electron-app build:all",
+        "buid:all": "pnpm run --prefix=xmcl-electron-app build:all",l
         "build:dir": "pnpm run --prefix=xmcl-electron-app build:dir",
         "build:main": "pnpm run --prefix=xmcl-electron-app build",
         "build:renderer": "pnpm run --prefix=xmcl-keystone-ui build",
