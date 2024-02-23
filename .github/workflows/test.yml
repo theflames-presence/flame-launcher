@@ -52,7 +52,4 @@ jobs:
     - name: Install
       run: pnpm install
     - name: Build
-      run: |
-        echo: "Test"
-        echo: "Testy"
- 
+      run: echo "test"
