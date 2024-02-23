@@ -26,8 +26,16 @@ jobs:
       - name: Install Python 3 (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          choco install python --version=3.9 -y
+          choco install python --version=3.9 -y || echo "Python installation failed, trying alternative method..."
           refreshenv
+          python --version || echo "Python not found"
+
+      - name: Retry Python installation (Windows)
+        if: matrix.os == 'windows-latest' && steps.python-version.outcome == 'failed'
+        run: |
+          choco install python --version=3.9 -y --force
+          refreshenv
+          python --version || exit 1  # Exit if Python is still not installed
 
       - name: Upgrade pip
         run: python -m pip install --upgrade pip
@@ -35,7 +43,7 @@ jobs:
       - name: Install better-sqlite3
         run: npm install better-sqlite3 --build-from-source
 
-      # Add more steps as needed...
+      # Additional steps to handle other dependencies or tasks...
 
       - name: my-step
         run: echo "Hello World!"
