@@ -1,6 +1,8 @@
 # Flame-Launcher
 This Launcher is made by Aislx FlamEs
 
+**You can install this by with simple command**
+**Or in my official website [Download](https://fmcl.rf.gd)**
 ```shell
 winget install aislx.FlameLauncher
 ```
