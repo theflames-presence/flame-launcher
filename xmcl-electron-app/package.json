@@ -2,8 +2,8 @@
     "name": "xmcl",
     "private": true,
     "main": "./index.js",
-    "version": "0.42.0",
-    "author": "ci010 <cijhn@hotmail.com>",
+    "version": "1.0.3",
+    "author": "aislxflames <proarghaop@gmail.com>",
     "description": "A great minecraft launcher in the future",
     "license": "MIT",
     "engines": {
@@ -11,7 +11,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/voxelum/x-minecraft-launcher"
+        "url": "https://github.com/aislxflames/flame-launcher"
     },
     "msstoreCliAppId": "9MXJWHXTP4B9",
     "scripts": {
