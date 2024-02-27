@@ -25,14 +25,21 @@ This Launcher is made by Aislx FlamEs
 # Letest Features
 **🐛Bug Fixes**
 
-- Mods not installing fixed
-- Minecraft slow opening fixed
-- Minecraft will open faster
+- Optifine display and search 
+- Fix some glitch of version diagnose 
+- Some version cannot launched 
+- Redundent decodeURIComponent causing unzip failure 
+- Should not show save/load after install 
+- Localize download update button 
+- Fix some local version input glich 
+- Server icon show everywhere when server refreshed
+- Should load skin right after login
+- Fix crash in wayland mode 
+- Quilt version lookup should also respect with minecraft version 
 
-⚓Features Added
+**⚓Features Added**
 
-- layout improved
-- added many options to create instance button
-- modpack store added
-- green changed to red ui
-- layout chose in first time install launcher
+- Support java arch display 
+- Add streamer mode
+- Support elyby authlib
+- Support dedicated gpu 
