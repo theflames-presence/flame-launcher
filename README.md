@@ -1,6 +1,9 @@
 # Flame-Launcher
 This Launcher is made by Aislx FlamEs
 
+```shell
+winget install aislx.FlameLauncher
+```
 # **Advance Layout have mods and many features**
 ![image](https://github.com/aislxflames/flame-launcher/assets/120901302/9982698c-4169-4154-a615-b3cf4306401f)
 - We have here many mods platform like modrinth curseforge ftb etc
