@@ -215,6 +215,7 @@ disk:
   used: Викоростовано
 download: Завантажити
 downloadCount: 'Завантажень: {count}'
+downloadUpdate: Завантажити оновлення
 duration:
   day: '{duration} день | {duration} дні'
   hour: '{duration} година | {duration} години'
@@ -1163,8 +1164,8 @@ setting:
     focus: Макет фокусування
   layoutDescription: Макет лаунчера, що відображає різну логіку інтерфейсу користувача
   layoutTitle: Макет
-  linuxEnableDedicatedGPUOptimization: Призначити виділений графічний процесор
-  linuxEnableDedicatedGPUOptimizationDescription: Ця опція призначить виділений графічний процесор для процесу Minecraft.
+  enableDedicatedGPUOptimization: Призначити виділений графічний процесор
+  enableDedicatedGPUOptimizationDescription: Ця опція призначить виділений графічний процесор для процесу Minecraft.
   linuxTitlebar: Рідний рядок заголовка
   linuxTitlebarDescription: Використовувати рідний рядок заголовка linux для панелі запуску
   location: Розташування сховища
@@ -1187,8 +1188,17 @@ setting:
     remove: Прибрати
     repulse: Репульс
   particleModeDescription: Виберіть поведінку частки при натисканні
+  replaceNative: Замінити рідні бібліотеки
+  replaceNativeDescription: Замініть рідні бібліотеки відповідно до арки вашого комп’ютера.
+  replaceNatives:
+    all: все
+    legacy: Лише застаріла версія
   resetToDefault: Скидання до значення за промовчанням
   showRoot: Відображати
+  streamerMode: Потоковий режим
+  streamerModeDescription: >-
+    Це приховає вашу особисту інформацію, як-от електронну адресу, у панелі
+    запуску.
   theme:
     dark: Темна тема
     light: Світла тема
@@ -1282,7 +1292,7 @@ task:
   nTaskRunning: 'Запущено задач: {count}'
   name: Завдання Завдання
   pause: Пауза
-title: ''
+title: X Minecraft Launcher
 transportType:
   host: Кандидат Host
   prflx: Кандидат Peer Reflexive

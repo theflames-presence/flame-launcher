@@ -246,11 +246,13 @@ diagnosis:
   missingVersionJar:
     message: Cliquez pour installer cette version
     name: Jar de version manquant pour Minecraft %{version}
+disable: Désactiver
 disk:
   available: Disponible
   used: Utilisé
 download: Télécharger
 downloadCount: '{count} téléchargements'
+downloadUpdate: Télécharger la mise à jour
 duration:
   day: '{duration} jour | {duration} jours'
   hour: |-
@@ -1195,8 +1197,8 @@ setting:
     La disposition du launcher représentant différentes logiques d'interface
     utilisateur
   layoutTitle: Mise en page
-  linuxEnableDedicatedGPUOptimization: Attribuer un GPU dédié
-  linuxEnableDedicatedGPUOptimizationDescription: Cette option attribuera un GPU dédié au processus Minecraft.
+  enableDedicatedGPUOptimization: Attribuer un GPU dédié
+  enableDedicatedGPUOptimizationDescription: Cette option attribuera un GPU dédié au processus Minecraft.
   linuxTitlebar: Barre de titre native
   linuxTitlebarDescription: Utiliser la barre de titre Linux native pour le launcher
   location: Emplacement du magasin
@@ -1218,8 +1220,17 @@ setting:
     remove: Éliminer
     repulse: Repousser
   particleModeDescription: Sélectionnez le comportement de clic des particules
+  replaceNative: Remplacer les bibliothèques natives
+  replaceNativeDescription: >-
+    Remplacez les bibliothèques natives en fonction de l'architecture de votre
+    ordinateur.
+  replaceNatives:
+    all: Tous
+    legacy: Version héritée uniquement
   resetToDefault: Réinitialiser
   showRoot: Afficher
+  streamerMode: Mode diffusion
+  streamerModeDescription: Cela masquera vos informations privées comme les e-mails dans le lanceur.
   theme:
     dark: Thème sombre
     light: Thème clair
@@ -1316,7 +1327,7 @@ task:
     Tâche | 
     Tâches
   pause: Pause
-title: 'Flame Launcher'
+title: X Minecraft Launcher
 transportType:
   host: Candidat Hôte
   prflx: Candidat Peer Reflexive

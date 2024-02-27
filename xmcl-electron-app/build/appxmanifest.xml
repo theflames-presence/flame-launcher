@@ -3,10 +3,10 @@
 	xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities">
-  <Identity Name="FMCL" Version="0.14.0.0" Publisher="IN=fmcl" ProcessorArchitecture="x64" />
+  <Identity Name="FMCL" Version="0.14.0.0" Publisher="CN=xmcl" ProcessorArchitecture="x64" />
   <Properties>
     <DisplayName>Flame Launcher</DisplayName>
-    <PublisherDisplayName>fmcl</PublisherDisplayName>
+    <PublisherDisplayName>xmcl</PublisherDisplayName>
     <Description>A Great Minecraft Launcher for Managing Resource</Description>
     <Logo>icons\256x256.png</Logo>
   </Properties>

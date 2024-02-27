@@ -49,10 +49,10 @@
       :description="t('setting.hideNewsDescription')"
     />
     <SettingItemCheckbox
-      v-if="env?.os === 'linux'"
-      v-model="linuxEnableDedicatedGPUOptimization"
-      :title="t('setting.linuxEnableDedicatedGPUOptimization')"
-      :description="t('setting.linuxEnableDedicatedGPUOptimizationDescription')"
+      v-if="env?.os === 'linux' || env?.os === 'windows'"
+      v-model="enableDedicatedGPUOptimization"
+      :title="t('setting.enableDedicatedGPUOptimization')"
+      :description="t('setting.enableDedicatedGPUOptimizationDescription')"
     />
     <SettingItemCheckbox
       v-model="enableDiscord"
@@ -63,6 +63,18 @@
       v-model="developerMode"
       :title="t('setting.developerMode')"
       :description="t('setting.developerModeDescription')"
+    />
+    <SettingItemCheckbox
+      v-model="streamerMode"
+      :title="t('setting.streamerMode')"
+      :description="t('setting.streamerModeDescription')"
+    />
+    <SettingItemSelect
+      :select="replaceNative === false ? '' : replaceNative"
+      :title="t('setting.replaceNative')"
+      :description="t('setting.replaceNativeDescription')"
+      :items="replaceNativeItems"
+      @update:select="replaceNative = !$event ? false : $event"
     />
 
     <SettingHeader>
@@ -162,15 +174,17 @@ import { useEnvironment } from '@/composables/environment'
 const env = useEnvironment()
 const {
   proxy, httpProxyEnabled, apiSets,
+  streamerMode,
   developerMode,
   apiSetsPreference,
   selectedLocale,
   maxSockets,
+  replaceNative,
   disableTelemetry,
   hideNews,
   enableDiscord,
   locales: rawLocales,
-  linuxEnableDedicatedGPUOptimization,
+  enableDedicatedGPUOptimization,
 } = useSettings()
 const { t } = useI18n()
 const apiSetItems = computed(() =>
@@ -191,6 +205,20 @@ const apiSetItems = computed(() =>
       }
     })))
 const locales = computed(() => rawLocales.value.map(({ locale, name }) => ({ text: name, value: locale })))
+const replaceNativeItems = computed(() => [
+  {
+    text: t('disable'),
+    value: '',
+  },
+  {
+    text: t('setting.replaceNatives.legacy'),
+    value: 'legacy-only',
+  },
+  {
+    text: t('setting.replaceNatives.all'),
+    value: 'all',
+  },
+])
 
 const { show } = useDialog('migration')
 const { root, showGameDirectory } = useGameDirectory()

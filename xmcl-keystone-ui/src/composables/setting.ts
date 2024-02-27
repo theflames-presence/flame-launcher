@@ -99,6 +99,7 @@ export function useGameDirectory() {
 
 export function useSettings() {
   const hideNews = useLocalStorageCacheBool('hideNews', false)
+  const streamerMode = inject('streamerMode', useLocalStorageCacheBool('streamerMode', false))
   const { state, error, isValidating } = injection(kSettingsState)
 
   const getProxy = () => {
@@ -122,13 +123,17 @@ export function useSettings() {
     get: () => locales.value.find(l => l.locale === state.value?.locale)?.locale || 'en',
     set: v => state.value?.localeSet(v),
   })
-  const linuxEnableDedicatedGPUOptimization = computed({
-    get: () => state.value?.linuxEnableDedicatedGPUOptimization ?? false,
-    set: v => state.value?.linuxEnableDedicatedGPUOptimizationSet(v),
+  const enableDedicatedGPUOptimization = computed({
+    get: () => state.value?.enableDedicatedGPUOptimization ?? false,
+    set: v => state.value?.enableDedicatedGPUOptimizationSet(v),
   })
   const apiSetsPreference = computed({
     get: () => state.value?.apiSetsPreference ?? '',
     set: v => state.value?.apiSetsPreferenceSet(v),
+  })
+  const replaceNative = computed({
+    get: () => state.value?.replaceNatives ?? 'legacy-only' as string | false,
+    set: v => state.value?.replaceNativesSet(v as any),
   })
   const maxSockets = ref(state.value?.maxSockets)
   const maxAPISockets = ref(state.value?.maxAPISockets)
@@ -181,7 +186,8 @@ export function useSettings() {
   })
 
   return {
-    linuxEnableDedicatedGPUOptimization,
+    enableDedicatedGPUOptimization,
+    streamerMode,
     developerMode,
     httpProxyEnabled,
     enableDiscord,
@@ -189,6 +195,7 @@ export function useSettings() {
     maxAPISockets,
     locales,
     proxy,
+    replaceNative,
     selectedLocale,
     apiSetsPreference,
     apiSets,

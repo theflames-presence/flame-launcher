@@ -14,7 +14,7 @@ export const config = {
   },
   protocols: {
     name: 'FMCL',
-    schemes: ['Fmcl'],
+    schemes: ['fmcl'],
   },
   // assign publish for auto-updater
   // set this to your own repo!
@@ -36,14 +36,14 @@ export const config = {
   appx: {
     displayName: 'Flame Launcher (Beta)',
     applicationId: 'AISLX.FMCL',
-    identityName: '22961CI010.XMCL',
+    identityName: '22961CI010.FMCL',
     backgroundColor: 'transparent',
     publisher: 'CN=DAFB9390-F5BD-4F94-828C-242F8DAA6FDE',
-    publisherDisplayName: 'Aislx',
+    publisherDisplayName: 'AISLX',
     setBuildNumber: true,
   },
   dmg: {
-    artifactName: 'fmcl-${version}.${ext}',
+    artifactName: 'xmcl-${version}.${ext}',
     contents: [
       {
         x: 410,
@@ -88,8 +88,8 @@ export const config = {
   },
   linux: {
     desktop: {
-      MimeType: 'x-scheme-handler/fmcl',
-      StartupWMClass: 'fmcl',
+      MimeType: 'x-scheme-handler/xmcl',
+      StartupWMClass: 'xmcl',
     },
     category: 'Game',
     icon: 'icons/dark.icns',

@@ -228,6 +228,8 @@ export function useInstanceEdit(instance: Ref<Instance>, edit: (instance: EditIn
     return false
   })
 
+  watch(computed(() => instance.value.version), () => load())
+
   async function save() {
     const payload = {
       name: data.name,
@@ -352,6 +354,7 @@ export function useInstanceEditVersions(data: Pick<InstanceData, 'runtime' | 've
       runtime.forge = ''
       runtime.neoForged = ''
       runtime.fabricLoader = ''
+      runtime.quiltLoader = ''
       runtime.optifine = ''
     }
   }
@@ -364,6 +367,7 @@ export function useInstanceEditVersions(data: Pick<InstanceData, 'runtime' | 've
         runtime.neoForged = ''
         runtime.fabricLoader = ''
         runtime.quiltLoader = ''
+        runtime.optifine = ''
       }
     }
   }
@@ -376,6 +380,7 @@ export function useInstanceEditVersions(data: Pick<InstanceData, 'runtime' | 've
         runtime.forge = ''
         runtime.fabricLoader = ''
         runtime.quiltLoader = ''
+        runtime.optifine = ''
       }
     }
   }
@@ -411,6 +416,7 @@ export function useInstanceEditVersions(data: Pick<InstanceData, 'runtime' | 've
       if (version) {
         data.version = ''
         runtime.quiltLoader = runtime.fabricLoader = ''
+        runtime.neoForged = ''
       }
     }
   }

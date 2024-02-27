@@ -13,9 +13,9 @@ export class DownloadAppInstallerTask extends BaseTask<void> {
   }
 
   protected async runTask(): Promise<void> {
-    const destination = join(app.getPath('downloads'), 'Flame Launcher.appinstaller')
+    const destination = join(app.getPath('downloads'), 'X Minecraft Launcher.appinstaller')
     await download({
-      url: 'https://fmcl.blob.core.windows.net/releases/xmcl.appinstaller',
+      url: 'https://xmcl.blob.core.windows.net/releases/xmcl.appinstaller',
       destination,
     })
     shell.showItemInFolder(destination)

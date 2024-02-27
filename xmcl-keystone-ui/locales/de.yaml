@@ -239,6 +239,7 @@ disk:
   used: Gepflegt
 download: Herunterladen
 downloadCount: 'Downloads: {count}'
+downloadUpdate: Aktualisierung herunterladen
 duration:
   day: '{duration} Tag | {duration} Tage'
   hour: '{duration} Stunde  | {duration} Stunden'
@@ -1235,8 +1236,8 @@ setting:
     focus: Layout der Fokussierung
   layoutDescription: Layout des Launcher, der verschiedene Logiken der Benutzeroberfläche anzeigt
   layoutTitle: Layout
-  linuxEnableDedicatedGPUOptimization: Weisen Sie eine dedizierte GPU zu
-  linuxEnableDedicatedGPUOptimizationDescription: Diese Option weist dem Minecraft-Prozess eine dedizierte GPU zu.
+  enableDedicatedGPUOptimization: Weisen Sie eine dedizierte GPU zu
+  enableDedicatedGPUOptimizationDescription: Diese Option weist dem Minecraft-Prozess eine dedizierte GPU zu.
   linuxTitlebar: Native Titelleiste
   linuxTitlebarDescription: Verwenden Sie die native Linux-Titelleiste für den Launcher
   location: Speicherort
@@ -1259,8 +1260,19 @@ setting:
     remove: entfernen
     repulse: Abwehren
   particleModeDescription: Wählen Sie das Verhalten des Partikels beim Anklicken
+  replaceNative: Ersetzen Sie native Bibliotheken
+  replaceNativeDescription: >-
+    Ersetzen Sie native Bibliotheken entsprechend der Architektur Ihres
+    Computers.
+  replaceNatives:
+    all: Alle
+    legacy: Nur Legacy-Version
   resetToDefault: Zurücksetzen auf den Standardwert
   showRoot: ВідображатиAnzeige
+  streamerMode: Streaming-Modus
+  streamerModeDescription: >-
+    Dadurch werden Ihre privaten Informationen wie E-Mails im Launcher
+    ausgeblendet.
   theme:
     dark: Dunkles Thema
     light: Thema Licht
@@ -1358,7 +1370,7 @@ task:
   nTaskRunning: 'Begonnene Aufgaben: {count}'
   name: Aufgaben Aufgabenя
   pause: Pause
-title: 'Flame Launcher'
+title: X Minecraft Launcher
 transportType:
   host: Gastgeber-Kandidat
   prflx: Gastgeber-Peer Reflexive

@@ -68,7 +68,10 @@ export interface SettingSchema {
    * @default 16
    */
   maxAPISockets?: number
-
+  /**
+   * @default "legacy-only"
+   */
+  replaceNatives: 'all' | 'legacy-only' | false
   /**
    * @default 0
    */
@@ -128,5 +131,5 @@ export interface SettingSchema {
   /**
    * @default true
    */
-  linuxEnableDedicatedGPUOptimization: boolean
+  enableDedicatedGPUOptimization: boolean
 }

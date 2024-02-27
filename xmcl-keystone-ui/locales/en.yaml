@@ -214,6 +214,7 @@ disk:
   available: Available
   used: Used
 download: Download
+downloadUpdate: Download Update
 downloadCount: '{count} downloads'
 duration:
   day: '{duration} day | {duration} days'
@@ -1150,6 +1151,8 @@ setting:
     focus: Focus Layout
   layoutDescription: The launcher layout reprensenting different UI logic
   layoutTitle: Layout
+  enableDedicatedGPUOptimization: Assign Dedicated GPU
+  enableDedicatedGPUOptimizationDescription: This option will assign dedicated GPU to Minecraft process.
   linuxEnableDedicatedGPUOptimization: Assign Dedicated GPU
   linuxEnableDedicatedGPUOptimizationDescription: This option will assign dedicated GPU to Minecraft process.
   linuxTitlebar: Native title bar
@@ -1173,8 +1176,15 @@ setting:
     remove: Remove
     repulse: Repulse
   particleModeDescription: Select the particle click behavior
+  replaceNative: Replace Native Libraries
+  replaceNativeDescription: Replace native libraries according to your computer's arch.
+  replaceNatives:
+    all: All
+    legacy: Legacy Version Only
   resetToDefault: Reset to Default
   showRoot: Show
+  streamerMode: Streaming Mode
+  streamerModeDescription: This will hide your private information like email in launcher.
   theme:
     dark: Dark Theme
     light: Light Theme

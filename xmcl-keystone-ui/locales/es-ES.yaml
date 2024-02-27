@@ -222,6 +222,8 @@ diagnosis:
   missingAssetsIndex:
     message: Launcher descargará el índice de assets por ti
     name: Falta el archivo de índice de activos de {version}.
+disable: Desactivar
+downloadUpdate: Descarga de la actualización
 errors:
   DatabaseNotOpened: |-
     ¡La base de datos no está abierta! 
@@ -876,8 +878,8 @@ setting:
     El diseño del lanzador representa una lógica de interfaz de usuario
     diferente
   layoutTitle: Diseño
-  linuxEnableDedicatedGPUOptimization: Asignar GPU dedicada
-  linuxEnableDedicatedGPUOptimizationDescription: Esta opción asignará GPU dedicada al proceso de Minecraft.
+  enableDedicatedGPUOptimization: Asignar GPU dedicada
+  enableDedicatedGPUOptimizationDescription: Esta opción asignará GPU dedicada al proceso de Minecraft.
   linuxTitlebar: Barra de Título Nativa en Linux
   linuxTitlebarDescription: Usar la barra de título nativa de Linux para el lanzador
   location: Ubicación del Almacenamiento
@@ -898,8 +900,17 @@ setting:
     remove: Eliminar
     repulse: Repulsar
   particleModeDescription: Selecciona el comportamiento al hacer clic en las partículas
+  replaceNative: Reemplazar bibliotecas nativas
+  replaceNativeDescription: Reemplace las bibliotecas nativas según el arco de su computadora.
+  replaceNatives:
+    all: Todo
+    legacy: Solo versión heredada
   resetToDefault: Restablecer a los Valores Predeterminados
   showRoot: Mostrar
+  streamerMode: Modo de transmisión
+  streamerModeDescription: >-
+    Esto ocultará su información privada, como el correo electrónico, en el
+    iniciador.
   theme:
     dark: Tema Oscuro
     light: Tema Claro
@@ -963,7 +974,7 @@ task:
   nTaskRunning: '{count} tareas en ejecución'
   name: Tarea | Tareas
   pause: Pausar
-title: 'Flame Luancher'
+title: X Minecraft Launcher
 transportType:
   host: Candidato de Anfitrión
   prflx: Candidato Reflexivo de Par
