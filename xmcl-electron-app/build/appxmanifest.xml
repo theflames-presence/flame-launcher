@@ -6,7 +6,7 @@
   <Identity Name="FMCL" Version="0.14.0.0" Publisher="IN=fmcl" ProcessorArchitecture="x64" />
   <Properties>
     <DisplayName>Flame Launcher</DisplayName>
-    <PublisherDisplayName>xmcl</PublisherDisplayName>
+    <PublisherDisplayName>fmcl</PublisherDisplayName>
     <Description>A Great Minecraft Launcher for Managing Resource</Description>
     <Logo>icons\256x256.png</Logo>
   </Properties>

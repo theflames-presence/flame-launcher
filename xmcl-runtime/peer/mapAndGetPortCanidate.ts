@@ -16,13 +16,13 @@ export function parseCandidate(candidate: string) {
 export async function mapLocalPort(natService: NatService, ip: string, priv: number, pub: number, logger: Logger) {
   if (!await natService.isSupported()) return false
   const mappings = [{
-    description: `XMCL Multiplayer - udp - ${priv} - ${pub}`,
+    description: `FMCL Multiplayer - udp - ${priv} - ${pub}`,
     protocol: 'udp',
     private: priv,
     public: pub,
     ttl: 24 * 60 * 60,
   }, {
-    description: `XMCL Multiplayer - tcp - ${priv} - ${pub}`,
+    description: `FMCL Multiplayer - tcp - ${priv} - ${pub}`,
     protocol: 'tcp',
     private: priv,
     public: pub,

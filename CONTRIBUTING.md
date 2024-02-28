@@ -215,5 +215,8 @@ Then, you can build Electron bundling with frontend you just build:
 pnpm build:all
 ```
 
-If you want a debug build, you can use `pnpm build:dir` which only build the directory result, and won't pack them up to different release format.
-  
+If you want a debug build, you can use 
+```bash
+pnpm build:dir 
+```  
+which only build the directory result, and won't pack them up to different release format.
