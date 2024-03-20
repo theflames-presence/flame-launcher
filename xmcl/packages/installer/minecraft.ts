@@ -1,11 +1,11 @@
 import { MinecraftFolder, MinecraftLocation, ResolvedLibrary, ResolvedVersion, Version, Version as VersionJson } from '@xmcl/core'
-import { ChecksumNotMatchError, ChecksumValidatorOptions, DownloadBaseOptions, JsonValidator, Validator } from '@xmcl/file-transfer'
-import { task, Task } from '@xmcl/task'
+import { ChecksumNotMatchError, ChecksumValidatorOptions, DownloadBaseOptions, JsonValidator, Validator, getDownloadBaseOptions } from '@xmcl/file-transfer'
+import { Task, task } from '@xmcl/task'
 import { readFile, stat, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { Dispatcher, request } from 'undici'
 import { DownloadTask } from './downloadTask'
-import { ensureDir, errorToString, joinUrl, normalizeArray, ParallelTaskOptions } from './utils'
+import { ParallelTaskOptions, ensureDir, errorToString, joinUrl, normalizeArray } from './utils'
 import { ZipValidator } from './zipValdiator'
 
 /**
@@ -321,8 +321,7 @@ export function installAssetsTask(version: ResolvedVersion, options: AssetsOptio
           hash: file.sha1,
         },
         destination: folder.getLogConfig(file.id),
-        agent: options.agent,
-        headers: options.headers,
+      ...getDownloadBaseOptions(options),
       }).setName('asset', { name: file.id, hash: file.sha1, size: file.size }))
     }
     const jsonPath = folder.getPath('assets', 'indexes', version.assets + '.json')
@@ -345,7 +344,7 @@ export function installAssetsTask(version: ResolvedVersion, options: AssetsOptio
       const urls = resolveDownloadUrls(version.assetIndex!.url, version, options.assetsIndexUrl)
       for (const url of urls) {
         try {
-          const response = await request(url, { dispatcher: options.agent?.dispatcher })
+          const response = await request(url, { dispatcher: options?.dispatcher })
           const json = await response.body.json() as any
           await writeFile(jsonPath, JSON.stringify(json))
           return json
@@ -428,12 +427,9 @@ export class InstallJsonTask extends DownloadTask {
 
     super({
       url: urls,
-      headers: options.headers,
-      agent: options.agent,
       validator: expectSha1 ? options.checksumValidatorResolver?.({ algorithm: 'sha1', hash: expectSha1 }) || { algorithm: 'sha1', hash: expectSha1 } : new JsonValidator(),
       destination,
-      skipPrevalidate: options.skipPrevalidate,
-      skipRevalidate: options.skipRevalidate,
+      ...getDownloadBaseOptions(options),
     })
 
     this.name = 'json'
@@ -458,10 +454,7 @@ export class InstallJarTask extends DownloadTask {
       url: urls,
       validator: options.checksumValidatorResolver?.({ algorithm: 'sha1', hash: expectSha1 }) || { algorithm: 'sha1', hash: expectSha1 },
       destination,
-      headers: options.headers,
-      agent: options.agent,
-      skipPrevalidate: options.skipPrevalidate,
-      skipRevalidate: options.skipRevalidate,
+      ...getDownloadBaseOptions(options),
     })
 
     this.name = 'jar'
@@ -479,10 +472,7 @@ export class InstallAssetIndexTask extends DownloadTask {
       url: resolveDownloadUrls(version.assetIndex.url, version, options.assetsIndexUrl),
       destination: jsonPath,
       validator: options.checksumValidatorResolver?.({ algorithm: 'sha1', hash: expectSha1 }) || { algorithm: 'sha1', hash: expectSha1 },
-      headers: options.headers,
-      agent: options.agent,
-      skipPrevalidate: options.skipPrevalidate,
-      skipRevalidate: options.skipRevalidate,
+      ...getDownloadBaseOptions(options),
     })
 
     this.name = 'assetIndex'
@@ -503,10 +493,8 @@ export class InstallLibraryTask extends DownloadTask {
         ? new ZipValidator()
         : options.checksumValidatorResolver?.({ algorithm: 'sha1', hash: expectSha1 }) || { algorithm: 'sha1', hash: expectSha1 },
       destination,
-      headers: options.headers,
-      agent: options.agent,
-      skipPrevalidate: options.skipPrevalidate,
-      skipRevalidate: options.skipRevalidate,
+      ...getDownloadBaseOptions(options),
+      skipHead: lib.download.size < 2 * 1024 * 1024,
     })
 
     this.name = 'library'
@@ -542,10 +530,8 @@ export class InstallAssetTask extends DownloadTask {
           },
         }
         : options.checksumValidatorResolver?.({ algorithm: 'sha1', hash }) || { algorithm: 'sha1', hash },
-      headers: options.headers,
-      agent: options.agent,
-      skipPrevalidate: options.skipPrevalidate,
-      skipRevalidate: options.skipRevalidate,
+      ...getDownloadBaseOptions(options),
+      skipHead: asset.size < 2 * 1024 * 1024,
     })
 
     this._total = size

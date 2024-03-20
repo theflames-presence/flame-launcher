@@ -1,5 +1,0 @@
-For change .fmcl:
-xmcl-electron-app/main/controllers/setupWindows.ts
-
-For change colorTheme:
-xmcl-keystone-ui/src/composables/colorTheme.ts

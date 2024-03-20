@@ -1,4 +1,5 @@
 import { getPlatform, Platform } from '@xmcl/core'
+import { DownloadBaseOptions, getDownloadBaseOptions } from '@xmcl/file-transfer'
 import { Task, task } from '@xmcl/task'
 import { exec } from 'child_process'
 import { unlink } from 'fs/promises'
@@ -6,7 +7,6 @@ import { arch, EOL, platform, tmpdir } from 'os'
 import { basename, join, resolve } from 'path'
 import { Dispatcher, request } from 'undici'
 import { DownloadTask } from './downloadTask'
-import { DownloadBaseOptions } from '@xmcl/file-transfer'
 import { ensureDir, missing } from './utils'
 
 export interface JavaInfo {
@@ -66,8 +66,7 @@ export class DownloadJRETask extends DownloadTask {
         algorithm: 'sha1',
         hash: sha1,
       },
-      agent: options.agent,
-      headers: options.headers,
+      ...getDownloadBaseOptions(options),
     })
 
     this.name = 'downloadJre'
@@ -199,7 +198,7 @@ export function parseJavaVersion(versionText: string): { version: string; majorV
 export async function getPotentialJavaLocations(): Promise<string[]> {
   const unchecked = new Set<string>()
   const currentPlatform = platform()
-  const javaFile = currentPlatform === 'win32' ? 'javaw.exe' : 'java'
+  const javaFile = currentPlatform === 'win32' ? 'java.exe' : 'java'
 
   if (process.env.JAVA_HOME) {
     unchecked.add(join(process.env.JAVA_HOME, 'bin', javaFile))
@@ -225,15 +224,12 @@ export async function getPotentialJavaLocations(): Promise<string[]> {
         resolve(stdout.split(EOL).map((item) => item.replace(/[\r\n]/g, ''))
           .filter((item) => item != null && item !== undefined)
           .filter((item) => item[0] === ' ')
-          .map((item) => `${item.split('    ')[3]}\\bin\\javaw.exe`))
+          .map((item) => `${item.split('    ')[3]}\\bin\\java.exe`))
       })
     })
     for (const o of [...out, ...await where()]) {
       unchecked.add(o)
     }
-    const currentArch = arch()
-    unchecked.add('C:\\Program Files (x86)\\Minecraft Launcher\\runtime\\jre-x64/X86')
-    unchecked.add(`C:\\Program Files (x86)\\Minecraft Launcher\\runtime\\jre-legacy\\windows-${currentArch}\\jre-legacy`)
   } else if (currentPlatform === 'darwin') {
     unchecked.add('/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home/bin/java')
     unchecked.add(await which())
