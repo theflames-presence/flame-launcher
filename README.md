@@ -30,17 +30,15 @@ winget install aislx.FlameLauncher
 # Letest Features
 **🐛Bug Fixes**
 
-- Optifine display and search 
-- Fix some glitch of version diagnose 
-- Some version cannot launched 
-- Redundent decodeURIComponent causing unzip failure 
-- Should not show save/load after install 
-- Localize download update button 
-- Fix some local version input glich 
-- Server icon show everywhere when server refreshed
-- Should load skin right after login
-- Fix crash in wayland mode 
-- Quilt version lookup should also respect with minecraft version 
+
+- Should hint user to fix legacy forge
+- Adjust network retry policy 
+- Align the windows java path 
+- Some record props is overflowed 
+- Some curseforge file cannot be downloaded
+- Game version switching not working
+- Some files cannot be downloaded
+
 
 **⚓Features Added**
 
@@ -48,3 +46,8 @@ winget install aislx.FlameLauncher
 - Add streamer mode
 - Support elyby authlib
 - Support dedicated gpu 
+- Adjust download retry policy
+- Try to use autoSelectFamily to improve the ipv6 connectivity
+- Improve the modpack store page UX. 
+- Update network stack 
+- Added Hungarian language 
