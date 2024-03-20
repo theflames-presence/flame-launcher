@@ -50,4 +50,3 @@ winget install aislx.FlameLauncher
 - Try to use autoSelectFamily to improve the ipv6 connectivity
 - Improve the modpack store page UX. 
 - Update network stack 
-- Added Hungarian language 
