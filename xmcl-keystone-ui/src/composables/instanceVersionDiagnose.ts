@@ -1,4 +1,5 @@
-import { DiagnoseServiceKey, InstallServiceKey, InstanceServiceKey, LocalVersionHeader, ReadWriteLock, RuntimeVersions, getExpectVersion } from '@xmcl/runtime-api'
+import type { LibraryIssue } from '@xmcl/core'
+import { DiagnoseServiceKey, InstallServiceKey, InstanceServiceKey, LocalVersionHeader, ReadWriteLock, RuntimeVersions, getExpectVersion, parseOptifineVersion } from '@xmcl/runtime-api'
 import { InjectionKey, Ref } from 'vue'
 import { InstanceResolveVersion } from './instanceVersion'
 import { useInstanceVersionInstall } from './instanceVersionInstall'
@@ -12,7 +13,7 @@ export function useInstanceVersionDiagnose(path: Ref<string>, runtime: Ref<Runti
   const issueItems = ref([] as LaunchMenuItem[])
   const { t } = useI18n()
   const { install } = useInstanceVersionInstall(versions)
-  const { installAssetsForVersion, installForge, installAssets, installLibraries, installDependencies, installByProfile } = useService(InstallServiceKey)
+  const { installAssetsForVersion, installForge, installAssets, installLibraries, installNeoForged, installDependencies, installOptifine, installByProfile } = useService(InstallServiceKey)
   const { editInstance } = useService(InstanceServiceKey)
 
   let operation = undefined as undefined | (() => Promise<void>)
@@ -87,12 +88,27 @@ export function useInstanceVersionDiagnose(path: Ref<string>, runtime: Ref<Runti
     const profileIssue = await diagnoseProfile(version.id)
     if (abortSignal.aborted) { return }
     if (profileIssue) {
-      operations.push(async () => {
-        await installForge({
-          mcversion: version.minecraftVersion,
-          version: runtime.value.forge!,
+      console.log(profileIssue)
+      if (runtime.value.forge) {
+        operations.push(async () => {
+          await installForge({
+            mcversion: version.minecraftVersion,
+            version: runtime.value.forge!,
+          })
         })
-      })
+      } else if (runtime.value.neoForged) {
+        operations.push(async () => {
+          await installNeoForged({
+            minecraft: version.minecraftVersion,
+            version: runtime.value.neoForged!,
+          })
+        })
+      } else {
+        operations.push(async () => {
+          await installByProfile(profileIssue.installProfile)
+        })
+      }
+
       items.push(reactive({
         title: computed(() => t('diagnosis.badInstall.name', { version: version.id })),
         description: computed(() => t('diagnosis.badInstall.message')),
@@ -104,20 +120,59 @@ export function useInstanceVersionDiagnose(path: Ref<string>, runtime: Ref<Runti
       if (abortSignal.aborted) { return }
 
       if (librariesIssue.length > 0) {
-        const options = { named: { count: librariesIssue.length } }
-        console.log(librariesIssue)
-        operations.push(async () => {
-          await installLibraries(librariesIssue.map(v => v.library), version.id, librariesIssue.length < 15)
-        })
-        items.push(librariesIssue.some(v => v.type === 'corrupted')
-          ? reactive({
-            title: computed(() => t('diagnosis.corruptedLibraries.name', options, { plural: librariesIssue.length })),
-            description: computed(() => t('diagnosis.corruptedLibraries.message')),
+        const optifinesIssues = [] as LibraryIssue[]
+        const forgeIssues = [] as LibraryIssue[]
+        const commonIssues = [] as LibraryIssue[]
+        for (const i of librariesIssue) {
+          if (i.library.groupId === 'optifine') {
+            optifinesIssues.push(i)
+          } else if (i.library.groupId === 'net.minecraftforge' && i.library.artifactId === 'forge' && (i.library.classifier === 'client' || !i.library.classifier)) {
+            forgeIssues.push(i)
+          } else {
+            commonIssues.push(i)
+          }
+        }
+        if (commonIssues.length > 0) {
+          const options = { count: commonIssues.length, name: commonIssues[0].library.path }
+          operations.push(async () => {
+            await installLibraries(commonIssues.map(v => v.library), version.id, commonIssues.length < 15)
           })
-          : reactive({
-            title: computed(() => t('diagnosis.missingLibraries.name', options, { plural: librariesIssue.length })),
-            description: computed(() => t('diagnosis.missingLibraries.message')),
+          items.push(commonIssues.some(v => v.type === 'corrupted')
+            ? reactive({
+              title: computed(() => t('diagnosis.corruptedLibraries.name', options, { plural: commonIssues.length })),
+              description: computed(() => t('diagnosis.corruptedLibraries.message')),
+            })
+            : reactive({
+              title: computed(() => t('diagnosis.missingLibraries.name', options, { plural: commonIssues.length })),
+              description: computed(() => t('diagnosis.missingLibraries.message')),
+            }))
+        }
+        if (optifinesIssues.length > 0) {
+          items.push(reactive({
+            title: computed(() => t('diagnosis.badInstall.name')),
+            description: computed(() => t('diagnosis.badInstall.message')),
           }))
+          const { type, patch } = parseOptifineVersion(runtime.value.optifine!)
+          operations.push(async () => {
+            await installOptifine({
+              mcversion: runtime.value.minecraft,
+              type,
+              patch,
+            })
+          })
+        }
+        if (forgeIssues.length > 0) {
+          items.push(reactive({
+            title: computed(() => t('diagnosis.badInstall.name')),
+            description: computed(() => t('diagnosis.badInstall.message')),
+          }))
+          operations.push(async () => {
+            await installForge({
+              mcversion: runtime.value.minecraft,
+              version: runtime.value.forge!,
+            })
+          })
+        }
       }
     }
 
@@ -143,17 +198,17 @@ export function useInstanceVersionDiagnose(path: Ref<string>, runtime: Ref<Runti
       const assetsIssue = await diagnoseAssets(version)
       if (abortSignal.aborted) { return }
       if (assetsIssue.length > 0) {
-        const options = { named: { count: assetsIssue.length } }
+        const options = { count: assetsIssue.length, name: assetsIssue[0]?.asset.name }
         operations.push(async () => {
           await installAssets(assetsIssue.map(v => v.asset), version.id, assetsIssue.length < 15)
         })
         items.push(assetsIssue.some(v => v.type === 'corrupted')
           ? reactive({
-            title: computed(() => t('diagnosis.corruptedAssets.name', 2, options)),
+            title: computed(() => t('diagnosis.corruptedAssets.name', options, 2)),
             description: computed(() => t('diagnosis.corruptedAssets.message')),
           })
           : reactive({
-            title: computed(() => t('diagnosis.missingAssets.name', 2, options)),
+            title: computed(() => t('diagnosis.missingAssets.name', options, 2)),
             description: computed(() => t('diagnosis.missingAssets.message')),
           }),
         )

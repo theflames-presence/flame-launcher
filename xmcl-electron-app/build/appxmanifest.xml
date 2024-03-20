@@ -3,7 +3,7 @@
 	xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities">
-  <Identity Name="FMCL" Version="0.14.0.0" Publisher="IN=fmcl" ProcessorArchitecture="x64" />
+  <Identity Name="FMCL" Version="0.14.0.0" Publisher="IN=befe393d-b78a-486a-87d8-7126a72aa937-20240308180058" ProcessorArchitecture="x64" />
   <Properties>
     <DisplayName>Flame Launcher</DisplayName>
     <PublisherDisplayName>fmcl</PublisherDisplayName>

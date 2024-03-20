@@ -2,8 +2,8 @@
     "name": "@xmcl/keystone-ui",
     "private": true,
     "productName": "fmcl",
-    "version": "1.0.3",
-    "author": "aislxflames <proarghaop@gmail.com>",
+    "version": "",
+    "author": "aislx <proarghaop@gmail.com>",
     "description": "A great minecraft launcher in the future",
     "license": "MIT",
     "engines": {
