@@ -49,7 +49,7 @@ jobs:
         name: FMCL-WINDOWS-x64-v${{ secrets.FMCL_VERSION }}
         path: C:\Users\runneradmin\Documents\flame-launcher\xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
       
-    - name: FMCL-x64-Upload
+    - name: FMCL-x32-Upload
       uses: actions/upload-artifact@v3
       with:
           name: FMCL-WINDOWS-x32-v${{ secrets.FMCL_VERSION }}
