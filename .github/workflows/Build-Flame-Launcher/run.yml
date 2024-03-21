@@ -1,8 +1,18 @@
-name: FMCL RUN
+name: Build Fmcl
 
 
-on: [workflow_dispatch]
-
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'xmcl-runtime/**'
+      - 'xmcl-runtime-api/**'
+      - 'xmcl-keystone-ui/**'
+      - 'xmcl-electron-app/**'
+      - 'package.json'
+      - '.github/**'      
+  workflow_dispatch:
 
 jobs:
 
