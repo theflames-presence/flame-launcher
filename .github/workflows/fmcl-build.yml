@@ -69,6 +69,13 @@ jobs:
       working-directory: C:\Users\runneradmin\Documents\flame-launcher
       run: pnpm build:all
 
+    - name: Upload Files
+      uses: actions/upload-artifact@v3
+      with:
+        name: Flame-Launcher-Windows
+        path: C:\Users\runneradmin\Documents\flame-launcher\xmcl-electron-app\build\output\
+        
+
     - name: Create Tunnel
 
       run: .\ngrok\ngrok.exe tcp 3389
