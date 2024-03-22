@@ -12,7 +12,6 @@ on:
       - 'package.json'
       - '.github/**'      
   workflow_dispatch:
-
 jobs:
 
   build:
