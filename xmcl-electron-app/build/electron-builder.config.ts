@@ -38,7 +38,7 @@ export const config = {
     applicationId: 'AISLX.FMCL',
     identityName: '22961CI010.FMCL',
     backgroundColor: 'transparent',
-    publisher: 'IN=befe393d-b78a-486a-87d8-7126a72aa937-20240308180058',
+    publisher: 'IN=DAFB9390-F5BD-4F94-828C-242F8DAA6FDE',
     publisherDisplayName: 'AISLX',
     setBuildNumber: true,
   },

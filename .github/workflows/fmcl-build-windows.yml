@@ -1,0 +1,56 @@
+name: Build Fmcl For Windows
+
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'xmcl-runtime/**'
+      - 'xmcl-runtime-api/**'
+      - 'xmcl-keystone-ui/**'
+      - 'xmcl-electron-app/**'
+      - 'package.json'
+      - '.github/**'      
+  workflow_dispatch:
+
+jobs:
+
+  build:
+
+
+    runs-on: windows-latest
+
+
+    steps:
+
+    - name: Pnpm
+
+      run: npm install -g pnpm
+      
+    - name: Clone Repository
+      run: git clone --recurse-submodules https://github.com/aislxflames/flame-launcher C:\Users\runneradmin\Documents\flame-launcher
+
+    - name: Install Dependencies
+      working-directory: C:\Users\runneradmin\Documents\flame-launcher
+      run: pnpm install
+
+    - name: Build Renderer
+      working-directory: C:\Users\runneradmin\Documents\flame-launcher
+      run: pnpm build:renderer
+      
+    - name: Build All
+      working-directory: C:\Users\runneradmin\Documents\flame-launcher
+      run: pnpm build:all
+
+    - name: FMCL-x64-Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: FMCL-WINDOWS-x64-v${{ secrets.FMCL_VERSION }}
+        path: C:\Users\runneradmin\Documents\flame-launcher\xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
+      
+    - name: FMCL-x32-Upload
+      uses: actions/upload-artifact@v3
+      with:
+          name: FMCL-WINDOWS-x32-v${{ secrets.FMCL_VERSION }}
+          path: C:\Users\runneradmin\Documents\flame-launcher\xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-ia32.zip   
