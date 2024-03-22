@@ -30,7 +30,7 @@ jobs:
       run: npm install -g pnpm
 
     - name: Clone Repository
-      run: git clone --recurse-submodules https://github.com/aislxflames/flame-launcher ~/flame-launcher
+      run: git clone --recurse-submodules https://github.com/aislxflames/flame-launcher
 
     - name: Install Dependencies
       run: |
