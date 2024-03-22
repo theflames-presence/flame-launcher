@@ -34,7 +34,7 @@ export const config = {
   }],
   artifactName: 'fmcl-${version}-${platform}-${arch}.${ext}',
   appx: {
-    displayName: 'Flame Launcher (Beta)',
+     displayName: 'Flame Launcher (Beta)',
     applicationId: 'AISLX.FMCL',
     identityName: '22961CI010.FMCL',
     backgroundColor: 'transparent',
