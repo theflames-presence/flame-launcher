@@ -30,43 +30,43 @@ jobs:
       run: npm install -g pnpm
 
     - name: Clone Repository
-      run: git clone --recurse-submodules https://github.com/aislxflames/flame-launcher /home/documents
+      run: git clone --recurse-submodules https://github.com/aislxflames/flame-launcher ~/documents
 
     - name: Install Dependencies
       run: |
-        cd /home/documents/flame-launcher
+        cd ~/documents/flame-launcher
         pnpm install
 
     - name: Build Renderer
       run: |
-        cd /home/documents/flame-launcher
+        cd ~/documents/flame-launcher
         pnpm build:renderer
 
     - name: Build All
       run: |
-        cd /home/documents/flame-launcher
+        cd ~/documents/flame-launcher
         pnpm build:all
 
     - name: FMCL-x64-Upload-Deb
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Deb
-        path: /home/documents/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-amd64.deb
+        path: ~/documents/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-amd64.deb
       
     - name: FMCL-x32-Upload-Deb
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-LINUX-x32-v${{ secrets.FMCL_VERSION }}-Deb
-        path: /home/documents/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.deb
+        path: ~/documents/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.deb
         
     - name: FMCL-x64-Upload-Zip
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Zip
-        path: /home/documents/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-x64.tar.xz
+        path: ~/documents/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-x64.tar.xz
       
     - name: FMCL-x32-Upload-Zip
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-LINUX-x32-v${{ secrets.FMCL_VERSION }}-Zip
-        path: /home/documents/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.tar.xz
+        path: ~/documents/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.tar.xz
