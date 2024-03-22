@@ -1,4 +1,4 @@
-name: Build Fmcl
+name: Build Fmcl For Linux
 
 on:
   push:
