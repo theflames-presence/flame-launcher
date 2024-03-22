@@ -34,7 +34,7 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        cd /runner/documents/flame-launcher
+        cd home/runner/documents/flame-launcher
         pnpm install
 
     - name: Build Renderer
