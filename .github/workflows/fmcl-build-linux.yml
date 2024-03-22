@@ -3,7 +3,7 @@ name: Build Fmcl For Linux
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - 'xmcl-runtime/**'
       - 'xmcl-runtime-api/**'
