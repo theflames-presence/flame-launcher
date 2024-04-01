@@ -257,7 +257,11 @@ export class LauncherApp extends EventEmitter {
     this.logger.log(`Boot from ${this.appDataPath}`)
 
     // register xmcl protocol
+<<<<<<< HEAD
     if (!this.host.isDefaultProtocolClient('xmcl')) {
+=======
+    if (!this.host.isDefaultProtocolClient('fmcl')) {
+>>>>>>> 392d4469fea2d5db9116a8602979391dcab46659
       const result = this.host.setAsDefaultProtocolClient('xmcl')
       if (result) {
         this.logger.log('Successfully register the xmcl protocol')
