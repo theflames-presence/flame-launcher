@@ -7,7 +7,7 @@ function getAppInstallerContent(version: string, publisher: string) {
       Version="${version}.0"
       Uri="https://xmcl.blob.core.windows.net/releases/xmcl.appinstaller" >
       <MainPackage
-          Name="FMCL"
+          Name="XMCL"
           Publisher="${publisher}"
           Version="${version}.${process.env.BUILD_NUMBER || '0'}"
           ProcessorArchitecture="x64"

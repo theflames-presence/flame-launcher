@@ -1,9 +1,9 @@
 {
     "name": "@xmcl/runtime",
     "private": true,
-    "version": "1.0.4",
+    "version": "0.40.0",
     "author": "aislx <proarghaop@gmail.com>",
-    "description": "The runtime for flame launcher in nodejs",
+    "description": "The runtime for x minecraft launcher in nodejs",
     "license": "MIT",
     "main": "index.ts",
     "engines": {
@@ -11,7 +11,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/aislxflames/flame-launcher"
+        "url": "https://github.com/voxelum/x-minecraft-launcher"
     },
     "scripts": {
         "check": "tsc --project tsconfig.json --noEmit",
@@ -59,14 +59,14 @@
         "graceful-fs": "^4.2.10",
         "http-cache-semantics": "^4.1.0",
         "iconv-lite": "^0.6.3",
-        "jschardet": "github:aadsm/jschardet",
+        "jschardet": "3.1.2",
         "kysely": "^0.26.1",
         "lodash.debounce": "^4.0.8",
         "lodash.throttle": "^4.1.1",
         "node-datachannel": "0.5.3",
         "node-watch": "^0.7.3",
         "normalize-url": "^7.2.0",
-        "undici": "6.6.2",
+        "undici": "6.10.2",
         "ws": "8.10.0",
         "yazl": "^2.5.1"
     },

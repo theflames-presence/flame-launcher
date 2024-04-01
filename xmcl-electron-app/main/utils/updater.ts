@@ -131,13 +131,13 @@ export class ElectronUpdater implements LauncherAppUpdater {
     this.logger.log('Try get update from selfhost')
     const baseService = await app.registry.get(BaseService)
     const { allowPrerelease, locale } = await baseService.getSettings()
-    const url = `https://api.fmcl.app/latest?version=v${app.version}&prerelease=${allowPrerelease || false}`
+    const url = `https://api.xmcl.app/latest?version=v${app.version}&prerelease=${allowPrerelease || false}`
     const response = await request(url, {
       headers: {
         'Accept-Language': locale,
       },
       throwOnError: true,
-    }).catch(() => request('https://fmcl.blob.core.windows.net/releases/latest_version.json'))
+    }).catch(() => request('https://xmcl.blob.core.windows.net/releases/latest_version.json'))
     const result = await response.body.json() as any
     const updateInfo: ReleaseInfo = {
       name: result.tag_name,

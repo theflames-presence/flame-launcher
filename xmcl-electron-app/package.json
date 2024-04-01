@@ -1,9 +1,9 @@
 {
-    "name": "fmcl",
+    "name": "xmcl",
     "private": true,
     "main": "./index.js",
-    "version": "1.0.4",
-    "author": "aislxflames <proarghaop@gmail.com>",
+    "version": "1.0.5",
+    "author": "aislx <proarghaop@gmail.com>",
     "description": "A great minecraft launcher in the future",
     "license": "MIT",
     "engines": {
@@ -70,6 +70,6 @@
         "tslib": "^2.5.0",
         "tsx": "^3.13.0",
         "typescript": "^5.2.2",
-        "undici": "6.6.2"
+        "undici": "6.10.2"
     }
 }
