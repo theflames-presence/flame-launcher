@@ -1,6 +1,0 @@
-{
-  "name": "undici-shim",
-  "version": "0.0.2",
-  "private": true,
-  "module": "index.ts"
-}

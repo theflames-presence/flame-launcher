@@ -25,6 +25,7 @@ export default defineConfig({
       external: ['electron'],
     },
     minify: 'terser',
+    sourcemap: true,
     terserOptions: {
       keep_classnames: true,
     },

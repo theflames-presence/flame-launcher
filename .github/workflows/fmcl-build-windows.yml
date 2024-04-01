@@ -12,7 +12,7 @@ on:
       - 'xmcl-electron-app/**'
       - 'package.json'
       - '.github/**'      
-      
+  workflow_dispatch:
 jobs:
 
   build:
