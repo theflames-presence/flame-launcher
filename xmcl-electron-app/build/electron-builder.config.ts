@@ -38,7 +38,7 @@ export const config = {
     applicationId: 'AISLX.FMCL',
     identityName: '22961CI010.FMCL',
     backgroundColor: 'transparent',
-    publisher: 'CN=DAFB9390-F5BD-4F94-828C-242F8DAA6FDE',
+    publisher: 'IN=DAFB9390-F5BD-4F94-828C-242F8DAA6FDE',
     publisherDisplayName: 'AISLX',
     setBuildNumber: true,
   },
@@ -89,11 +89,11 @@ export const config = {
   linux: {
     desktop: {
       MimeType: 'x-scheme-handler/xmcl',
-      StartupWMClass: 'fmcl',
+      StartupWMClass: 'xmcl',
     },
     category: 'Game',
     icon: 'icons/dark.icns',
-    artifactName: 'fmcl-${version}-${arch}.${ext}',
+    artifactName: 'xmcl-${version}-${arch}.${ext}',
     target: [
       { target: 'deb', arch: ['x64', 'arm64'] },
       { target: 'rpm', arch: ['x64', 'arm64'] },

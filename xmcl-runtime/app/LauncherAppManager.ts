@@ -32,7 +32,7 @@ export class LauncherAppManager implements AppsHost {
 
     app.protocol.registerHandler('xmcl', ({ request, response }) => {
       const parsed = request.url
-      if (parsed.host === 'launch er' && parsed.pathname === '/app') {
+      if (parsed.host === 'launcher' && parsed.pathname === '/app') {
         const params = parsed.searchParams
         const appUrl = params.get('url')
         if (appUrl) {

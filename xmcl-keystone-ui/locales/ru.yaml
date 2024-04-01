@@ -179,6 +179,9 @@ diagnosis:
   incompatibleJava:
     message: Можно запросить лаунчер скачать его за вас.
     name: Версия java {javaVersion} не подходит для {version}!
+  instanceFiles:
+    description: 'Установка экземпляра включает файлы: {counts}.'
+    title: Незавершенная установка экземпляра
   invalidJava:
     message: Нажмите, чтобы использовать другую java для запуска.
     name: Неверное расположение java.
@@ -973,10 +976,12 @@ resourcepack:
   incompatible: >-
     Несовместимый формат текстурпака ({format}). Подходящий {accept}. Текущий
     {actual}.
+  independent: Экземпляр использует независимую папку пакета ресурсов
   manage: Управление текстурпаками
   name: Текстурпак | Текстурпаки
   searchOnCurseforge: Искать {name} на curseforge
   selected: Выбранные текстурпаки
+  shared: Экземпляр использует общую папку пакета ресурсов
   showFile: Открыть текстурпак {file} в папке
   showInCurseforge: Показать {name} на curseforge
   unselected: Невыбранные текстурпаки
@@ -1238,6 +1243,7 @@ tag:
 task:
   cancelled: Отменено
   clear: Очистить завершенные задачи
+  connections: Сетевые соединения
   empty: Нет запущенных задач
   failed: Не удалось
   manager: Диспетчер задач
