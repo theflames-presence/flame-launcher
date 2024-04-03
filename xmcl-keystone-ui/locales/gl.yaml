@@ -214,6 +214,9 @@ diagnosis:
   incompatibleJava:
     message: Preguntar o Lanzador que o descargue por ti.
     name: ¡A versión de java {javaVersion} non é adecuada para {version}!
+  instanceFiles:
+    description: A instalación da instancia inclúe {counts} ficheiros.
+    title: Instalación de instancia incompleta
   invalidJava:
     message: Prema para iniciar con outra versión de java.
     name: Ubicación de Java non válida.
@@ -237,6 +240,9 @@ launchBlocked:
     title: Non se puido iniciar o proceso de xogo
 mod:
   searchOnCurseforge: Busca {name} en curseforge
+resourcepack:
+  independent: A instancia utiliza o cartafol do paquete de recursos independente
+  shared: A instancia utiliza o cartafol do paquete de recursos compartidos
 setting:
   enableDedicatedGPUOptimization: Asignar GPU dedicada
   enableDedicatedGPUOptimizationDescription: Esta opción asignará unha GPU dedicada ao proceso de Minecraft.
@@ -252,3 +258,12 @@ setting:
   streamerModeDescription: >-
     Isto ocultará a túa información privada como o correo electrónico no
     launcher.
+task:
+  connection:
+    connected: Conectado
+    free: Libre
+    pending: Pendente
+    queued: En cola
+    running: Conexión en execución
+    size: reconto total
+  connections: Conexións de rede

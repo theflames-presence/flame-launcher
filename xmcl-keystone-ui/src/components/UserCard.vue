@@ -1,7 +1,8 @@
 <template>
   <v-card
-    outlined
-    class="invisible-scroll user-menu "
+    :outlined="outlined"
+    flat
+    class="invisible-scroll user-menu"
   >
     <transition
       name="fade-transition"
@@ -10,7 +11,7 @@
       <template v-if="!login">
         <div :key="0">
           <v-list>
-            <UserMenuUserItem
+            <UserCardUserItem
               v-if="selected"
               :user="selected"
               controls
@@ -18,26 +19,22 @@
               :refreshing="refreshing"
               @remove="onShowDeleteDialog()"
               @abort-refresh="abortRefresh()"
-              @refresh="onRefresh()"
+              @refresh="onRefresh(true)"
             />
           </v-list>
 
-          <UserMenuMicrosoft
+          <UserCardMicrosoft
             v-if="selected && selected.authority === AUTHORITY_MICROSOFT"
             :user="selected"
           />
-          <UserMenuMojang
-            v-else-if="selected && selected.authority === AUTHORITY_MOJANG"
-            :user="selected"
-          />
-          <UserMenuYggdrasil
+          <UserCardYggdrasil
             v-else-if="!!selected"
             :user="selected"
           />
 
           <v-divider v-if="usersToSwitch.length > 0" />
           <v-list dense>
-            <UserMenuUserItem
+            <UserCardUserItem
               v-for="(item) of usersToSwitch"
               :key="item.id"
               :hide-user-name="streamerMode"
@@ -85,7 +82,7 @@
           </div>
 
           <div class="flex flex-grow items-center justify-center">
-            <AppLoginForm
+            <UserLoginForm
               :inside="false"
               :options="options"
               @login="reset()"
@@ -96,6 +93,7 @@
     </transition>
     <DeleteDialog
       dialog="user-delete"
+      :width="400"
       :title="t('userAccount.removeTitle')"
       @confirm="onRemoveUser"
     >
@@ -110,12 +108,13 @@ import { useLocalStorageCacheBool } from '@/composables/cache'
 import { useDialog } from '@/composables/dialog'
 import { kUserContext, useUserExpired } from '@/composables/user'
 import { injection } from '@/util/inject'
-import { AUTHORITY_MICROSOFT, AUTHORITY_MOJANG, UserServiceKey } from '@xmcl/runtime-api'
-import AppLoginForm from './AppLoginForm.vue'
-import UserMenuMicrosoft from './UserMenuMicrosoft.vue'
-import UserMenuMojang from './UserMenuMojang.vue'
-import UserMenuUserItem from './UserMenuUserItem.vue'
-import UserMenuYggdrasil from './UserMenuYggdrasil.vue'
+import { AUTHORITY_MICROSOFT, UserServiceKey } from '@xmcl/runtime-api'
+import UserLoginForm from './UserLoginForm.vue'
+import UserCardMicrosoft from './UserCardMicrosoft.vue'
+import UserCardUserItem from './UserCardUserItem.vue'
+import UserCardYggdrasil from './UserCardYggdrasil.vue'
+
+const props = defineProps<{ show: boolean; outlined?: boolean }>()
 
 const { t } = useI18n()
 const { users, select, userProfile: selected } = injection(kUserContext)
@@ -124,30 +123,35 @@ const expired = useUserExpired(computed(() => selected.value))
 const { show: onShowDeleteDialog } = useDialog('user-delete')
 const streamerMode = inject('streamerMode', useLocalStorageCacheBool('streamerMode', false))
 
-const props = defineProps<{ show: boolean }>()
-
 const onSelectUser = (user: string) => {
   select(user)
 }
 const login = ref(users.value.length === 0)
-const { refresh: onRefresh, refreshing, error } = useRefreshable(async () => {
-  if (users.value.length === 0) {
-    login.value = true
-  } else {
+const refreshing = ref(false)
+
+async function onRefresh(force = false) {
+  refreshing.value = true
+  try {
+    if (users.value.length === 0) {
+      login.value = true
+      return
+    }
     if (!selected.value.id) {
       select(users.value[0].id)
     }
     if (selected.value?.id || selected.value.invalidated || expired.value) {
       // Try to refresh
       const authority = selected.value?.authority
-      await refreshUser(selected.value.id).catch((e) => {
+      await refreshUser(selected.value.id, false, true).catch((e) => {
         console.error(e)
         reset({ username: selected.value?.username, authority, error: t('login.userRelogin') })
         login.value = true
       })
     }
+  } finally {
+    refreshing.value = false
   }
-})
+}
 
 watch(() => props.show, (s) => {
   if (!s) return
@@ -172,9 +176,3 @@ const reset = (o?: { username?: string; password?: string; microsoftUrl?: string
 
 const usersToSwitch = computed(() => users.value.filter(v => selected.value ? (v.id !== selected.value.id) : true))
 </script>
-<style scoped>
-.user-menu {
-  @apply w-[600px] max-w-[600px] overflow-y-auto;
-  max-height: min(700px, 90vh);
-}
-</style>

@@ -30,6 +30,7 @@ import { kInstanceSave, useInstanceSaves } from '@/composables/save'
 import { kServerStatusCache, useServerStatusCache } from '@/composables/serverStatus'
 import { kSettingsState, useSettingsState } from '@/composables/setting'
 import { kShaderPackSearch, useShaderPackSearch } from '@/composables/shaderPackSearch'
+import { useTelemetryTrack } from '@/composables/telemetryTrack'
 import { kTutorial, useTutorialModel } from '@/composables/tutorial'
 import { kUILayout, useUILayout } from '@/composables/uiLayout'
 import { kMarketRoute, useMarketRoute } from '@/composables/useMarketRoute'
@@ -44,6 +45,7 @@ import { provide } from 'vue'
 
 export default defineComponent({
   setup(props, ctx) {
+    useTelemetryTrack()
     provide(kVuetify, vuetify.framework)
     provide(kSemaphores, useSemaphores())
     provide(kExceptionHandlers, useExceptionHandlers())
@@ -76,7 +78,7 @@ export default defineComponent({
     const task = useLaunchTask(instance.path, instance.runtime, instanceVersion.versionHeader)
     const instanceLaunch = useInstanceLaunch(instance.instance, instanceVersion.resolvedVersion, instanceJava.java, user.userProfile, settings)
 
-    const modsSearch = useModsSearch(instance.runtime, instanceMods.mods)
+    const modsSearch = useModsSearch(instance.runtime, instanceMods.mods, instanceMods.isValidating)
     const modUpgrade = useModUpgrade(instance.path, instance.runtime, modsSearch.all)
 
     const resourcePackSearch = useResourcePackSearch(instance.runtime, resourcePacks.enabled, resourcePacks.disabled)
