@@ -28,8 +28,8 @@ app.on('web-contents-created', (event, contents) => {
 
 autoUpdater.setFeedURL({
   provider: 'github',
-  repo: 'flame-launcher',
-  owner: 'aislxflames',
+  repo: 'x-minecraft-launcher',
+  owner: 'voxelum',
 })
 autoUpdater.logger = null
 

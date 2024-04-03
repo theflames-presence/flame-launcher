@@ -1,4 +1,4 @@
-import { createWriteStream, rename as srename, unlink as sunlink, stat as sstat, open as sopen, close as sclose } from 'fs'
+import { createWriteStream, rename as srename, unlink as sunlink, stat as sstat, open as sopen, close as sclose, fdatasync } from 'fs'
 import { promisify } from 'util'
 import { mkdir } from 'fs/promises'
 import { dirname } from 'path'
@@ -19,6 +19,7 @@ const stat = promisify(sstat)
 const open = promisify(sopen)
 const close = promisify(sclose)
 const finished = promisify(sfinished)
+const datasync = promisify(fdatasync)
 
 export function getDownloadBaseOptions<T extends DownloadBaseOptions>(options?: T): DownloadBaseOptions {
   if (!options) return {}
@@ -167,17 +168,10 @@ async function get(url: string, fd: number, destination: string, headers: Record
       dispatcher,
       signal,
     }, ({ statusCode, headers }) => {
-      if (statusCode >= 300) {
-        // unreachable
-        return new PassThrough()
-      }
-
-      if (statusCode === 203) {
+      if (statusCode === 203 || statusCode >= 300) {
         const pass = new PassThrough()
 
-        if (statusCode === 203) {
-          setImmediate(() => pass.emit('error', new errors.ResponseStatusCodeError('', statusCode, headers, '')))
-        }
+        setImmediate(() => pass.emit('error', new errors.ResponseStatusCodeError('', statusCode, headers, '')))
 
         return pass
       }
@@ -196,7 +190,6 @@ async function get(url: string, fd: number, destination: string, headers: Record
           callback()
         },
         highWaterMark: 1024 * 1024,
-        emitClose: false,
       })
 
       writable = createWriteStream(destination, {
@@ -214,7 +207,7 @@ async function get(url: string, fd: number, destination: string, headers: Record
       return transform
     })
 
-    if (writable && !writable.closed && !writable.destroyed && !writable.writableFinished) {
+    if (writable && !writable.writableFinished) {
       await finished(writable)
     }
   } catch (e) {
@@ -328,6 +321,13 @@ export async function download(options: DownloadOptions) {
         if (e instanceof errors.RequestAbortedError) throw e
         noErrors = false
         aggregate.push(decorate(e, 'get'))
+      }
+
+      try {
+        await datasync(fd)
+      } catch (e) {
+        noErrors = false
+        aggregate.push(decorate(e, 'datasync'))
       }
 
       if (!skipRevalidate && validator) {

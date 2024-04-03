@@ -16,13 +16,13 @@ export function parseCandidate(candidate: string) {
 export async function mapLocalPort(natService: NatService, ip: string, priv: number, pub: number, logger: Logger) {
   if (!await natService.isSupported()) return false
   const mappings = [{
-    description: `XMCL Multiplayer - udp - ${priv} - ${pub}`,
+    description: `FMCL Multiplayer - udp - ${priv} - ${pub}`,
     protocol: 'udp',
     private: priv,
     public: pub,
     ttl: 24 * 60 * 60,
   }, {
-    description: `XMCL Multiplayer - tcp - ${priv} - ${pub}`,
+    description: `FMCL Multiplayer - tcp - ${priv} - ${pub}`,
     protocol: 'tcp',
     private: priv,
     public: pub,
@@ -30,7 +30,7 @@ export async function mapLocalPort(natService: NatService, ip: string, priv: num
   }] as UpnpMapOptions[]
 
   const currentMappings = await natService.getMappings()
-  const existedMappings = currentMappings.filter(m => m.description.indexOf('XMCL Multiplayer') !== -1 &&
+  const existedMappings = currentMappings.filter(m => m.description.indexOf('FMCL Multiplayer') !== -1 &&
     m.private.port === priv &&
     m.private.host === ip &&
     m.public.port === pub &&

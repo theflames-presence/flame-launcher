@@ -58,7 +58,7 @@ export interface LogEmitter extends EventEmitter {
 
 export class LauncherApp extends EventEmitter {
   /**
-   * Launcher %APPDATA%/xmcl path
+   * Launcher %APPDATA%/fmcl path
    */
   readonly appDataPath: string
 
@@ -90,7 +90,7 @@ export class LauncherApp extends EventEmitter {
   readonly server: Server = createServer((req, res) => {
     this.protocol.handle({
       method: req.method,
-      url: new URL(req.url ?? '/', 'xmcl://launcher'),
+      url: new URL(req.url ?? '/', 'fmcl://launcher'),
       headers: req.headers,
       body: req,
     }).then((resp) => {
@@ -241,7 +241,7 @@ export class LauncherApp extends EventEmitter {
   }
 
   /**
-   * Determine the root of the project. By default, it's %APPDATA%/xmcl
+   * Determine the root of the project. By default, it's %APPDATA%/fmcl
    */
   protected async setup() {
     process.on('SIGINT', () => {
@@ -256,7 +256,7 @@ export class LauncherApp extends EventEmitter {
 
     this.logger.log(`Boot from ${this.appDataPath}`)
 
-    // register xmcl protocol
+    // register fmcl protocol
     if (!this.host.isDefaultProtocolClient('fmcl')) {
       const result = this.host.setAsDefaultProtocolClient('fmcl')
       if (result) {
@@ -318,14 +318,14 @@ export class LauncherApp extends EventEmitter {
           }
         }
         this.logger.log('Didn\'t find --url options')
-        const protocolOption = process.argv.find(a => a.startsWith('xmcl://'))
+        const protocolOption = process.argv.find(a => a.startsWith('fmcl://'))
         if (protocolOption) {
           const u = new URL(protocolOption)
           if (u.host === 'launcher' && u.pathname === '/app' && u.searchParams.has('url')) {
             return u.searchParams.get('url') as string
           }
         }
-        this.logger.log('Didn\'t find xmcl:// protocol')
+        this.logger.log('Didn\'t find fmcl:// protocol')
       }
     }
     this.logger.log('Didn\'t find the start up url, try to load from config file.')
