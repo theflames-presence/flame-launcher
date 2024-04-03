@@ -11,7 +11,8 @@ on:
       - 'xmcl-keystone-ui/**'
       - 'xmcl-electron-app/**'
       - 'package.json'
-      
+  workflow_dispatch:
+  
 jobs:
 
   build:
