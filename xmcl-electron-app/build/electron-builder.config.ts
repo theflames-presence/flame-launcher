@@ -32,18 +32,18 @@ export const config = {
     to: '.',
     filter: 'package.json',
   }],
-  artifactName: 'xmcl-${version}-${platform}-${arch}.${ext}',
+  artifactName: 'fmcl-${version}-${platform}-${arch}.${ext}',
   appx: {
     displayName: 'Flame Launcher (Beta)',
-    applicationId: 'CI010.XMCL',
-    identityName: '22961CI010.XMCL',
+    applicationId: 'AISLX.FMCL',
+    identityName: '22961CI010.FMCL',
     backgroundColor: 'transparent',
-    publisher: 'IN=DAFB9390-F5BD-4F94-828C-242F8DAA6FDE',
+    publisher: 'CN=DAFB9390-F5BD-4F94-828C-242F8DAA6FDE',
     publisherDisplayName: 'AISLX',
     setBuildNumber: true,
   },
   dmg: {
-    artifactName: 'xmcl-${version}.${ext}',
+    artifactName: 'fmcl-${version}.${ext}',
     contents: [
       {
         x: 410,
@@ -89,11 +89,11 @@ export const config = {
   linux: {
     desktop: {
       MimeType: 'x-scheme-handler/xmcl',
-      StartupWMClass: 'xmcl',
+      StartupWMClass: 'fmcl',
     },
     category: 'Game',
     icon: 'icons/dark.icns',
-    artifactName: 'xmcl-${version}-${arch}.${ext}',
+    artifactName: 'fmcl-${version}-${arch}.${ext}',
     target: [
       { target: 'deb', arch: ['x64', 'arm64'] },
       { target: 'rpm', arch: ['x64', 'arm64'] },

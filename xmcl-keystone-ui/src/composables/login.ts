@@ -73,6 +73,11 @@ export function useAuthorityItems(allowThirdparty: Ref<boolean>, services: Ref<Y
         text: t('userServices.microsoft.name'),
         icon: 'gavel',
       },
+      {
+        value: AUTHORITY_MOJANG,
+        text: t('userServices.mojang.name'),
+        icon: 'spatial_tracking',
+      },
     ] as AuthorityItem[]
 
     if (allowThirdparty.value) {

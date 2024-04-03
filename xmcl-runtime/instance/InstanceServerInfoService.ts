@@ -16,12 +16,12 @@ export class InstanceServerInfoService extends AbstractService implements IInsta
 
   async watch(path: string) {
     const stateManager = await this.app.registry.get(ServiceStateManager)
-    return stateManager.registerOrGet(getServerInfoKey(path), async ({ defineAsyncOperation }) => {
+    return stateManager.registerOrGet(getServerInfoKey(path), async () => {
       const state = new ServerInfoState()
 
       const serversPath = join(path, 'servers.dat')
 
-      const update = defineAsyncOperation(async () => {
+      const update = async () => {
         if (await exists(serversPath)) {
           const serverDat = await readFile(serversPath)
           const infos = /* await readInfo(serverDat) */ undefined as any
@@ -30,12 +30,13 @@ export class InstanceServerInfoService extends AbstractService implements IInsta
         } else {
           this.log('No server data found in instance.')
         }
-      })
+      }
       const watcher = watch(path, (event, filePath) => {
         if (event === 'update') {
           update()
         }
       })
+
       await update()
 
       return [state, () => {

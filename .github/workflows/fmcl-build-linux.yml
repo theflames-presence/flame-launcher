@@ -1,18 +1,17 @@
-name: Build FMCL For Linux
+name: Build Fmcl For Linux
 
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - 'xmcl-runtime/**'
       - 'xmcl-runtime-api/**'
       - 'xmcl-keystone-ui/**'
       - 'xmcl-electron-app/**'
       - 'package.json'
-      - '.github/**'
-  workflow_dispatch:
-
+      - '.github/**'     
+      
 jobs:
 
   build:
@@ -24,7 +23,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '16.x' # Updated Node.js version to a valid one
+        node-version: '20'
 
     - name: Install Pnpm
       run: npm install -g pnpm
@@ -40,31 +39,31 @@ jobs:
     - name: Build Renderer
       run: |
         cd ~/flame-launcher
-        pnpm run build:renderer
+        pnpm build:renderer
 
     - name: Build All
       run: |
         cd ~/flame-launcher
-        pnpm run build:all
+        pnpm build:all
 
     - name: FMCL-x64-Upload-Deb
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Deb
         path: ~/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-amd64.deb
-
+      
     - name: FMCL-x32-Upload-Deb
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-LINUX-x32-v${{ secrets.FMCL_VERSION }}-Deb
         path: ~/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.deb
-
+        
     - name: FMCL-x64-Upload-Zip
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Zip
         path: ~/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-x64.tar.xz
-
+      
     - name: FMCL-x32-Upload-Zip
       uses: actions/upload-artifact@v3
       with:

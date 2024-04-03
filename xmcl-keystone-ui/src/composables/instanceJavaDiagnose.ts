@@ -51,7 +51,6 @@ export function useInstanceJavaDiagnose(path: Ref<string>, all: Ref<JavaRecord[]
         },
       }
     }
-    return undefined
   })
   const { show: showJavaDialog } = useDialog(JavaIssueDialogKey)
 

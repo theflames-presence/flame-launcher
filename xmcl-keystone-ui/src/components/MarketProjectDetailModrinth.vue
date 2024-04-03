@@ -61,7 +61,6 @@ const dependencies = computed(() => {
           return file
         }
       }
-      return undefined
     })
     const otherFile = computed(() => {
       for (const file of props.allFiles) {
@@ -69,7 +68,6 @@ const dependencies = computed(() => {
           return file
         }
       }
-      return undefined
     })
     const task = useModrinthTask(computed(() => recommendedVersion.id))
     const dep: ProjectDependency = reactive({
