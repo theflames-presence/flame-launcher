@@ -18,8 +18,8 @@ export enum BackgroundType {
 }
 
 export function useBarBlur() {
-  const blurSidebar = useLocalStorageCacheInt('blurSidebar', 4)
-  const blurAppBar = useLocalStorageCacheInt('blurAppBar', 4)
+  const blurSidebar = useLocalStorageCacheInt('blurSidebar', 6)
+  const blurAppBar = useLocalStorageCacheInt('blurAppBar', 6)
 
   return {
     blurSidebar,

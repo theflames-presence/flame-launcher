@@ -7,19 +7,19 @@ export function useColorTheme(darkTheme: Ref<boolean>) {
   const lightAppBarColor = useLocalStorageCacheStringValue<string>('lightAppBarColor', '#e0e0e0FF')
   const lightSideBarColor = useLocalStorageCacheStringValue<string>('lightSideBarColor', '#FFFFFFFF')
 
-  const darkAppBarColor = useLocalStorageCacheStringValue<string>('darkAppBarColor', '#111111FF')
-  const darkSideBarColor = useLocalStorageCacheStringValue<string>('darkSideBarColor', '#111111FF')
+  const darkAppBarColor = useLocalStorageCacheStringValue<string>('darkAppBarColor', '#04000f')
+  const darkSideBarColor = useLocalStorageCacheStringValue<string>('darkSideBarColor', '#04000f')
 
-  const darkPrimaryColor = useLocalStorageCacheStringValue<string>('darkPrimaryColor', '#4caf50')
-  const darkBackground = useLocalStorageCacheStringValue<string>('darkBackground', '#121212')
+  const darkPrimaryColor = useLocalStorageCacheStringValue<string>('darkPrimaryColor', '#ff0000')
+  const darkBackground = useLocalStorageCacheStringValue<string>('darkBackground', '#04000f')
   const darkInfoColor = useLocalStorageCacheStringValue<string>('darkInfoColor', '#2196F3')
   const darkErrorColor = useLocalStorageCacheStringValue<string>('darkErrorColor', '#FF5252')
   const darkWarningColor = useLocalStorageCacheStringValue<string>('darkWarningColor', '#FB8C00')
   const darkSuccessColor = useLocalStorageCacheStringValue<string>('darkSuccessColor', '#4CAF50')
   const darkAccentColor = useLocalStorageCacheStringValue<string>('darkAccentColor', '#00e676')
-  const darkCardColor = useLocalStorageCacheStringValue<string>('darkCardColor', '#0c0c0ccc')
+  const darkCardColor = useLocalStorageCacheStringValue<string>('darkCardColor', '#110f17')
 
-  const lightPrimaryColor = useLocalStorageCacheStringValue<string>('lightPrimaryColor', '#1976D2')
+  const lightPrimaryColor = useLocalStorageCacheStringValue<string>('lightPrimaryColor', '#9003fc')
   const lightBackground = useLocalStorageCacheStringValue<string>('lightBackground', '#FFFFFF')
   const lightInfoColor = useLocalStorageCacheStringValue<string>('lightInfoColor', '#2196F3')
   const lightErrorColor = useLocalStorageCacheStringValue<string>('lightErrorColor', '#FF5252')
@@ -28,7 +28,7 @@ export function useColorTheme(darkTheme: Ref<boolean>) {
   const lightAccentColor = useLocalStorageCacheStringValue<string>('lightAccentColor', '#82B1FF')
   const lightCardColor = useLocalStorageCacheStringValue<string>('lightCardColor', '#e0e0e080')
 
-  const cssVars = computed(() => ({
+  const cssVars = computed(() => ({ 
     '--primary': primaryColor.value,
     'background-color': backgroundColor.value,
   }))
