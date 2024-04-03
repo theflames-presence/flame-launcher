@@ -10,8 +10,9 @@ on:
       - 'xmcl-keystone-ui/**'
       - 'xmcl-electron-app/**'
       - 'package.json'
-      - '.github/**'     
-      
+      - '.github/**' 
+workflow_dispatch:
+  
 jobs:
 
   build:
