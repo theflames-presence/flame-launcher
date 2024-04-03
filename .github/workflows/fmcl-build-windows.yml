@@ -64,7 +64,7 @@ jobs:
         release_name: v${{ secrets.FMCL_VERSION }}
     
     - name: FMCL-x64-Upload to Github 
-      id: upload-release-asset
+      id: upload-release-x64
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -76,7 +76,7 @@ jobs:
     
     
     - name: FMCL-x32-Upload to Github 
-      id: upload-release-asset
+      id: upload-release-x32
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
