@@ -92,14 +92,6 @@ export function useLaunchButton() {
         menu: [userIssue.value],
         onClick: () => fixUserIssue(),
       }
-    } else if (filesIssue.value) {
-      return {
-        icon: 'get_app',
-        text: t('install'),
-        color: 'blue',
-        menu: [filesIssue.value],
-        onClick: () => fixInstanceFileIssue(),
-      }
     } else if (versionIssues.value.length > 0) {
       return {
         icon: 'get_app',
@@ -108,13 +100,23 @@ export function useLaunchButton() {
         menu: versionIssues.value,
         onClick: () => fixVersionIssues(),
       }
+    } else if (filesIssue.value) {
+      return {
+        icon: 'get_app',
+        text: t('install'),
+        color: 'blue',
+        menu: [filesIssue.value],
+        onClick: () => fixInstanceFileIssue(),
+      }
     } else if (javaIssue.value && !javaIssue.value.onClick) {
       return {
         icon: 'get_app',
         text: t('install'),
         color: 'blue',
         menu: [javaIssue.value],
-        onClick: () => fixJavaIssue(),
+        onClick: () => {
+          fixJavaIssue()
+        },
       }
     } else {
       return {
@@ -123,9 +125,9 @@ export function useLaunchButton() {
         leftIcon: 'play_arrow',
         menu: javaIssue.value ? [javaIssue.value] : [],
         onClick: async () => {
-          await mutate().catch(() => { })
+          await mutate().catch(() => {})
           await fixInstanceFileIssue()
-          await launch()
+          launch()
           showLaunchStatusDialog(false)
         },
       }

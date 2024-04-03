@@ -3,7 +3,7 @@ import { Socket } from 'net'
 import { TlsOptions } from 'tls'
 import { Agent, buildConnector, Client, errors, Dispatcher } from 'undici'
 import { kClose, kDestroy } from 'undici/lib/core/symbols'
-import DispatcherBase from 'undici/lib/dispatcher/dispatcher-base'
+import DispatcherBase from 'undici/lib/dispatcher-base'
 import { URL } from 'url'
 import { buildHeaders } from './utils'
 
@@ -50,9 +50,6 @@ export class ProxyAgent extends DispatcherBase {
   private proxyHeader?: Record<string, string>
 
   private pConnect: buildConnector.connector
-  private _connect: buildConnector.connector
-  private requestTls?: buildConnector.BuildOptions
-  private proxyTls?: buildConnector.BuildOptions
 
   async setProxy(uri: URL, auth?: string) {
     const oldClient = this.proxyClient
@@ -71,11 +68,6 @@ export class ProxyAgent extends DispatcherBase {
     this.isProxyEnabled = enabled
   }
 
-  setConnectTimeout(timeout: number) {
-    this.pConnect = buildConnector({ timeout, ...this.proxyTls || {} })
-    this._connect = buildConnector({ timeout, ...this.requestTls || {} })
-  }
-
   constructor(opts: {
     controller: ProxySettingController
     factory: (connect: buildConnector.connector) => Agent
@@ -85,15 +77,13 @@ export class ProxyAgent extends DispatcherBase {
     super()
 
     opts.controller.add(this)
-    this.requestTls = opts.requestTls
-    this.proxyTls = opts.proxyTls
 
-    this.pConnect = buildConnector(opts.proxyTls)
-    this._connect = buildConnector(opts.requestTls)
+    this.pConnect = buildConnector(opts.requestTls)
+    const connector = buildConnector(opts.proxyTls)
 
     const connect = async (opts: any, callback: buildConnector.Callback) => {
       if (!this.isProxyEnabled || !this.proxyClient) {
-        this._connect(opts, callback)
+        connector(opts, callback)
         return
       }
       let requestedHost = opts.host
@@ -118,7 +108,7 @@ export class ProxyAgent extends DispatcherBase {
           return
         }
         const servername = opts.servername
-        this._connect({
+        connector({
           ...opts,
           servername,
           httpSocket: socket,

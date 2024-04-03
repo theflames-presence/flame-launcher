@@ -64,4 +64,3 @@ feedback:
   generateSaveAs: Save the report to
   generateReport: Generate Report
 </i18n>
-

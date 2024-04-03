@@ -3,6 +3,11 @@
     v-if="!data.fetching"
     class="setup flex flex-col overflow-auto"
   >
+    <!-- <v-card-title
+      class="elevation-3 text-lg font-bold"
+    >
+      <h2>{{ t('setup.title') }}{{ currentTitle }}</h2>
+    </v-card-title> -->
     <v-stepper
       v-model="data.step"
       class="non-moveable visible-scroll flex h-full flex-col overflow-auto bg-transparent"
@@ -39,7 +44,7 @@
         <v-divider />
 
         <v-stepper-step step="4">
-          {{ t('setup.account.name') }}
+          {{ t('setup.game.name') }}
         </v-stepper-step>
       </v-stepper-header>
 
@@ -51,6 +56,12 @@
           <SetLocale
             v-model="locale"
           />
+          <div class="flex-grow" />
+          <SetupFooter
+            next
+            :loading="data.loading"
+            @next="next"
+          />
         </v-stepper-content>
         <v-stepper-content
           class="h-full overflow-auto overflow-x-hidden pt-2"
@@ -61,6 +72,14 @@
             class="h-full overflow-y-auto px-4"
             :default-path="data.defaultPath"
             :drives="data.drives"
+          />
+
+          <SetupFooter
+            prev
+            next
+            :loading="data.loading"
+            @prev="prev"
+            @next="next"
           />
         </v-stepper-content>
         <v-stepper-content
@@ -74,27 +93,36 @@
             :default-path="data.defaultPath"
             :drives="data.drives"
           />
+
+          <SetupFooter
+            prev
+            next
+            :disabled="hasError"
+            :loading="data.loading"
+            @prev="prev"
+            @next="next"
+          />
         </v-stepper-content>
         <v-stepper-content
           class="h-full overflow-auto overflow-x-hidden pt-2"
           step="4"
         >
-          <SetupAccount
+          <SelectGame
             v-model="data.instancePath"
+            :default-path="data.minecraftPath"
+          />
+
+          <div class="flex-grow" />
+          <SetupFooter
+            prev
+            next
+            :loading="data.loading"
+            finish
+            @prev="prev"
+            @next="setup"
           />
         </v-stepper-content>
       </v-stepper-items>
-      <slot name="actions">
-        <SetupFooter
-          :prev="data.step !== 1"
-          next
-          :disabled="hasError"
-          :loading="data.loading"
-          :finish="data.step === 4"
-          @prev="prev"
-          @next="data.step === 4 ? setup() : next()"
-        />
-      </slot>
     </v-stepper>
   </v-card>
   <v-card
@@ -117,7 +145,7 @@ import { BaseServiceKey, Drive } from '@xmcl/runtime-api'
 import SetupAppearance from './SetupAppearance.vue'
 import SetDataRoot from './SetupDataRoot.vue'
 import SetupFooter from './SetupFooter.vue'
-import SetupAccount from './SetupAccount.vue'
+import SelectGame from './SetupInstance.vue'
 import SetLocale from './SetupLocale.vue'
 
 const emit = defineEmits(['ready'])

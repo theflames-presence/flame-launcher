@@ -217,9 +217,6 @@ diagnosis:
   incompatibleJava:
     message: Vous pouvez demander au launcher de le télécharger pour vous.
     name: La version java {javaVersion} ne convient pas à {version} !
-  instanceFiles:
-    description: L'installation de l'instance inclut {counts} fichiers.
-    title: Installation de l'instance incomplète
   invalidJava:
     message: Cliquez pour utiliser une autre installation Java pour lancer.
     name: Emplacement Java non valide.
@@ -1043,12 +1040,10 @@ resourcepack:
   incompatible: >-
     Format de pack de ressources incompatible ({format}). Fait pour {accept}.
     Actuel {actual}.
-  independent: L'instance utilise un dossier de pack de ressources indépendant
   manage: Gérer les packs de ressources
   name: Pack de Ressources | Packs de Ressources
   searchOnCurseforge: Rechercher {name} dans curseforge
   selected: Packs de ressources sélectionnés
-  shared: L'instance utilise le dossier du pack de ressources partagé
   showFile: Afficher le pack de ressources dans le dossier {file}
   showInCurseforge: Afficher {name} dans curseforge
   unselected: Packs de ressources désélectionnés
@@ -1325,7 +1320,6 @@ tag:
 task:
   cancelled: Annulé
   clear: Effacer les tâches terminées
-  connections: Les connexions de réseau
   empty: Aucune tâche en cours d'exécution
   failed: Échec
   manager: Gestionnaire des tâches

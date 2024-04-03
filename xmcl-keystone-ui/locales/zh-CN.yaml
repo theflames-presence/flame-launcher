@@ -218,8 +218,8 @@ diagnosis:
     message: 你可以选择自己让启动器帮你下载，或者自己下载
     name: 版本 {version} 可能不兼容 Java {javaVersion}!
   instanceFiles:
-    description: 实例安装包括 {counts} 个文件。
-    title: 实例安装未完成
+    description: 这可能是因为之前安装实例时没安装完
+    title: 实例文件缺失
   invalidJava:
     message: 请选择一个有效的 Java 路径.
     name: 当前 Java 路径已经失效
@@ -965,7 +965,6 @@ resourcepack:
   enable: 一共启用了 {count} 个资源包
   import: 导入资源包
   incompatible: 不兼容的资源包格式({format})。适用范围 {accept}。当前版本 {actual}。
-  independent: 实例使用独立资源包文件夹
   manage: 管理资源包
   name: 资源包 | 资源包
   searchHint: 搜索资源包
@@ -973,7 +972,6 @@ resourcepack:
   searchOnModrinth: '@:mod.searchOnModrinth'
   selectSearchHint: 查看选择的资源包
   selected: 已选资源包
-  shared: 实例使用共享资源包文件夹
   showFile: 在文件夹中显示 {file}
   showInCurseforge: 在 Curseforge 中显示 {name}
   unselected: 未选资源包
@@ -1157,10 +1155,6 @@ settingLabel:
   local: 实例配置
   localHint: 这个配置已被当前实例修改
 setup:
-  account:
-    description: 添加你常用的账号。如果你还没有账号，你可先跳过这步。
-    name: 添加游戏账号
-    skip: 先不登陆了
   appearance:
     name: '@:setting.appearance'
   dataRoot:
@@ -1221,7 +1215,6 @@ tag:
 task:
   cancelled: 已取消
   clear: 清除已完成的任务
-  connections: 网络连接
   empty: 目前没有运行中的任务
   failed: 失败
   manager: 任务管理器

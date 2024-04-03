@@ -44,8 +44,6 @@ export interface PoolStats {
 export interface BaseService {
   getNetworkStatus(): Promise<Record<string, PoolStats>>
 
-  destroyPool(origin: string): Promise<void>
-
   validateDataDictionary(path: string): Promise<undefined | 'noperm' | 'bad' | 'nondictionary' | 'exists'>
 
   getSessionId(): Promise<string>
