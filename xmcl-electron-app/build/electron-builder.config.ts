@@ -32,7 +32,7 @@ export const config = {
     to: '.',
     filter: 'package.json',
   }],
-  artifactName: 'xmcl-${version}-${platform}-${arch}.${ext}',
+  artifactName: 'fmcl-${version}-${platform}-${arch}.${ext}',
   appx: {
     displayName: 'Flame Launcher (Beta)',
     applicationId: 'CI010.XMCL',
@@ -43,7 +43,7 @@ export const config = {
     setBuildNumber: true,
   },
   dmg: {
-    artifactName: 'xmcl-${version}.${ext}',
+    artifactName: 'fmcl-${version}.${ext}',
     contents: [
       {
         x: 410,
@@ -93,7 +93,7 @@ export const config = {
     },
     category: 'Game',
     icon: 'icons/dark.icns',
-    artifactName: 'xmcl-${version}-${arch}.${ext}',
+    artifactName: 'fmcl-${version}-${arch}.${ext}',
     target: [
       { target: 'deb', arch: ['x64', 'arm64'] },
       { target: 'rpm', arch: ['x64', 'arm64'] },
