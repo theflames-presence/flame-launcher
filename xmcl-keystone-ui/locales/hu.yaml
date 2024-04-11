@@ -459,7 +459,7 @@ instances:
   addVanilla: Létrehozás vanilla-szerű Minecraftból
   addVanillaDescription: >-
     Importálás a közös .minecraft mappából. Ez duplikálja az eredeti
-    játékprofilt az FMCL-be.
+    játékprofilt az XMCL-be.
   choose: Játék kiválasztása
   importFolder: Importálás mappából
   importFolderDescription: Minecraft importálása a Launcherbe
@@ -1081,6 +1081,7 @@ save:
   importTitle: Mentés importálása
   manage: Mentések kezelése
   name: Mentés | Mentések
+  showDirectory: Mentés könyvtár megjelenítése
 screenshots:
   empty: Nincsenek képernyőképeid
   goto: Mappa megnyitása
@@ -1138,6 +1139,7 @@ setting:
     cover: Elfedje
     name: Illeszkedjen
   backgroundImageSelect: kiválasztás
+  backgroundMusic: Téma Háttérzene
   backgroundType: Háttérkép típusa
   backgroundTypeDescription: >-
     Speciális hatás megjelenítése a háttérben (Ez befolyásolhatja a
@@ -1176,7 +1178,7 @@ setting:
   developerModeDescription: Fejlesztői mód a saját írt mod tesztelésére irányul
   disableTelemetry: Telemetria kikapcsolása
   disableTelemetryDescription: >-
-    Az FMCL összegyűjti a játékindítási és a felhasználói bejelentkezési
+    Az XMCL összegyűjti a játékindítási és a felhasználói bejelentkezési
     eseményeket.
   enableDiscord: Discord státusz engedélyezése
   enableDiscordDescription: Ez folyamatosan frissíti az launcher állapotát a discordra.
@@ -1230,6 +1232,12 @@ setting:
     dark: Sötét téma
     light: Világos téma
     system: Rendszer téma használata
+  themeFont: Betűtípus
+  themeFontDescription: Módosítsa az indító betűtípusát.
+  themeResetFont: Betűtípus visszaállítása
+  themeSelectFont: Válassza a Betűtípus lehetőséget
+  themeShare: Téma megosztása
+  themeShareDescription: Megoszthatja a témát a barátjával.
   update: Frissítés
   useBmclAPI: BMCL API használata
   useBmclAPIDescription: >-
@@ -1237,6 +1245,7 @@ setting:
     tartózkodsz. (Ez nem befolyásolja, ha nem a kínai kontinensen tartózkodik.)
   useProxy: HTTP Proxy
   useProxyDescription: A http-kérés proxy-kiszolgálójának címe
+  viewBackgroundMusic: Zenék megtekintése
 settingLabel:
   global: Globális
   globalHint: Ez a beállítás követi a globális beállítást
@@ -1247,7 +1256,7 @@ setup:
     name: '@:setting.appearance'
   dataRoot:
     description: >-
-      Az adatgyökér nem egy közös .minecraft könyvtár. Mivel az FMCL adatok
+      Az adatgyökér nem egy közös .minecraft könyvtár. Mivel az XMCL adatok
       könyvtárszerkezet különbözik a vanilla könyvtárszerkezettől, nem
       javasoljuk, hogy a a közös .minecraft könyvtárat adatgyökérként használni.
     drives: Ajánlott helyek
@@ -1330,6 +1339,10 @@ task:
   nTaskRunning: '{count} folyamat fut'
   name: Folyamat | Folyamatok
   pause: Szüneteltetés
+theme:
+  selectImage: Válassza a Kép lehetőséget
+  selectMusic: Válassza a Zene lehetőséget
+  selectVideo: Válassza a Videó lehetőséget
 title: Flame Launcher
 transportType:
   host: Kiszolgáló jelölt

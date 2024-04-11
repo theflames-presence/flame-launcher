@@ -30,7 +30,7 @@ export async function mapLocalPort(natService: NatService, ip: string, priv: num
   }] as UpnpMapOptions[]
 
   const currentMappings = await natService.getMappings()
-  const existedMappings = currentMappings.filter(m => m.description.indexOf('FMCL Multiplayer') !== -1 &&
+  const existedMappings = currentMappings.filter(m => m.description.indexOf('XMCL Multiplayer') !== -1 &&
     m.private.port === priv &&
     m.private.host === ip &&
     m.public.port === pub &&

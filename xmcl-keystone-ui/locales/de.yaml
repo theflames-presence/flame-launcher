@@ -1123,6 +1123,7 @@ save:
   importTitle: Importieren einer Speicherung
   manage: Verwaltung der Reservate
   name: Speichern | Speichern
+  showDirectory: Speicherverzeichnis anzeigen
 screenshots:
   empty: Sie haben keine Bildschirmfotos
   goto: Öffnen Sie den Ordner
@@ -1181,6 +1182,7 @@ setting:
     cover: Trimmen
     name: Fit
   backgroundImageSelect: Wählen Sie
+  backgroundMusic: Thematische Hintergrundmusik
   backgroundType: Hintergrund Typ
   backgroundTypeDescription: >-
     Einen speziellen Effekt auf dem Hintergrund anzeigen (kann die Leistung
@@ -1280,6 +1282,12 @@ setting:
     dark: Dunkles Thema
     light: Thema Licht
     system: Verwenden Sie das Systemthema
+  themeFont: Schriftart
+  themeFontDescription: Ändern Sie die Schriftart des Launchers.
+  themeResetFont: Schriftart zurücksetzen
+  themeSelectFont: Wählen Sie Schriftart aus
+  themeShare: Thema teilen
+  themeShareDescription: Sie können das Thema mit Ihrem Freund teilen.
   update: Update
   useBmclAPI: Verwenden Sie die BMCL-API
   useBmclAPIDescription: >-
@@ -1288,6 +1296,7 @@ setting:
      (Funktioniert nicht, wenn Sie sich nicht auf dem chinesischen Festland befinden)
   useProxy: HTTP-Proxy
   useProxyDescription: Proxy-Server-Adresse für http-Anfrage
+  viewBackgroundMusic: Musik anzeigen
 settingLabel:
   global: Global
   globalHint: Diese Einstellung entspricht der globalen Einstellung
@@ -1346,7 +1355,7 @@ setup:
     language: Sprache.
     name: Sprache einstellen
   path: Aktueller Pfad
-  title: Willkommen beim X Minecraft Launcher. Bevor wir beginnen, brauchen wir Sie
+  title: Willkommen beim Flame Launcher. Bevor wir beginnen, brauchen wir Sie
 shaderPack:
   deletion: Shader löschen
   deletionHint: >-
@@ -1381,6 +1390,10 @@ task:
   nTaskRunning: 'Begonnene Aufgaben: {count}'
   name: Aufgaben Aufgabenя
   pause: Pause
+theme:
+  selectImage: Bild auswählen
+  selectMusic: Wählen Sie Musik
+  selectVideo: Wählen Sie Video
 title: Flame Launcher
 transportType:
   host: Gastgeber-Kandidat

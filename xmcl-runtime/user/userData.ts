@@ -64,8 +64,6 @@ function migrateUserProfile(userProfile: UserProfileCompatible): UserProfile | u
       output.authority = AUTHORITY_MOJANG
     } else if (userProfile.authService === 'offline') {
       output.authority = AUTHORITY_DEV
-    } else if (userProfile.authService === 'littleskin.cn') {
-      output.authority = 'https://littleskin.cn/api/yggdrasil'
     } else if (userProfile.authService === 'authserver.ely.by') {
       output.authority = 'https://authserver.ely.by/api/authlib-injector'
     } else {

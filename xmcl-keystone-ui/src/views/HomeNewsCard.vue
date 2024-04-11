@@ -62,11 +62,11 @@ const nav = () => {
 
 .container {
   height: 100%;
-  background-color: rgba(19, 2, 41, 0);
+  background-color: rgba(0, 0, 0, 0.0);
 }
 
 .container.on-hover {
-  background-color: rgba(66, 1, 1, 0.5) !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
 }
 
 </style>
