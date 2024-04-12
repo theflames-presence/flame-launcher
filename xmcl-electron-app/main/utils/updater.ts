@@ -144,9 +144,9 @@ export class ElectronUpdater implements LauncherAppUpdater {
       body: result.body,
       date: result.published_at,
       files: result.assets.map((a: any) => ({ url: a.browser_download_url, name: a.name })),
-      newUpdate: true,
+      newUpdate: false,
       useAutoUpdater: false,
-      incremental: true,
+      incremental: false,
     }
     updateInfo.newUpdate = `v${app.version}` !== updateInfo.name
     const platformString = app.platform.os === 'windows' ? 'win' : app.platform.os === 'osx' ? 'mac' : 'linux'
