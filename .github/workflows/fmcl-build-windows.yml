@@ -22,38 +22,31 @@ jobs:
 
 
     steps:
-
-    - name: Pnpm
-
-      run: npm install -g pnpm
-      
-    - name: Clone Repository
-      run: git clone --recurse-submodules https://github.com/aislxflames/flame-launcher C:\Users\runneradmin\Documents\flame-launcher
-
-    - name: Install Dependencies
-      working-directory: C:\Users\runneradmin\Documents\flame-launcher
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - uses: pnpm/action-setup@v2.0.1
+      with:
+        version: 8.3.0
+    - name: Fix node-gyp and Python
+      run: python3 -m pip install packaging setuptools
+    - name: Use Node.js 16
+      uses: actions/setup-node@v2
+      with:
+        node-version: 16
+        cache: 'pnpm'
+    - name: Install
       run: pnpm install
+    - name: Build
+      run: |
+        pnpm run --prefix xmcl-keystone-ui build
+        pnpm run --prefix xmcl-electron-app build:all
+      env:
+        BUILD_NUMBER: ${{ secrets.FMCL_VERSION }}
+        NODE_OPTIONS: --max-old-space-size=32768
+        NODE_ENV: production
+        CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_TOKEN }}
 
-    - name: Build Renderer
-      working-directory: C:\Users\runneradmin\Documents\flame-launcher
-      run: pnpm build:renderer
-      
-    - name: Build All
-      working-directory: C:\Users\runneradmin\Documents\flame-launcher
-      run: pnpm build:all
-
-    - name: FMCL-x64-Upload
-      uses: actions/upload-artifact@v3
-      with:
-        name: FMCL-WINDOWS-x64-v${{ secrets.FMCL_VERSION }}
-        path: C:\Users\runneradmin\Documents\flame-launcher\xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
-      
-    - name: FMCL-x32-Upload
-      uses: actions/upload-artifact@v3
-      with:
-          name: FMCL-WINDOWS-x32-v${{ secrets.FMCL_VERSION }}
-          path: C:\Users\runneradmin\Documents\flame-launcher\xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-ia32.zip   
-    
     - name: Create Github Release
       id: create-new-release
       uses: actions/create-release@v1
@@ -70,7 +63,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-new-release.outputs.upload_url }}
-        asset_path: C:\Users\runneradmin\Documents\flame-launcher\xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
+        asset_path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
         asset_name: fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
         asset_content_type: application/zip
     
@@ -82,7 +75,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-new-release.outputs.upload_url }}
-        asset_path: C:\Users\runneradmin\Documents\flame-launcher\xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-ia32.zip
+        asset_path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-ia32.zip
         asset_name: fmcl-${{ secrets.FMCL_VERSION }}-win32-ia32.zip
         asset_content_type: application/zip
     
