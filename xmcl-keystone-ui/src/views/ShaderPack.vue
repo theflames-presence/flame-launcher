@@ -8,6 +8,7 @@
       dragover,
     }"
     :loading="loading"
+    @load="loadMoreModrinth"
   >
     <template #item="{ item, hasUpdate, checked, selectionMode, selected, on }">
       <v-subheader
@@ -57,12 +58,10 @@
         :installed="selectedItem.files?.map(i => i.resource) || []"
         :runtime="runtime"
       />
-      <Hint
+      <MarketRecommendation
         v-else
-        icon="playlist_add"
-        :text="
-          t('shaderPack.selectSearchHint')"
-        class="h-full"
+        modrinth="shader"
+        @modrinth="modrinthCategories.push($event.name)"
       />
     </template>
     <!-- <DeleteDialog
@@ -101,6 +100,7 @@ import { ProjectEntry, ProjectFile } from '@/util/search'
 import { Resource, ResourceDomain, ResourceServiceKey } from '@xmcl/runtime-api'
 import ShaderPackDetailResource from './ShaderPackDetailResource.vue'
 import ShaderPackItem from './ShaderPackItem.vue'
+import MarketRecommendation from '@/components/MarketRecommendation.vue'
 
 const {
   modrinthError,
@@ -111,9 +111,13 @@ const {
   shaderProjectFiles,
   shaderLoaderFilters,
   modrinthCategories,
+  loadMoreModrinth,
   gameVersion,
+  effect,
 } = injection(kShaderPackSearch)
 const { runtime, path } = injection(kInstance)
+
+effect()
 
 const all = computed(() => {
   if (networkOnly.value) return items.value

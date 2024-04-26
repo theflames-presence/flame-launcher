@@ -243,6 +243,8 @@ export interface File {
 
   hashes: FileHash[]
 
+  fileFingerprint: number
+
   /**
    * The date of this file uploaded
    */
@@ -520,6 +522,38 @@ export interface CurseforgeClientOptions {
   baseUrl?: string
 }
 
+export interface FingerprintMatch {
+  /**
+   * The mod id
+   */
+  id: number
+  file: File
+  latestFiles: File[]
+}
+export interface FingerprintsMatchesResult {
+  data: {
+    isCacheBuilt: boolean
+    exactMatches: FingerprintMatch[]
+    exactFingerprints: number[]
+    partialMatches: FingerprintMatch[]
+    partialFingerprints: object
+    unmatchedFingerprints: number[]
+  }
+}
+
+export interface FingerprintFuzzyMatch {
+  id: number
+  file: File
+  latestFiles: File[]
+  fingerprints: number[]
+}
+
+export interface FingerprintFuzzyMatchResult {
+  data: {
+    fuzzyMatches: FingerprintFuzzyMatch[]
+  }
+}
+
 export class CurseforgeApiError extends Error {
   constructor(readonly url: string, readonly status: number, readonly body: string) {
     super(`Fail to fetch curseforge api ${url}. Status=${status}. ${body}`)
@@ -751,6 +785,46 @@ export class CurseforgeV1Client {
       throw new CurseforgeApiError(url.toString(), response.status, await response.text())
     }
     const result = await response.json() as { data: string }
+    return result.data
+  }
+
+  async getFingerprintsMatchesByGameId(gameId: number, fingerprints: number[], signal?: AbortSignal) {
+    const url = new URL(this.baseUrl + `/v1/fingerprints/${gameId}`)
+    const response = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({ fingerprints }),
+      headers: {
+        ...this.headers,
+        'content-type': 'application/json',
+        accept: 'application/json',
+      },
+      dispatcher: this.dispatcher,
+      signal,
+    })
+    if (response.status !== 200) {
+      throw new CurseforgeApiError(url.toString(), response.status, await response.text())
+    }
+    const result = await response.json() as FingerprintsMatchesResult
+    return result.data
+  }
+
+  async getFingerprintsFuzzyMatchesByGameId(gameId: number, fingerprints: number[], signal?: AbortSignal) {
+    const url = new URL(this.baseUrl + `/v1/fingerprints/fuzzy/${gameId}`)
+    const response = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({ fingerprints }),
+      headers: {
+        ...this.headers,
+        'content-type': 'application/json',
+        accept: 'application/json',
+      },
+      dispatcher: this.dispatcher,
+      signal,
+    })
+    if (response.status !== 200) {
+      throw new CurseforgeApiError(url.toString(), response.status, await response.text())
+    }
+    const result = await response.json() as FingerprintFuzzyMatchResult
     return result.data
   }
 }

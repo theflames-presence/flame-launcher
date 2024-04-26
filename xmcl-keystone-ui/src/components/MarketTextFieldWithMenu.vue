@@ -51,8 +51,12 @@
         {{ t('minecraftVersion.name') }}
       </v-subheader>
       <v-chip-group
+        ref="chipGroup"
         v-model="gameVersionModel"
-        column
+        center-active
+        show-arrows
+        mandatory
+        @wheel.native.stop="onWheel"
       >
         <v-chip
           v-for="v of versionIds"
@@ -80,21 +84,12 @@
         column
         multiple
       >
-        <v-chip
+        <ModrinthCategoryChip
           v-for="tag in _modrinthCategories"
           :key="tag.name"
-          filter
+          :tag="tag"
           :disabled="!enableModrinth"
-          outlined
-          label
-        >
-          <v-avatar
-            v-if="tag.icon"
-            left
-            v-html="tag.icon"
-          />
-          {{ t('modrinth.categories.' + tag.name) }}
-        </v-chip>
+        />
       </v-chip-group>
       <template v-if="curseforgeCategoryFilter">
         <v-subheader class="flex">
@@ -113,24 +108,12 @@
           column
           :disabled="!enableCurseforge"
         >
-          <v-chip
+          <CurseforgeCategoryChip
             v-for="c of curseforgeCategories"
             :key="c.id"
-            filter
             :disabled="!enableCurseforge"
-            outlined
-            label
-          >
-            <v-avatar
-              left
-            >
-              <v-img
-                :src="c.iconUrl"
-              />
-            </v-avatar>
-
-            {{ tCategory(c.name) }}
-          </v-chip>
+            :value="c"
+          />
         </v-chip-group>
       </template>
     </v-card>
@@ -138,14 +121,16 @@
 </template>
 <script setup lang="ts">
 import MarketTextField from '@/components/MarketTextField.vue'
-import { useCurseforgeCategories, useCurseforgeCategoryI18n } from '@/composables/curseforge'
+import { kCurseforgeCategories, useCurseforgeCategoryI18n } from '@/composables/curseforge'
 import { kInstance } from '@/composables/instance'
-import { useModrinthTags } from '@/composables/modrinth'
+import { kModrinthTags } from '@/composables/modrinth'
 import { useSortByItems } from '@/composables/sortBy'
 import { useMinecraftVersions } from '@/composables/version'
 import { vSharedTooltip } from '@/directives/sharedTooltip'
 import { injection } from '@/util/inject'
 import { ModsSearchSortField } from '@xmcl/curseforge'
+import ModrinthCategoryChip from './ModrinthCategoryChip.vue'
+import CurseforgeCategoryChip from './CurseforgeCategoryChip.vue'
 
 const props = defineProps<{
   curseforgeCategory?: number | undefined
@@ -179,7 +164,7 @@ const { versions } = useMinecraftVersions()
 const focused = ref(false)
 provide('focused', focused)
 
-const { refresh, refreshing, categories: cCategories } = useCurseforgeCategories()
+const { refresh, refreshing, categories: cCategories } = injection(kCurseforgeCategories)
 const curseforgeCategories = computed(() => {
   if (!props.curseforgeCategoryFilter) return []
   const result = cCategories.value
@@ -188,7 +173,7 @@ const curseforgeCategories = computed(() => {
   return result.filter(r => r.parentCategoryId === parent?.id)
 })
 
-const { refreshing: refreshingTag, categories: mCategories, error: tagError } = useModrinthTags()
+const { refreshing: refreshingTag, categories: mCategories, error: tagError } = injection(kModrinthTags)
 const _modrinthCategories = computed(() => {
   const result = mCategories.value
   if (!result) return []
@@ -200,15 +185,7 @@ const { runtime } = injection(kInstance)
 function filterGameVersion(v: string) {
   if (v.indexOf('-') !== -1) return false
   if (!v.startsWith('1.')) return false
-  const current = props.gameVersion || runtime.value.minecraft
-  const minor = Number(current.split('.')[1])
-  // minor match
-  if (minor.toString() === v.split('.')[1]) return true
-
-  // minor +1 or -1
-  if (minor + 1 === Number(v.split('.')[1]) || minor - 1 === Number(v.split('.')[1])) return true
-
-  return false
+  return true
 }
 const versionIds = computed(() => versions.value.map(v => v.id).filter(filterGameVersion))
 
@@ -255,4 +232,24 @@ const onClear = () => {
 
 const sortByItems = useSortByItems()
 
+const chipGroup = ref(null as any)
+const onWheel = (e: WheelEvent) => {
+  if (e.deltaY > 0) {
+    chipGroup.value?.onAffixClick('next')
+  } else {
+    chipGroup.value?.onAffixClick('prev')
+  }
+  e.preventDefault()
+  e.stopPropagation()
+}
+
 </script>
+
+<style>
+.v-slide-group__prev {
+  min-width: 28px;
+}
+.v-slide-group__next {
+  min-width: 28px;
+}
+</style>

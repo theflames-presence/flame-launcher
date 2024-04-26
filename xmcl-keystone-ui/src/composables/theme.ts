@@ -1,9 +1,10 @@
 import { useStyleTag } from '@vueuse/core'
 import { MediaData, ThemeData, ThemeServiceKey } from '@xmcl/runtime-api'
-import { InjectionKey, computed } from 'vue'
+import { InjectionKey, computed, set } from 'vue'
 import { Framework } from 'vuetify'
 import { useLocalStorageCacheStringValue } from './cache'
 import { useService } from './service'
+import debounce from 'lodash.debounce'
 
 export const kTheme: InjectionKey<ReturnType<typeof useTheme>> = Symbol('theme')
 
@@ -50,6 +51,7 @@ export interface UIThemeData {
   backgroundMusic: MediaData[]
   backgroundMusicPlayOrder?: 'sequential' | 'shuffle'
   backgroundImage?: MediaData // image or video
+  backgroundColorOverlay?: boolean
   backgroundType?: BackgroundType
   backgroundVolume?: number
   backgroundImageFit: 'cover' | 'contain'
@@ -60,9 +62,7 @@ export interface UIThemeData {
   blurAppBar?: number
 }
 
-export function useTheme(framework: Framework) {
-  const { addMedia, removeMedia, exportTheme, importTheme } = useService(ThemeServiceKey)
-
+export function useTheme(framework: Framework, { addMedia, removeMedia, exportTheme, importTheme } = useService(ThemeServiceKey)) {
   const selectedThemeName = useLocalStorageCacheStringValue('selectedThemeName', 'default' as string)
   const darkTheme = useLocalStorageCacheStringValue<'dark' | 'light' | 'system'>('darkTheme', 'system')
   const currentTheme = ref<UIThemeData>({
@@ -92,8 +92,14 @@ export function useTheme(framework: Framework) {
       lightAccentColor: '#82B1FF',
       lightCardColor: '#e0e0e080',
     },
+    backgroundColorOverlay: false,
+    backgroundVolume: 1,
+    backgroundImage: undefined,
     backgroundImageFit: 'cover',
+    font: undefined,
     blur: 4,
+    blurSidebar: 0,
+    blurAppBar: 0,
   })
   const isDark = computed(() => {
     if (darkTheme.value === 'system') {
@@ -121,6 +127,13 @@ export function useTheme(framework: Framework) {
     },
   })
   const backgroundImage = computed(() => currentTheme.value?.backgroundImage)
+  const backgroundColorOverlay = computed({
+    get() { return currentTheme.value?.backgroundColorOverlay ?? false },
+    set(v: boolean) {
+      currentTheme.value.backgroundColorOverlay = v
+      writeTheme(currentTheme.value.name, currentTheme.value)
+    },
+  })
   const backgroundMusic = computed(() => currentTheme.value?.backgroundMusic ?? [])
   const backgroundImageFit = computed({
     get() { return currentTheme.value.backgroundImageFit },
@@ -368,12 +381,16 @@ export function useTheme(framework: Framework) {
     return theme
   }
 
-  function writeTheme(name: string, theme: UIThemeData) {
+  const flushWrite = debounce((name: string, theme: UIThemeData) => {
     const themes = localStorage.getItem('themes')
     const parsed = themes ? JSON.parse(themes) as Record<string, UIThemeData> : {}
     parsed[name] = theme
     console.log(theme)
     localStorage.setItem('themes', JSON.stringify(parsed))
+  }, 800)
+
+  function writeTheme(name: string, theme: UIThemeData) {
+    flushWrite(name, theme)
   }
 
   function resetDarkToDefault() {
@@ -434,7 +451,7 @@ export function useTheme(framework: Framework) {
     if (!theme) return
     const m = theme.backgroundMusic?.splice(index, 1)
     if (m) {
-      await removeMedia(m[0].url)
+      await removeMedia(m[0].url).catch(() => { })
     }
     writeTheme(theme.name, theme)
   }
@@ -446,9 +463,9 @@ export function useTheme(framework: Framework) {
     if (!theme) return
     const old = theme.backgroundImage
     if (old) {
-      await removeMedia(old.url)
+      await removeMedia(old.url).catch(() => { })
     }
-    theme.backgroundImage = media
+    set(theme, 'backgroundImage', media)
     writeTheme(theme.name, theme)
   }
 
@@ -456,7 +473,7 @@ export function useTheme(framework: Framework) {
     const theme = currentTheme.value
     if (!theme) return
     if (theme.backgroundImage) {
-      await removeMedia(theme.backgroundImage.url)
+      await removeMedia(theme.backgroundImage.url).catch(() => { })
       theme.backgroundImage = undefined
       writeTheme(theme.name, theme)
     }
@@ -478,7 +495,7 @@ export function useTheme(framework: Framework) {
     const theme = currentTheme.value
     if (!theme) return
     if (theme.font) {
-      await removeMedia(theme.font.url)
+      await removeMedia(theme.font.url).catch(() => { })
       theme.font = undefined
       writeTheme(theme.name, theme)
     }
@@ -520,6 +537,9 @@ export function useTheme(framework: Framework) {
     }
     if (theme.blurAppBar) {
       settings.blurAppBar = theme.blurAppBar
+    }
+    if (theme.backgroundColorOverlay) {
+      settings.backgroundColorOverlay = theme.backgroundColorOverlay
     }
     settings.dark = isDark.value
     const serialized: ThemeData = {
@@ -575,6 +595,12 @@ export function useTheme(framework: Framework) {
     if (data.settings?.blurAppBar) {
       theme.blurAppBar = data.settings.blurAppBar as number
     }
+    if (data.settings?.backgroundColorOverlay) {
+      theme.backgroundColorOverlay = data.settings?.backgroundColorOverlay as boolean
+    }
+    if (data.assets.font) {
+      theme.font = data.assets.font as MediaData
+    }
     if (data.settings?.dark) {
       darkTheme.value = data.settings.dark ? 'dark' : 'light'
     } else {
@@ -615,12 +641,17 @@ export function useTheme(framework: Framework) {
     --color-success: ${successColor.value};
     --color-warning: ${warningColor.value};
     --color-border: ${isDark.value ? 'hsla(0, 0%, 100%, .12)' : 'hsla(0, 0%, 100%, .12)'};
+    --color-highlight-bg: ${isDark.value ? 'hsla(0, 0%, 100%, .12)' : 'hsla(0, 0%, 100%, .12)'};
+    --color-secondary-text: ${isDark.value ? 'rgba(156, 163, 175, 1)' : 'rgba(75, 85, 99, 1)'};
   }
 
   .v-application {
     background-color: ${backgroundColor.value};
   }
   `))
+
+  const backgroundImageOverride = ref('')
+  const backgroundImageOverrideOpacity = ref(1)
 
   return {
     isDark,
@@ -637,6 +668,9 @@ export function useTheme(framework: Framework) {
     darkTheme,
     exportTheme: _exportTheme,
     importTheme: _importTheme,
+    backgroundImageOverride,
+    backgroundImageOverrideOpacity,
+    backgroundColorOverlay,
 
     appBarColor,
     sideBarColor,

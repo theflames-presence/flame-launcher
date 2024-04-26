@@ -28,7 +28,7 @@ export const pluginGFW: LauncherAppPlugin = (app) => {
         headersTimeout: 5000,
       }).then(() => 'yandex' as const, () => 'global' as const),
     ])
-    logger.log(networkEnv ? 'Detected current in India mainland.' : 'Detected current NOT in India mainland.')
+    logger.log(networkEnv ? 'Detected current in China mainland.' : 'Detected current NOT in China mainland.')
     taobao.close()
     google.close()
     return networkEnv
