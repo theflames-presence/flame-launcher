@@ -8,6 +8,7 @@
     }"
     :error="modrinthError"
     :loading="loading"
+    @load="onLoad"
   >
     <template #item="{ item, hasUpdate, checked, selectionMode, selected, on }">
       <v-subheader
@@ -38,14 +39,15 @@
         class="h-full"
       />
       <MarketProjectDetailModrinth
-        v-else-if="selectedItem && (selectedItem.modrinth || selectedModrinthId)"
-        :modrinth="selectedItem.modrinth"
+        v-else-if="selectedItem?.modrinth || selectedModrinthId"
+        :modrinth="selectedItem?.modrinth"
         :project-id="selectedModrinthId"
-        :installed="selectedItem.installed"
+        :installed="selectedItem?.installed || getInstalledModrinth(selectedItem?.modrinth?.project_id || selectedModrinthId)"
         :game-version="gameVersion"
         :loaders="modrinthLoaders"
         :categories="modrinthCategories"
         :all-files="files"
+        :curseforge="selectedItem?.curseforge?.id || selectedCurseforgeId"
         @install="onInstall"
         @uninstall="onUninstall"
         @enable="onEnable"
@@ -53,14 +55,15 @@
         @category="toggleCategory"
       />
       <MarketProjectDetailCurseforge
-        v-else-if="selectedItem && selectedCurseforgeId"
-        :curseforge="selectedItem.curseforge"
-        :curseforge-id="selectedItem.curseforge?.id || selectedCurseforgeId"
-        :installed="selectedItem.installed"
+        v-else-if="selectedItem?.curseforge || selectedCurseforgeId"
+        :curseforge="selectedItem?.curseforge"
+        :curseforge-id="Number(selectedItem?.curseforge?.id || selectedCurseforgeId)"
+        :installed="selectedItem?.installed || getInstalledCurseforge(Number(selectedItem?.curseforge?.id || selectedCurseforgeId))"
         :loaders="[]"
         :game-version="gameVersion"
         :category="curseforgeCategory"
         :all-files="files"
+        :modrinth="selectedItem?.modrinth?.project_id || selectedModrinthId"
         @install="onInstall"
         @uninstall="onUninstall"
         @enable="onEnable"
@@ -73,19 +76,19 @@
         :installed="selectedItem.installed"
         :runtime="runtime"
       />
-      <Hint
+      <MarketRecommendation
         v-else
-        icon="playlist_add"
-        :text="
-          t('resourcepack.selectSearchHint')"
-        class="h-full"
+        curseforge="texture-packs"
+        modrinth="resourcepack"
+        @modrinth="modrinthCategories.push($event.name)"
+        @curseforge="curseforgeCategory = $event.id"
       />
     </template>
-    <DeleteDialog
+    <SimpleDialog
       :title="t('resourcepack.delete.title')"
     >
       {{ t('resourcepack.delete.content') }}
-    </DeleteDialog>
+    </SimpleDialog>
   </MarketBase>
 </template>
 
@@ -110,7 +113,8 @@ import { ProjectEntry, ProjectFile } from '@/util/search'
 import { Resource, ResourceDomain, ResourceServiceKey } from '@xmcl/runtime-api'
 import ResourcePackDetailResource from './ResourcePackDetailResource.vue'
 import ResourcePackItem from './ResourcePackItem.vue'
-import DeleteDialog from '@/components/DeleteDialog.vue'
+import SimpleDialog from '@/components/SimpleDialog.vue'
+import MarketRecommendation from '@/components/MarketRecommendation.vue'
 
 const { runtime, path } = injection(kInstance)
 const { files, enable, disable, insert } = injection(kInstanceResourcePacks)
@@ -122,10 +126,16 @@ const {
   curseforgeCategory,
   enabled,
   disabled,
+  loadMoreCurseforge,
+  loadMoreModrinth,
   keyword,
   networkOnly,
   gameVersion,
+  effect,
 } = injection(kResourcePackSearch)
+
+// Register the resource pack search effect
+effect()
 
 const isLocalFile = (f: any): f is ProjectEntry<InstanceResourcePack> => !!f
 
@@ -188,6 +198,11 @@ const onDrop = (item: ResourcePackProject, id: string) => {
   }
 }
 
+const onLoad = () => {
+  loadMoreCurseforge()
+  loadMoreModrinth()
+}
+
 const toggleCategory = useToggleCategories(modrinthCategories)
 
 // Reset all filter
@@ -246,6 +261,13 @@ const onInstallProject = useProjectInstall(
   curseforgeInstaller,
   modrinthInstaller,
 )
+
+const getInstalledModrinth = (projectId: string) => {
+  return files.value.filter((m) => m.modrinth?.projectId === projectId)
+}
+const getInstalledCurseforge = (modId: number | undefined) => {
+  return files.value.filter((m) => m.curseforge?.projectId === modId)
+}
 
 </script>
 

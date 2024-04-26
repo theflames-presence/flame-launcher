@@ -32,18 +32,21 @@ export interface LauncherApp {
   on(channel: 'engine-ready', listener: () => void): this
   on(channel: 'root-migrated', listener: (newRoot: string) => void): this
   on(channel: 'service-call-end', listener: (serviceName: string, serviceMethod: string, duration: number, success: boolean) => void): this
+  on(channel: 'service-state-init', listener: (stateKey: string) => void): this
 
   once(channel: 'app-booted', listener: (manifest: InstalledAppManifest) => void): this
   once(channel: 'window-all-closed', listener: () => void): this
   once(channel: 'engine-ready', listener: () => void): this
   once(channel: 'root-migrated', listener: (newRoot: string) => void): this
   once(channel: 'service-call-end', listener: (serviceName: string, serviceMethod: string, duration: number, success: boolean) => void): this
+  once(channel: 'service-state-init', listener: (stateKey: string) => void): this
 
   emit(channel: 'app-booted', manifest: InstalledAppManifest): this
   emit(channel: 'service-call-end', serviceName: string, serviceMethod: string, duration: number, success: boolean): this
   emit(channel: 'window-all-closed'): boolean
   emit(channel: 'engine-ready'): boolean
   emit(channel: 'root-migrated', root: string): this
+  emit(channel: 'service-state-init', stateKey: string): this
 }
 
 export interface LogEmitter extends EventEmitter {
@@ -85,7 +88,7 @@ export class LauncherApp extends EventEmitter {
   readonly server: Server = createServer((req, res) => {
     this.protocol.handle({
       method: req.method,
-      url: new URL(req.url ?? '/', 'fmcl://launcher'),
+      url: new URL(req.url ?? '/', 'xmcl://launcher'),
       headers: req.headers,
       body: req,
     }).then((resp) => {
@@ -236,7 +239,7 @@ export class LauncherApp extends EventEmitter {
   }
 
   /**
-   * Determine the root of the project. By default, it's %APPDATA%/fmcl
+   * Determine the root of the project. By default, it's %APPDATA%/xmcl
    */
   protected async setup() {
     process.on('SIGINT', () => {
@@ -251,13 +254,13 @@ export class LauncherApp extends EventEmitter {
 
     this.logger.log(`Boot from ${this.appDataPath}`)
 
-    // register fmcl protocol
-    if (!this.host.isDefaultProtocolClient('fmcl')) {
-      const result = this.host.setAsDefaultProtocolClient('fmcl')
+    // register xmcl protocol
+    if (!this.host.isDefaultProtocolClient('xmcl')) {
+      const result = this.host.setAsDefaultProtocolClient('xmcl')
       if (result) {
-        this.logger.log('Successfully register the fmcl protocol')
+        this.logger.log('Successfully register the xmcl protocol')
       } else {
-        this.logger.log('Fail to register the fmcl protocol')
+        this.logger.log('Fail to register the xmcl protocol')
       }
     }
 
@@ -310,14 +313,14 @@ export class LauncherApp extends EventEmitter {
           }
         }
         this.logger.log('Didn\'t find --url options')
-        const protocolOption = process.argv.find(a => a.startsWith('fmcl://'))
+        const protocolOption = process.argv.find(a => a.startsWith('xmcl://'))
         if (protocolOption) {
           const u = new URL(protocolOption)
           if (u.host === 'launcher' && u.pathname === '/app' && u.searchParams.has('url')) {
             return u.searchParams.get('url') as string
           }
         }
-        this.logger.log('Didn\'t find fmcl:// protocol')
+        this.logger.log('Didn\'t find xmcl:// protocol')
       }
     }
     this.logger.log('Didn\'t find the start up url, try to load from config file.')

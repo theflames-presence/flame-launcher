@@ -7,7 +7,7 @@ import { kModrinthInstaller } from '@/composables/modrinthInstaller'
 import { useModrinthProject } from '@/composables/modrinthProject'
 import { useModrinthProjectDetailData, useModrinthProjectDetailVersions } from '@/composables/modrinthProjectDetailData'
 import { getModrinthVersionModel, useModrinthTask } from '@/composables/modrinthVersions'
-import { useSWRVModel } from '@/composables/swrv'
+import { useLoading, useSWRVModel } from '@/composables/swrv'
 import { kSWRVConfig } from '@/composables/swrvConfig'
 import { injection } from '@/util/inject'
 import { ProjectFile } from '@/util/search'
@@ -36,8 +36,9 @@ const emit = defineEmits<{
 
 // Project
 const projectId = computed(() => props.projectId)
-const { project, refreshing: loading, refresh } = useModrinthProject(projectId)
+const { project, isValidating: isValidatingModrinth, refresh } = useModrinthProject(projectId)
 const model = useModrinthProjectDetailData(projectId, project, computed(() => props.modrinth))
+const loading = useLoading(isValidatingModrinth, project, projectId)
 
 // Versions
 const { data: versions, isValidating: loadingVersions } = useSWRVModel(
@@ -150,6 +151,9 @@ const { push, currentRoute } = useRouter()
 const onOpenDependency = (dep: ProjectDependency) => {
   push({ query: { ...currentRoute.query, id: `modrinth:${dep.id}` } })
 }
+
+const curseforgeId = computed(() => props.curseforge || props.allFiles.find(v => v.curseforge?.projectId)?.curseforge?.projectId)
+
 </script>
 
 <template>
@@ -166,7 +170,8 @@ const onOpenDependency = (dep: ProjectDependency) => {
     :loading="loading"
     :loading-versions="loadingVersions"
     :modrinth="projectId"
-    :curseforge="curseforge"
+    :curseforge="curseforgeId"
+    current-target="modrinth"
     @open-dependency="onOpenDependency"
     @install="onInstall"
     @enable="enabled = $event"

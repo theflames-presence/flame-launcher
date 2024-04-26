@@ -78,6 +78,7 @@
 import ErrorView from '@/components/ErrorView.vue'
 import SplitPane from '@/components/SplitPane.vue'
 import { UpgradePlan } from '@/composables/modUpgrade'
+import { useQuery } from '@/composables/query'
 import { ProjectEntry } from '@/util/search'
 
 const props = defineProps<{
@@ -92,20 +93,18 @@ const emit = defineEmits<{
   (event: 'drop', e: DragEvent): void
 }>()
 
-const { replace } = useRouter()
-const route = useRoute()
-
-const selectedId = computed({
-  get: () => route.query.id as string | undefined,
-  set: (v) => {
-    if (route.query.id !== v) {
-      replace({ query: { ...route.query, id: v } })
-    }
-  },
-})
+const selectedId = useQuery('id')
 const selectedItem = computed(() => {
   if (!selectedId.value) return undefined
   return props.items.find((i) => typeof i === 'object' && i.id === selectedId.value) as ProjectEntry | undefined
+})
+
+watch(() => props.items, (i, old) => {
+  if (!old || old.length === 0) {
+    if (i.length > 0) {
+      selectedId.value = i[0].id
+    }
+  }
 })
 
 const selectedModrinthId = computed(() => {

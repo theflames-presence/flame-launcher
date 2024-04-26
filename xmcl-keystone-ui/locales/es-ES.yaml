@@ -429,8 +429,11 @@ logsCrashes:
   placeholder: No se encontraron archivos
   title: Registros o Informes de Errores
 me:
+  games: Mis juegos
+  modpacks: Mis paquetes de modificaciones
   news: Noticias
   recentPlay: Juego Reciente
+  versions: Versiones instaladas
 minecraftVersion:
   empty: No se pueden cargar las versiones de Minecraft
   name: Versión de Minecraft
@@ -476,6 +479,7 @@ modInstall:
   installHint: Se instalará el archivo {file} con {dependencies} dependencias
   installed: Instalado
   noVersionSupported: El Mod no es compatible con la versión actual de Minecraft
+  recommendation: ¡Explora las modificaciones {first} o {second} en {modrinth} y {curseforge}!
   search: Resultado de la Búsqueda
   searchHint: Buscar y seleccionar proyecto
   source: Fuente de Mods
@@ -820,6 +824,10 @@ setting:
   autoDownloadDescription: Descargar actualizaciones automáticamente si están disponibles
   autoInstallOnAppQuit: Autoinstalar
   autoInstallOnAppQuitDescription: Autoinstalar la actualización al salir de la aplicación
+  backgroundColorAbove: Mostrar color de fondo como superposición
+  backgroundColorAboveDescription: >-
+    Esto hará que el color de fondo se muestre encima de la imagen o el vídeo de
+    fondo.
   backgroundImage: Imagen de fondo
   backgroundImageBlur: Desenfoque de imagen
   backgroundImageBlurDescription: Arrastra para desenfocar, fácil
@@ -876,8 +884,7 @@ setting:
   githubRelease: Lanzamiento en GitHub
   globalSetting: Configuración Global de la Instancia
   globalSettingHint: La instancia utilizará estos ajustes por defecto.
-  hideNews: Ocultar Noticias
-  hideNewsDescription: Esto ocultará las noticias en la página de la instancia
+  hideNewsHeader: Ocultar escaparate de noticias
   language: Idioma
   languageDescription: El idioma de la interfaz
   latestVersion: Última Versión
@@ -914,6 +921,7 @@ setting:
     all: Todo
     legacy: Solo versión heredada
   resetToDefault: Restablecer a los Valores Predeterminados
+  showNewsHeader: Mostrar escaparate de noticias
   showRoot: Mostrar
   streamerMode: Modo de transmisión
   streamerModeDescription: >-
@@ -965,7 +973,7 @@ setup:
     language: Idioma
     name: Establecer Idioma
   path: Ruta Actual
-  title: 'Bienvenido a Flame Launcher. Antes de comenzar, necesitamos que '
+  title: 'Bienvenido a X Minecraft Launcher. Antes de comenzar, necesitamos que '
 shaderPack:
   deletion: Eliminar Pack de Shaders
   deletionHint: Esto eliminará el archivo del pack de shaders {path} y no se podrá deshacer.
@@ -975,6 +983,8 @@ shaderPack:
   name: Pack de Shaders
   showDirectory: Mostrar directorio de packs de shaders
   showFile: Mostrar este pack de shaders en la carpeta
+shared:
+  accept: Aceptar
 summery: Resumen
 tag:
   create: Crear Etiqueta
@@ -1001,17 +1011,37 @@ theme:
   selectImage: Seleccionar imagen
   selectMusic: Seleccionar música
   selectVideo: Seleccionar vídeo
-title: Flame Launcher
+title: X Minecraft Launcher
 transportType:
   host: Candidato de Anfitrión
   prflx: Candidato Reflexivo de Par
   relay: Candidato de Relevo
   srflx: Candidato Reflexivo de Servidor
+tutorial:
+  hideNewsHeaderDescription: |-
+    Puedes ver el show de noticias a la izquierda. 
+    Al hacer clic en este botón se puede ocultar esta vitrina.
+  instanceSelectDescription: >-
+    Al hacer clic en este botón se navegará a la página para seleccionar el
+    juego y leer las noticias.
+  recentPlayDescription: >-
+    Los juegos creados se enumerarán aquí. 
+
+    Puede cambiar las vistas aquí para ver también las versiones instaladas y
+    los modpacks descargados.
+  storePoupularModpackDescription: Verás los modpacks más populares en Curseforge y Modrinth en esta sección.
+  storeSearchCategoryDescription: También puede alternar las categorías o filtros aquí.
+  storeSearchDescription: |-
+    Puede buscar Modpack ingresando en este cuadro de texto. 
+    Presione Entrar para buscar.
+  storeSearchResultDescription: Verá todos los resultados de búsqueda enumerados aquí.
 universalDrop:
   enableModsAfterImport: Habilitar Mods Después de la Importación
   start: Importación Iniciada
   title: Suelta el(los) Archivo(s) Aquí para Importar como
   unknownResource: Desconocido
+update:
+  goOfficialWebDownload: Vuelva a descargar en el sitio web oficial.
 upstream:
   missingModpackMetadata: >-
     No se encontraron los metadatos antiguos del modpack.
