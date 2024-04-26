@@ -1153,8 +1153,7 @@ setting:
   githubRelease: Github Release
   globalSetting: Global Instance Setting
   globalSettingHint: Instance will use these settings by default.
-  hideNews: Hide News
-  hideNewsDescription: This will hide the news under the instance page
+  hideNewsHeader: Hide News Showcase
   language: Language
   languageDescription: The display language
   latestVersion: Latest Version
