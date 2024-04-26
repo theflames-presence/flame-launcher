@@ -27,7 +27,7 @@ jobs:
         node-version: '20'
 
     - name: Install Pnpm
-      run: npm install -g pnpm
+      run: npm install -g pnpm@v8.15.7
 
     - name: Clone Repository
       run: git clone --recurse-submodules https://github.com/aislxflames/flame-launcher ~/flame-launcher
