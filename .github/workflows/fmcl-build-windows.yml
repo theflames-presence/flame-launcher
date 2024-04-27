@@ -47,6 +47,19 @@ jobs:
         NODE_ENV: production
         CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_TOKEN }}
 
+    - name: FMCL-x64-Upload-Zip
+      uses: actions/upload-artifact@v3
+      with:
+        name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Zip
+        path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
+      
+    - name: FMCL-x32-Upload-Zip
+      uses: actions/upload-artifact@v3
+      with:
+        name: FMCL-LINUX-x32-v${{ secrets.FMCL_VERSION }}-Zip
+        path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-ia32.zip
+    
+    
     - name: Create Github Release
       id: create-new-release
       uses: actions/create-release@v1
