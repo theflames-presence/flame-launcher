@@ -50,13 +50,13 @@ jobs:
     - name: FMCL-x64-Upload-Zip
       uses: actions/upload-artifact@v3
       with:
-        name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Zip
+        name: FMCL-WINDOWS-x64-v${{ secrets.FMCL_VERSION }}-Zip
         path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
       
     - name: FMCL-x32-Upload-Zip
       uses: actions/upload-artifact@v3
       with:
-        name: FMCL-LINUX-x32-v${{ secrets.FMCL_VERSION }}-Zip
+        name: FMCL-WINDOWS-x32-v${{ secrets.FMCL_VERSION }}-Zip
         path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-ia32.zip
     
     

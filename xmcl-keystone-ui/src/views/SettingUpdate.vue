@@ -5,12 +5,7 @@
     </SettingHeader>
     <v-list-item v-if="!disableUpdate">
       <v-list-item-action class="self-center">
-        <v-btn
-          v-shared-tooltip="_ => t('setting.checkUpdate')"
-          icon
-          :loading="checkingUpdate"
-          @click="checkUpdate"
-        >
+        <v-btn v-shared-tooltip="_ => t('setting.checkUpdate')" icon :loading="checkingUpdate" @click="checkUpdate">
           <v-icon>refresh</v-icon>
         </v-btn>
       </v-list-item-action>
@@ -28,13 +23,8 @@
         </v-list-item-subtitle>
       </v-list-item-content>
       <v-list-item-action class="self-center">
-        <v-btn
-          :loading="checkingUpdate || installing"
-          :disabled="updateStatus === 'none'"
-          :color="updateStatus !== 'none' ? 'primary' : ''"
-          :text="updateStatus === 'none'"
-          @click="showUpdateInfo()"
-        >
+        <v-btn :loading="checkingUpdate || installing" :disabled="updateStatus === 'none'"
+          :color="updateStatus !== 'none' ? 'primary' : ''" :text="updateStatus === 'none'" @click="showUpdateInfo()">
           {{
             updateStatus === "none"
               ? t("launcherUpdate.alreadyLatest")
@@ -86,7 +76,7 @@ import { vSharedTooltip } from '@/directives/sharedTooltip'
 import SettingHeader from '@/components/SettingHeader.vue'
 
 const { show: showUpdateInfo } = useDialog('update-info')
-const disableUpdate = false // state.env !== 'raw'
+const disableUpdate = true // state.env !== 'raw'
 const { updateInfo, updateStatus, checkUpdate, checkingUpdate, version } = useUpdateSettings()
 const hasNewUpdate = computed(() => updateInfo.value?.name !== version.value)
 const installing = useServiceBusy(BaseServiceKey, 'quitAndInstall')

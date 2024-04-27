@@ -463,7 +463,7 @@ instances:
   addVanilla: 从原版 Minecraft 创建
   addVanillaDescription: |-
     从通用 .minecraft 文件夹导入。
-    这会将原始游戏配置文件复制到 XMCL。
+    这会将原始游戏配置文件复制到 FMCL。
   choose: 选择游戏
   importFolder: 从文件夹导入
   importFolderDescription: 导入 Minecraft 到启动器
@@ -1103,11 +1103,11 @@ setting:
   developerMode: 开发者模式
   developerModeDescription: 开发者模式意在于帮助你测试你自己写的 Mod
   disableTelemetry: 关闭遥测
-  disableTelemetryDescription: XMCL 会收集游戏启动以及用户登录事件
+  disableTelemetryDescription: FMCL 会收集游戏启动以及用户登录事件
   enableDedicatedGPUOptimization: 分配专用 GPU
   enableDedicatedGPUOptimizationDescription: 此选项将为 Minecraft 进程分配专用 GPU。
   enableDiscord: 启用 Discord Presence
-  enableDiscordDescription: 根据 XMCL 实时更新 Discord 的状态
+  enableDiscordDescription: 根据 FMCL 实时更新 Discord 的状态
   general: 基本设置
   githubRelease: Github
   globalSetting: 全局实例设置
@@ -1181,7 +1181,7 @@ setup:
   appearance:
     name: '@:setting.appearance'
   dataRoot:
-    description: 数据存储目录不是常规的 .minecraft 目录。因为 XMCL 的数据目录格式特殊，不建议将常规 .minecraft 目录设置为数据目录。
+    description: 数据存储目录不是常规的 .minecraft 目录。因为 FMCL 的数据目录格式特殊，不建议将常规 .minecraft 目录设置为数据目录。
     drives: 推荐路径
     name: 设置数据存储目录
   defaultLayoutDescription: |-

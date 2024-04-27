@@ -489,7 +489,7 @@ instances:
   addVanilla: Erstellen Sie mit Vanilla Minecraft
   addVanillaDescription: |-
     Importieren Sie aus dem gemeinsamen .minecraft-Ordner. 
-    Dadurch wird das ursprüngliche Spielprofil in die XMCL kopiert.
+    Dadurch wird das ursprüngliche Spielprofil in die FMCL kopiert.
   choose: Spiel auswählen
   importFolder: Importieren aus einem Ordner
   importFolderDescription: Minecraft in den Launcher importieren
@@ -1230,7 +1230,7 @@ setting:
     Der Entwicklermodus ist dazu gedacht, die von Ihnen geschriebene Mod zu
     testen.
   disableTelemetry: Telemetrie ausschalten
-  disableTelemetryDescription: XMCL sammelt die Ereignisse des Spielstarts und der Benutzeranmeldung.
+  disableTelemetryDescription: FMCL sammelt die Ereignisse des Spielstarts und der Benutzeranmeldung.
   enableDedicatedGPUOptimization: Weisen Sie eine dedizierte GPU zu
   enableDedicatedGPUOptimizationDescription: Diese Option weist dem Minecraft-Prozess eine dedizierte GPU zu.
   enableDiscord: Discord-Präsenz einschalten (Discord-Spielstatus)
@@ -1315,7 +1315,7 @@ setup:
     name: '@:setting.appearance'
   dataRoot:
     description: |-
-      Der Datenstamm ist kein normales .minecraft-Verzeichnis. Da die XMCL-Daten
+      Der Datenstamm ist kein normales .minecraft-Verzeichnis. Da die FMCL-Daten
        Verzeichnisstruktur von Vanilla abweicht, empfehlen wir nicht die Verwendung des
        das übliche .minecraft-Verzeichnis als Datenstamm zu verwenden.
     drives: Empfohlene Orte

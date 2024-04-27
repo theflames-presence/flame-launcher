@@ -39,7 +39,7 @@ For renderer side, which is the pure front-end
 - xmcl-runtime
   - The core implementation of the launcher architecture. This only depends on Node.js, and does not require Electron runtime.
 - xmcl-runtime-api
-  - This is the shared code & API for XMCL runtime. It can be used for renderer app (browser side)
+  - This is the shared code & API for FMCL runtime. It can be used for renderer app (browser side)
 
 
 ### Concept/Structure
