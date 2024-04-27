@@ -35,11 +35,11 @@ export const config = {
   artifactName: 'fmcl-${version}-${platform}-${arch}.${ext}',
   appx: {
     displayName: 'Flame Launcher (Beta)',
-    applicationId: 'CI010.XMCL',
-    identityName: '22961CI010.XMCL',
+    applicationId: 'CI010.FMCL',
+    identityName: '22961CI010.FMCL',
     backgroundColor: 'transparent',
-    publisher: 'CN=DAFB9390-F5BD-4F94-828C-242F8DAA6FDE',
-    publisherDisplayName: 'CI010',
+    publisher: 'IN=DAFB9390-F5BD-4F94-828C-242F8DAA6FDE',
+    publisherDisplayName: 'AISLX',
     setBuildNumber: true,
   },
   dmg: {

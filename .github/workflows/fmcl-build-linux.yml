@@ -20,14 +20,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
+    - uses: actions/checkout@v3
       with:
-        node-version: '20'
-
-    - name: Install Pnpm
-      run: npm install -g pnpm
+        submodules: recursive
+    - uses: pnpm/action-setup@v2.0.1
+      with:
+        version: 8.3.0
+    - name: Fix node-gyp and Python
+      run: python3 -m pip install packaging setuptools
+    - name: Use Node.js 16
+      uses: actions/setup-node@v2
+      with:
+        node-version: 16
+        cache: 'pnpm'
 
     - name: Clone Repository
       run: git clone --recurse-submodules https://github.com/aislxflames/flame-launcher ~/flame-launcher

@@ -874,7 +874,7 @@ setting:
   developerModeDescription: El Modo de Desarrollador está diseñado para probar tus propios mods
   disableTelemetry: Desactivar Telemetría
   disableTelemetryDescription: >-
-    XMCL recopilará eventos de inicio del juego y de inicio de sesión del
+    FMCL recopilará eventos de inicio del juego y de inicio de sesión del
     usuario.
   enableDedicatedGPUOptimization: Asignar GPU dedicada
   enableDedicatedGPUOptimizationDescription: Esta opción asignará GPU dedicada al proceso de Minecraft.
@@ -954,7 +954,7 @@ setup:
   dataRoot:
     description: >-
       El directorio de datos no es un directorio .minecraft común. Dado que la
-      estructura de directorios de datos de XMCL es diferente de la versión
+      estructura de directorios de datos de FMCL es diferente de la versión
       original, no recomendamos usar el directorio .minecraft común como
       directorio de datos.
     name: Establecer Directorio de Datos

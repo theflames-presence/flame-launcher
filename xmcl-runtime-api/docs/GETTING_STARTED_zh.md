@@ -47,8 +47,8 @@ pnpm dev
   > Network: use `--host` to expose
 ```
 
-然后请打开 XMCL 加载你的开发环境，
-在 托盘 中找到 XMCL 图标，右键选择`浏览第三方启动器界面`
+然后请打开 FMCL 加载你的开发环境，
+在 托盘 中找到 FMCL 图标，右键选择`浏览第三方启动器界面`
 
 ![](2022-04-11-16-21-20.png)
 
@@ -89,22 +89,22 @@ pnpm dev
 
 ### 常用服务属性
 
-| 功能                       | 服务               | 相关方法        | 备注                                                                                    |
-| -------------------------- | ------------------ | --------------- | --------------------------------------------------------------------------------------- |
-| 获得 Minecraft 版本列表    | InstallService     | state.minecraft |                                                                                         |
-| 安装 Forge 版本列表        | InstallService     | state.forge     | 这个列表是根据 Minecraft 版本存储的，如 state.forge['1.18.2'] 就是 1.18.2 的 forge 列表 |
-| 获得当前选择的实例的路径   | InstanceService    | state.path      | 配合 state.all[path] 来获得 path 对应的实例配置                                         |
-| 所有已知实例               | InstanceService    | state.instances |                                                                                         |
-| 获得实例安装的 Mod 列表    | InstanceModService | state.mods      |                                                                                         |
-| 获得**所有**已经安装的 Mod | ResourceService    | state.mods      |                                                                                         |
-| 获取所有已经安装的本地版本列表 | VersionService     | state.local           |                                                                                         |
+| 功能                           | 服务               | 相关方法        | 备注                                                                                    |
+| ------------------------------ | ------------------ | --------------- | --------------------------------------------------------------------------------------- |
+| 获得 Minecraft 版本列表        | InstallService     | state.minecraft |                                                                                         |
+| 安装 Forge 版本列表            | InstallService     | state.forge     | 这个列表是根据 Minecraft 版本存储的，如 state.forge['1.18.2'] 就是 1.18.2 的 forge 列表 |
+| 获得当前选择的实例的路径       | InstanceService    | state.path      | 配合 state.all[path] 来获得 path 对应的实例配置                                         |
+| 所有已知实例                   | InstanceService    | state.instances |                                                                                         |
+| 获得实例安装的 Mod 列表        | InstanceModService | state.mods      |                                                                                         |
+| 获得**所有**已经安装的 Mod     | ResourceService    | state.mods      |                                                                                         |
+| 获取所有已经安装的本地版本列表 | VersionService     | state.local     |                                                                                         |
 
 
 ## 情景
 
 Q：我已经按照流程完成了以上的步骤，现在准备好定制属于我的服务器的专属启动器，目前我需要的基础功能包括但不限于”更新minecraft、forge版本，与服务器同步mod以及配置文件，正版登录或离线登录“，在代码当中是如何具体实现的？
 A：
-在回答这个问题之前，你需要确保你大概了解 XMCL 的实例 (instance) 机制，并不复杂，详情请看[这个文档](https://xmcl.app/zh/faq)）
+在回答这个问题之前，你需要确保你大概了解 FMCL 的实例 (instance) 机制，并不复杂，详情请看[这个文档](https://xmcl.app/zh/faq)）
 
 为了避免我们服务器的配置和别的启动配置互相干扰，我们需要先申请一个独有的实例
 ```ts

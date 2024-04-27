@@ -459,7 +459,7 @@ instances:
   addVanilla: Létrehozás vanilla-szerű Minecraftból
   addVanillaDescription: >-
     Importálás a közös .minecraft mappából. Ez duplikálja az eredeti
-    játékprofilt az XMCL-be.
+    játékprofilt az FMCL-be.
   choose: Játék kiválasztása
   importFolder: Importálás mappából
   importFolderDescription: Minecraft importálása a Launcherbe
@@ -1186,7 +1186,7 @@ setting:
   developerModeDescription: Fejlesztői mód a saját írt mod tesztelésére irányul
   disableTelemetry: Telemetria kikapcsolása
   disableTelemetryDescription: >-
-    Az XMCL összegyűjti a játékindítási és a felhasználói bejelentkezési
+    Az FMCL összegyűjti a játékindítási és a felhasználói bejelentkezési
     eseményeket.
   enableDiscord: Discord státusz engedélyezése
   enableDiscordDescription: Ez folyamatosan frissíti az launcher állapotát a discordra.
@@ -1264,7 +1264,7 @@ setup:
     name: '@:setting.appearance'
   dataRoot:
     description: >-
-      Az adatgyökér nem egy közös .minecraft könyvtár. Mivel az XMCL adatok
+      Az adatgyökér nem egy közös .minecraft könyvtár. Mivel az FMCL adatok
       könyvtárszerkezet különbözik a vanilla könyvtárszerkezettől, nem
       javasoljuk, hogy a a közös .minecraft könyvtárat adatgyökérként használni.
     drives: Ajánlott helyek
