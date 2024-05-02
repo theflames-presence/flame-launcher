@@ -72,10 +72,10 @@ export function useTheme(framework: Framework, { addMedia, removeMedia, exportTh
     colors: {
       lightAppBarColor: '#e0e0e0FF',
       lightSideBarColor: '#FFFFFFFF',
-      darkAppBarColor: '#04000f',
-      darkSideBarColor: '#04000f',
+      darkAppBarColor: '#ff000024',
+      darkSideBarColor: '#ff000024',
       darkPrimaryColor: '#ff0000',
-      darkBackground: '#04000f',
+      darkBackground: '#0000001a',
       darkInfoColor: '#2196F3',
       darkErrorColor: '#FF5252',
       darkWarningColor: '#FB8C00',
