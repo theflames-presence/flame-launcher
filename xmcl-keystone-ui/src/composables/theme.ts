@@ -92,7 +92,7 @@ export function useTheme(framework: Framework, { addMedia, removeMedia, exportTh
       lightAccentColor: '#82B1FF',
       lightCardColor: '#e0e0e080',
     },
-    backgroundColorOverlay: false,
+    backgroundColorOverlay: true,
     backgroundVolume: 1,
     backgroundImage: undefined,
     backgroundImageFit: 'cover',
@@ -650,7 +650,7 @@ export function useTheme(framework: Framework, { addMedia, removeMedia, exportTh
   }
   `))
 
-  const backgroundImageOverride = ref('')
+  const backgroundImageOverride = ref('https://e1.pxfuel.com/desktop-wallpaper/891/788/desktop-wallpaper-minecraft-shaders-backgrounds-group-red-minecraft.jpg')
   const backgroundImageOverrideOpacity = ref(1)
 
   return {
