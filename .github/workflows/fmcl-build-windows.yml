@@ -50,7 +50,7 @@ jobs:
     - name: Fmcl-build-installer
       uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
       with:
-        path: D:\a\flame-launcher\flamelauncher-build/flamelauncher-build-x64.iss
+        path: flamelauncher-build/flamelauncher-build-x64.iss
         options: /O+
 
     - name: FMCL-x64-Upload-App
