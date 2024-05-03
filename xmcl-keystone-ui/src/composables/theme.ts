@@ -66,7 +66,7 @@ export function useTheme(framework: Framework, { addMedia, removeMedia, exportTh
   const selectedThemeName = useLocalStorageCacheStringValue('selectedThemeName', 'default' as string)
   const darkTheme = useLocalStorageCacheStringValue<'dark' | 'light' | 'system'>('darkTheme', 'system')
   const currentTheme = ref<UIThemeData>({
-    name: 'default',
+    name: 'flamelauncher-default',
     backgroundMusic: [],
     backgroundMusicPlayOrder: 'sequential',
     colors: {
@@ -82,9 +82,9 @@ export function useTheme(framework: Framework, { addMedia, removeMedia, exportTh
 
       darkSuccessColor: '#4CAF50',
       darkAccentColor: '#00e676',
-      darkCardColor: '#0c0c0ccc',
+      darkCardColor: '#ff000024',
       lightPrimaryColor: '#9403fc',
-      lightBackground: '#FFFFFF',
+      lightBackground: '#FFFFFF24',
       lightInfoColor: '#2196F3',
       lightErrorColor: '#FF5252',
       lightWarningColor: '#FB8C00',
@@ -650,7 +650,7 @@ export function useTheme(framework: Framework, { addMedia, removeMedia, exportTh
   }
   `))
 
-  const backgroundImageOverride = ref('https://e1.pxfuel.com/desktop-wallpaper/891/788/desktop-wallpaper-minecraft-shaders-backgrounds-group-red-minecraft.jpg')
+  const backgroundImageOverride = ref('https://github.com/aislxflames/flame-launcher/releases/download/v1.0.0/fmcl-background.jpg')
   const backgroundImageOverrideOpacity = ref(1)
 
   return {
