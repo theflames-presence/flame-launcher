@@ -1,7 +1,7 @@
 {
     "name": "@xmcl/runtime",
     "private": true,
-    "version": "1.0.7",
+    "version": "1.0.6",
     "author": "aislx <proarghaop@gmail.com>",
     "description": "The runtime for Flame Launcher in nodejs",
     "license": "MIT",
