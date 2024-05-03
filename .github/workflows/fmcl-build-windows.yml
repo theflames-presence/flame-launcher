@@ -46,14 +46,26 @@ jobs:
         NODE_OPTIONS: --max-old-space-size=32768
         NODE_ENV: production
         CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_TOKEN }}
+    
+    - name: Fmcl-build-installer
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+      with:
+        path: flamelauncher-build/flamelauncher-build-x64.iss
+        options: /O+
+        
+    - name: FMCL-x64-Upload-App
+      uses: actions/upload-artifact@v3
+      with:
+        name: FMCL-WINDOWS-x64-v${{ secrets.FMCL_VERSION }}-App
+        path: flamelauncher-build\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64
 
-    - name: FMCL-x64-Upload-Zip
+    - name: FMCL-x64-Upload-Archive
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-WINDOWS-x64-v${{ secrets.FMCL_VERSION }}-Zip
         path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
       
-    - name: FMCL-x32-Upload-Zip
+    - name: FMCL-x32-Upload-Archive
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-WINDOWS-x32-v${{ secrets.FMCL_VERSION }}-Zip
