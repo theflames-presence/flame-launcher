@@ -15,11 +15,9 @@ on:
   
 jobs:
 
-  build:
-
+  fmcl-build:
 
     runs-on: windows-latest
-
 
     steps:
     - uses: actions/checkout@v3
@@ -52,7 +50,7 @@ jobs:
       with:
         path: flamelauncher-build/flamelauncher-build-x64.iss
         options: /O+
-        
+
     - name: FMCL-x64-Upload-App
       uses: actions/upload-artifact@v3
       with:
