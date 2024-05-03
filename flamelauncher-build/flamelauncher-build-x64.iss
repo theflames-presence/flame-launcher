@@ -43,8 +43,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "xmcl-electron-app\build\output\fmcl-{#MyAppVersion}-win32-x64\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "xmcl-electron-app\build\output\fmcl-{#MyAppVersion}-win32-x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "D:\a\flame-launcher\xmcl-electron-app\build\output\fmcl-{#MyAppVersion}-win32-x64\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\a\flame-launcher\xmcl-electron-app\build\output\fmcl-{#MyAppVersion}-win32-x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]
