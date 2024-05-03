@@ -1,26 +1,16 @@
-name: Build Fmcl For Windows
+name: Build Flame Launcher
 
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'xmcl-runtime/**'
-      - 'xmcl-runtime-api/**'
-      - 'xmcl-keystone-ui/**'
-      - 'xmcl-electron-app/**'
-      - 'package.json'
+
   workflow_dispatch:
   
 jobs:
 
-  build:
-
+  build-windows:
 
     runs-on: windows-latest
-
-
+    
     steps:
     - uses: actions/checkout@v3
       with:
@@ -58,8 +48,74 @@ jobs:
       with:
         name: FMCL-WINDOWS-x32-v${{ secrets.FMCL_VERSION }}-Zip
         path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-ia32.zip
+
+  build-linux:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - uses: pnpm/action-setup@v2.0.1
+      with:
+        version: 8.3.0
+    - name: Fix node-gyp and Python
+      run: python3 -m pip install packaging setuptools
+    - name: Use Node.js 16
+      uses: actions/setup-node@v2
+      with:
+        node-version: 16
+        cache: 'pnpm'
+
+    - name: Clone Repository
+      run: git clone --recurse-submodules https://github.com/aislxflames/flame-launcher ~/flame-launcher
+
+    - name: Install Dependencies
+      run: |
+        cd ~/flame-launcher
+        pnpm install
+
+    - name: Build Renderer
+      run: |
+        cd ~/flame-launcher
+        pnpm build:renderer
+
+    - name: Build All
+      run: |
+        cd ~/flame-launcher
+        pnpm build:all
+
+    - name: FMCL-x64-Upload-Deb
+      uses: actions/upload-artifact@v3
+      with:
+        name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Deb
+        path: ~/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-amd64.deb
+      
+    - name: FMCL-x32-Upload-Deb
+      uses: actions/upload-artifact@v3
+      with:
+        name: FMCL-LINUX-x32-v${{ secrets.FMCL_VERSION }}-Deb
+        path: ~/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.deb
+        
+    - name: FMCL-x64-Upload-Zip
+      uses: actions/upload-artifact@v3
+      with:
+        name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Zip
+        path: ~/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-x64.tar.xz
+      
+    - name: FMCL-x32-Upload-Zip
+      uses: actions/upload-artifact@v3
+      with:
+        name: FMCL-LINUX-x32-v${{ secrets.FMCL_VERSION }}-Zip
+        path: ~/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.tar.xz
+
+
+  create-release:
     
-    
+    runs-on: ubuntu-latest
+
+    steps:
     - name: Create Github Release
       id: create-new-release
       uses: actions/create-release@v1
@@ -91,4 +147,6 @@ jobs:
         asset_path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-ia32.zip
         asset_name: fmcl-${{ secrets.FMCL_VERSION }}-win32-ia32.zip
         asset_content_type: application/zip
+    
+    
     
