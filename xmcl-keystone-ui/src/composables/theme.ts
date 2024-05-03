@@ -66,25 +66,25 @@ export function useTheme(framework: Framework, { addMedia, removeMedia, exportTh
   const selectedThemeName = useLocalStorageCacheStringValue('selectedThemeName', 'default' as string)
   const darkTheme = useLocalStorageCacheStringValue<'dark' | 'light' | 'system'>('darkTheme', 'system')
   const currentTheme = ref<UIThemeData>({
-    name: 'default',
+    name: 'flamelauncher-default',
     backgroundMusic: [],
     backgroundMusicPlayOrder: 'sequential',
     colors: {
       lightAppBarColor: '#e0e0e0FF',
       lightSideBarColor: '#FFFFFFFF',
-      darkAppBarColor: '#04000f',
-      darkSideBarColor: '#04000f',
+      darkAppBarColor: '#ff000024',
+      darkSideBarColor: '#ff000024',
       darkPrimaryColor: '#ff0000',
-      darkBackground: '#04000f',
+      darkBackground: '#0000001a',
       darkInfoColor: '#2196F3',
       darkErrorColor: '#FF5252',
       darkWarningColor: '#FB8C00',
 
       darkSuccessColor: '#4CAF50',
       darkAccentColor: '#00e676',
-      darkCardColor: '#0c0c0ccc',
+      darkCardColor: '#ff000024',
       lightPrimaryColor: '#9403fc',
-      lightBackground: '#FFFFFF',
+      lightBackground: '#FFFFFF24',
       lightInfoColor: '#2196F3',
       lightErrorColor: '#FF5252',
       lightWarningColor: '#FB8C00',
@@ -92,7 +92,7 @@ export function useTheme(framework: Framework, { addMedia, removeMedia, exportTh
       lightAccentColor: '#82B1FF',
       lightCardColor: '#e0e0e080',
     },
-    backgroundColorOverlay: false,
+    backgroundColorOverlay: true,
     backgroundVolume: 1,
     backgroundImage: undefined,
     backgroundImageFit: 'cover',
@@ -650,7 +650,7 @@ export function useTheme(framework: Framework, { addMedia, removeMedia, exportTh
   }
   `))
 
-  const backgroundImageOverride = ref('')
+  const backgroundImageOverride = ref('https://github.com/aislxflames/flame-launcher/releases/download/v1.0.0/fmcl-background.jpg')
   const backgroundImageOverrideOpacity = ref(1)
 
   return {
