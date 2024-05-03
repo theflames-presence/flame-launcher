@@ -45,7 +45,7 @@ jobs:
         CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_TOKEN }}
       
     - name: Unzip Build
-      run: unzip xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
+      run: unzip xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip fmcl-${{ secrets.FMCL_VERSION }}-win32-x64
 
     - name: Fmcl-build-installer
       uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
