@@ -24,14 +24,14 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 ChangesAssociations=yes
 DisableProgramGroupPage=yes
-LicenseFile=E:\Developing\Build Launcher\Launcher Setup File Making\Intro-License.txt
-InfoBeforeFile=E:\Developing\Build Launcher\Launcher Setup File Making\Intro-License.txt
+LicenseFile=flamelauncher-build\Flame-Launcher-License.txt
+InfoBeforeFile=flamelauncher-build\Intro-License.txt
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=flamelauncher-build\output
 OutputBaseFilename=Flame-Launcher.-v{#MyAppVersion}.-setup-x64
-SetupIconFile=E:\Developing\Build Launcher\Launcher Setup File Making\Flame-Launcher-Logo.ico
+SetupIconFile=flamelauncher-build\output\Flame-Launcher-Logo.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
