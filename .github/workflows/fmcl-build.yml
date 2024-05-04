@@ -67,7 +67,21 @@ jobs:
         name: BUILD-${{ runner.os }}
         path: |
           xmcl-electron-app/build/output/
-    
+
+    - name: FMCL-x64-Upload-App-Windows
+      if: ${{ runner.os == 'Windows' }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: FMCL-WINDOWS-x64-v${{ secrets.FMCL_VERSION }}-App
+        path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
+
+    - name: FMCL-x32-Upload-App-Windows
+      if: ${{ runner.os == 'Windows' }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: FMCL-WINDOWS-x32-v${{ secrets.FMCL_VERSION }}-App
+        path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
+
     - name: Upload Windows Archive x64
       if: ${{ runner.os == 'Windows' }}
       uses: actions/upload-artifact@v3
