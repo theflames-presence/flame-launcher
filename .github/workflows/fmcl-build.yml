@@ -46,6 +46,20 @@ jobs:
         NODE_OPTIONS: --max-old-space-size=32768
         NODE_ENV: production
         CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_TOKEN }}
+
+    - name: Fmcl-build-installer-x64
+      if: ${{ runner.os == 'Windows' }}
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+      with:
+        path: src/flamelauncher-build-x64.iss
+        options: /O+
+
+    - name: Fmcl-build-installer-x32
+      if: ${{ runner.os == 'Windows' }}
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+      with:
+        path: src/flamelauncher-build-x34.iss
+        options: /O+
     
     - name: Upload Build
       uses: actions/upload-artifact@v3
