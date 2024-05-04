@@ -56,7 +56,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-WINDOWS-x64-v${{ secrets.FMCL_VERSION }}-App
-        path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64
+        path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
 
     - name: FMCL-x64-Upload-Archive
       uses: actions/upload-artifact@v3
