@@ -55,7 +55,7 @@ jobs:
     - name: Fmcl-build-installer-x32
       uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
       with:
-        path: src/flamelauncher-build-x34.iss
+        path: src/flamelauncher-build-x32.iss
         options: /O+
 
     - name: FMCL-x64-Upload-App
