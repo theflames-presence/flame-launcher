@@ -46,10 +46,16 @@ jobs:
         NODE_ENV: production
         CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_TOKEN }}
       
-    - name: Fmcl-build-installer
+    - name: Fmcl-build-installer-x64
       uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
       with:
         path: src/flamelauncher-build-x64.iss
+        options: /O+
+
+    - name: Fmcl-build-installer-x32
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+      with:
+        path: src/flamelauncher-build-x34.iss
         options: /O+
 
     - name: FMCL-x64-Upload-App
@@ -57,6 +63,12 @@ jobs:
       with:
         name: FMCL-WINDOWS-x64-v${{ secrets.FMCL_VERSION }}-App
         path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
+
+    - name: FMCL-x32-Upload-App
+      uses: actions/upload-artifact@v3
+      with:
+        name: FMCL-WINDOWS-x32-v${{ secrets.FMCL_VERSION }}-App
+        path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
 
     - name: FMCL-x64-Upload-Archive
       uses: actions/upload-artifact@v3
@@ -80,8 +92,8 @@ jobs:
         tag_name: v${{ secrets.FMCL_VERSION }}
         release_name: v${{ secrets.FMCL_VERSION }}
     
-    - name: FMCL-x64-Upload to Github 
-      id: upload-release-x64
+    - name: FMCL-x64-Upload-Archive to Github 
+      id: upload-release-x64-archive
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -91,9 +103,8 @@ jobs:
         asset_name: fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
         asset_content_type: application/zip
     
-    
     - name: FMCL-x32-Upload to Github 
-      id: upload-release-x32
+      id: upload-release-x32-archive
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
