@@ -136,3 +136,7 @@ jobs:
         asset_name: Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
         asset_content_type: application/exe
 
+    - name: Upload to Winget
+      run: |
+        winget install wingetcreate
+        wingetcreate.exe update --submit --token ${{ secrets.GITHUB_TOKEN }} --urls https://github.com/aislxflames/flame-launcher/releases/download/v${{ secrets.FMCL_VERSION }}/Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe --version ${{ secrets.FMCL_VERSION }} aislx.FlameLauncher
