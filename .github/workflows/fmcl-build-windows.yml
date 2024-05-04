@@ -1,6 +1,5 @@
 name: Build Fmcl For Windows
 
-
 on:
   push:
     branches:
@@ -15,11 +14,9 @@ on:
   
 jobs:
 
-  build:
-
+  fmcl-build:
 
     runs-on: windows-latest
-
 
     steps:
     - uses: actions/checkout@v3
@@ -35,9 +32,11 @@ jobs:
       with:
         node-version: 16
         cache: 'pnpm'
+
     - name: Install
       run: pnpm install
-    - name: Build
+
+    - name: Build all
       run: |
         pnpm run --prefix xmcl-keystone-ui build
         pnpm run --prefix xmcl-electron-app build:all
@@ -46,14 +45,38 @@ jobs:
         NODE_OPTIONS: --max-old-space-size=32768
         NODE_ENV: production
         CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_TOKEN }}
+      
+    - name: Fmcl-build-installer-x64
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+      with:
+        path: src/flamelauncher-build-x64.iss
+        options: /O+
 
-    - name: FMCL-x64-Upload-Zip
+    - name: Fmcl-build-installer-x32
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+      with:
+        path: src/flamelauncher-build-x34.iss
+        options: /O+
+
+    - name: FMCL-x64-Upload-App
+      uses: actions/upload-artifact@v3
+      with:
+        name: FMCL-WINDOWS-x64-v${{ secrets.FMCL_VERSION }}-App
+        path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
+
+    - name: FMCL-x32-Upload-App
+      uses: actions/upload-artifact@v3
+      with:
+        name: FMCL-WINDOWS-x32-v${{ secrets.FMCL_VERSION }}-App
+        path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
+
+    - name: FMCL-x64-Upload-Archive
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-WINDOWS-x64-v${{ secrets.FMCL_VERSION }}-Zip
         path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
       
-    - name: FMCL-x32-Upload-Zip
+    - name: FMCL-x32-Upload-Archive
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-WINDOWS-x32-v${{ secrets.FMCL_VERSION }}-Zip
@@ -69,8 +92,8 @@ jobs:
         tag_name: v${{ secrets.FMCL_VERSION }}
         release_name: v${{ secrets.FMCL_VERSION }}
     
-    - name: FMCL-x64-Upload to Github 
-      id: upload-release-x64
+    - name: FMCL-x64-Upload Archive to Github 
+      id: upload-release-x64-archive
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -80,9 +103,8 @@ jobs:
         asset_name: fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
         asset_content_type: application/zip
     
-    
-    - name: FMCL-x32-Upload to Github 
-      id: upload-release-asset
+    - name: FMCL-x32-Upload Archive to Github 
+      id: upload-release-x32-archive
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -91,4 +113,30 @@ jobs:
         asset_path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-ia32.zip
         asset_name: fmcl-${{ secrets.FMCL_VERSION }}-win32-ia32.zip
         asset_content_type: application/zip
+
+    - name: FMCL-x64-Upload App to Github 
+      id: upload-release-x64-app
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create-new-release.outputs.upload_url }}
+        asset_path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
+        asset_name: Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
+        asset_content_type: application/exe
     
+    - name: FMCL-x32-Upload App to Github 
+      id: upload-release-x32-app
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create-new-release.outputs.upload_url }}
+        asset_path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
+        asset_name: Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
+        asset_content_type: application/exe
+
+    - name: Upload to Winget
+      run: |
+        winget install wingetcreate
+        wingetcreate.exe update --submit --token ${{ secrets.GITHUB_TOKEN }} --urls https://github.com/aislxflames/flame-launcher/releases/download/v${{ secrets.FMCL_VERSION }}/Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe --version ${{ secrets.FMCL_VERSION }} aislx.FlameLauncher
