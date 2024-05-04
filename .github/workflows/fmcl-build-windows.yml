@@ -45,19 +45,20 @@ jobs:
         CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_TOKEN }}
       
     - name: Unzip Build
-      run: unzip xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
-
+      run: |
+        unzip xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
+        mv "xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64\Flame Launcher.exe" flame-launcher.exe 
     - name: Fmcl-build-installer
       uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
       with:
-        path: flamelauncher-build/flamelauncher-build-x64.iss
+        path: src/flamelauncher-build-x64.iss
         options: /O+
 
     - name: FMCL-x64-Upload-App
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-WINDOWS-x64-v${{ secrets.FMCL_VERSION }}-App
-        path: flamelauncher-build\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64
+        path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64
 
     - name: FMCL-x64-Upload-Archive
       uses: actions/upload-artifact@v3
