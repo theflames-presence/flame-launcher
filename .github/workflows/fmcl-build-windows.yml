@@ -46,10 +46,6 @@ jobs:
         NODE_ENV: production
         CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_TOKEN }}
       
-    - name: Unzip Build
-      run: |
-        unzip xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
-        mv "D:\a\flame-launcher\flame-launcher\xmcl-electron-app\build\output\Flame Launcher.exe" flame-launcher.exe
     - name: Fmcl-build-installer
       uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
       with:
