@@ -32,9 +32,11 @@ jobs:
       with:
         node-version: 16
         cache: 'pnpm'
+        
     - name: Install
       run: pnpm install
-    - name: Build
+
+    - name: Build all
       run: |
         pnpm run --prefix xmcl-keystone-ui build
         pnpm run --prefix xmcl-electron-app build:all
@@ -45,9 +47,8 @@ jobs:
         CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_TOKEN }}
       
     - name: Unzip Build
-      run: |
-        unzip D:\a\flame-launcher\xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
-        mv "D:\a\flame-launcher\xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64\Flame Launcher.exe" flame-launcher.exe 
+      run: unzip xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
+
     - name: Fmcl-build-installer
       uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
       with:
