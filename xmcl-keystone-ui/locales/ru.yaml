@@ -313,6 +313,7 @@ help: Справка
 home: Главная
 importModpack:
   failed: Не удалось импортировать {modpack}
+  name: Импортировать модпак
   success: Импорт {modpack} успешно завершено
 importResource: Импорт ресурса
 install: Установить
@@ -429,6 +430,11 @@ instanceTemplate:
 instanceUpdate:
   basic: Обновление настроек
   files: Обновление файлов
+  loaderChanged: >-
+    Модлоадер этого экземпляра был изменен. 
+
+    Старый загрузчик модов — {modloader}, а новый загрузчик модов —
+    {newModloader}.
   title: Обновление экземпляра
   update: Начать обновление
 instances:
@@ -448,7 +454,7 @@ instances:
   addVanilla: Создайте из ванильного Minecraft
   addVanillaDescription: |-
     Импортируйте из общей папки .minecraft. 
-    Это приведет к дублированию исходного игрового профиля в FMCL.
+    Это приведет к дублированию исходного игрового профиля в XMCL.
   choose: Выберите игру
   importFolder: Импорт из папки
   importFolderDescription: Импорт Minecraft в лаунчер
@@ -643,6 +649,7 @@ mod:
 modInstall:
   install: Скачать
   installed: Скачан
+  noVersionSupported: Мод поддерживает только Minecraft {supported}.
   recommendation: Изучите {first} или {second} моды в {modrinth} и ​​{curseforge}!
   search: Результаты поиска
   searchHint: Найдите и выберите проект
@@ -882,6 +889,12 @@ multiplayer:
   joinManual: Присоединиться
   joinOrCreateGroup: Присоединиться/Создать группу
   joinOrCreateGroupHint: Получите идентификатор группы от своих друзей или создайте группу
+  kernel: P2P-ядро
+  kernelDescription: >-
+    Используйте либо собственный WebRTC, либо канал данных узла. 
+
+    Переключайте это значение только в том случае, если ваше p2p-соединение
+    когда-нибудь приведет к сбою окна запуска.
   leaveGroup: Покинуть группу
   localToken: Локальный токен
   manualConnect: Ручное подключение
@@ -1115,7 +1128,7 @@ setting:
   developerMode: Режим разработчика
   developerModeDescription: Режим разработчика нацелен на тестирование ваших модов
   disableTelemetry: Отключить сбор данных
-  disableTelemetryDescription: FMCL будет собирать информацию о запусках игр и входы в аккаунт.
+  disableTelemetryDescription: XMCL будет собирать информацию о запусках игр и входы в аккаунт.
   enableDedicatedGPUOptimization: Назначить выделенный графический процессор
   enableDedicatedGPUOptimizationDescription: Эта опция назначит выделенный графический процессор процессу Minecraft.
   enableDiscord: Включить активность Discord
@@ -1194,7 +1207,7 @@ setup:
     name: '@:setting.appearance'
   dataRoot:
     description: >-
-      Корень данных - это не обычный каталог .minecraft. Поскольку данные FMCL
+      Корень данных - это не обычный каталог .minecraft. Поскольку данные XMCL
       структура каталогов отличается от ванильной, мы не рекомендуем
       использовать общий каталог .minecraft в качестве корня данных.
     drives: Рекомендовать места
@@ -1237,7 +1250,7 @@ setup:
     name: Установить язык
   path: Текущий путь
   title: >-
-    Добро пожаловать в X Minecraft Launcher. Перед запуском нам необходимо,
+    Добро пожаловать в Flame Launcher. Перед запуском нам необходимо,
     чтобы вы 
 shaderPack:
   deletion: Удалить шейдер
@@ -1278,7 +1291,7 @@ theme:
   selectImage: Выберите изображение
   selectMusic: Выберите музыку
   selectVideo: Выберите видео
-title: X Minecraft Launcher
+title: Flame Launcher
 transportType:
   host: Кандидат Host
   prflx: Кандидат Peer Reflexive

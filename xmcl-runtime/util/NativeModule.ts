@@ -6,7 +6,7 @@ import { PassThrough } from 'stream'
 import { extract } from 'tar-stream'
 import { stream } from 'undici'
 import { createGunzip } from 'zlib'
-import { AnyError } from '~/util/error'
+import { AnyError } from '../util/error'
 
 export class NativeModuleLoader<T> {
   #retryCount = 0
@@ -24,7 +24,7 @@ export class NativeModuleLoader<T> {
       const nativeModule = getDependencyIfExists(root, this.nodeFileName)
       const result = this.loader(root, nativeModule)
       this.#signal.resolve(result)
-    } catch {
+    } catch (e) {
       if (this.#retryCount > 3) {
         this.#signal.reject(new AnyError('NativeInitError', 'Failed to load ' + this.nodeFileName))
         return

@@ -27,7 +27,7 @@
         <v-virtual-scroll
           v-if="items.length > 0"
           id="left-pane"
-          :bench="2"
+          :bench="16"
           class="visible-scroll h-full max-h-full w-full overflow-auto"
           :items="items"
           :item-height="itemHeight"
@@ -102,7 +102,10 @@ const selectedItem = computed(() => {
 watch(() => props.items, (i, old) => {
   if (!old || old.length === 0) {
     if (i.length > 0) {
-      selectedId.value = i[0].id
+      const first = i[0]
+      if (typeof first === 'object') {
+        selectedId.value = first.id
+      }
     }
   }
 })

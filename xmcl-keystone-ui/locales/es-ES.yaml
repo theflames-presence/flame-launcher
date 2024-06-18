@@ -279,6 +279,7 @@ help: Ayuda
 home: Inicio
 importModpack:
   failed: Error al importar {modpack}
+  name: Importar paquete de modificaciones
   success: Importación de {modpack} exitosa
 importResource: Importar Recurso
 install: Instalar
@@ -394,6 +395,9 @@ instanceTemplate:
 instanceUpdate:
   basic: Actualización de Ajustes
   files: Actualización de Archivos
+  loaderChanged: |-
+    Se ha cambiado el cargador de mods de esta instancia. 
+    El antiguo modloader es {modloader} y el nuevo modloader es {newModloader}.
   title: Actualizar Instancia
   update: Iniciar Actualización
 instances:
@@ -478,7 +482,7 @@ modInstall:
   install: Instalar
   installHint: Se instalará el archivo {file} con {dependencies} dependencias
   installed: Instalado
-  noVersionSupported: El Mod no es compatible con la versión actual de Minecraft
+  noVersionSupported: Mod solo es compatible con Minecraft {compatible}.
   recommendation: ¡Explora las modificaciones {first} o {second} en {modrinth} y {curseforge}!
   search: Resultado de la Búsqueda
   searchHint: Buscar y seleccionar proyecto
@@ -671,6 +675,13 @@ modrinth:
   updateAt: Actualizado
   versions: Versiones
   wikiUrl: Wiki
+multiplayer:
+  kernel: Núcleo P2P
+  kernelDescription: >-
+    Utilice WebRTC nativo o canal de datos de nodo. 
+
+    Cambie esto solo cuando su conexión p2p en algún momento bloquee la ventana
+    del iniciador.
 next: Siguiente
 'no': 'No'
 ok: Aceptar
@@ -874,7 +885,7 @@ setting:
   developerModeDescription: El Modo de Desarrollador está diseñado para probar tus propios mods
   disableTelemetry: Desactivar Telemetría
   disableTelemetryDescription: >-
-    FMCL recopilará eventos de inicio del juego y de inicio de sesión del
+    XMCL recopilará eventos de inicio del juego y de inicio de sesión del
     usuario.
   enableDedicatedGPUOptimization: Asignar GPU dedicada
   enableDedicatedGPUOptimizationDescription: Esta opción asignará GPU dedicada al proceso de Minecraft.
@@ -954,7 +965,7 @@ setup:
   dataRoot:
     description: >-
       El directorio de datos no es un directorio .minecraft común. Dado que la
-      estructura de directorios de datos de FMCL es diferente de la versión
+      estructura de directorios de datos de XMCL es diferente de la versión
       original, no recomendamos usar el directorio .minecraft común como
       directorio de datos.
     name: Establecer Directorio de Datos
@@ -973,7 +984,7 @@ setup:
     language: Idioma
     name: Establecer Idioma
   path: Ruta Actual
-  title: 'Bienvenido a X Minecraft Launcher. Antes de comenzar, necesitamos que '
+  title: 'Bienvenido a Flame Launcher. Antes de comenzar, necesitamos que '
 shaderPack:
   deletion: Eliminar Pack de Shaders
   deletionHint: Esto eliminará el archivo del pack de shaders {path} y no se podrá deshacer.
@@ -1011,7 +1022,7 @@ theme:
   selectImage: Seleccionar imagen
   selectMusic: Seleccionar música
   selectVideo: Seleccionar vídeo
-title: X Minecraft Launcher
+title: Flame Launcher
 transportType:
   host: Candidato de Anfitrión
   prflx: Candidato Reflexivo de Par
