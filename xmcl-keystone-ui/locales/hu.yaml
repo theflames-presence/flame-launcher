@@ -1,9 +1,9 @@
 AppAddInstanceDialog:
-  choiceTitle: Multiple launch profiles detected. Please select one to import.
-  configTitle: Configuration
-  createTitle: Create Game
+  choiceTitle: Több profil észlelve. Válassz egyet az importáláshoz.
+  configTitle: Konfiguráció
+  createTitle: Játék létrehozása
   downloadedNotification: A modpack {name} letöltődött. Szeretnél létrehozni egy példányt hozzá?
-  serverTitle: Input your server address
+  serverTitle: Add meg a kiszolgáló címét
 AppShareInstanceDialog:
   baseInfo: Alapvető beállítások
   cancelShare: Megosztás visszavonása
@@ -313,6 +313,7 @@ help: Súgó
 home: Kezdőlap
 importModpack:
   failed: '{modpack} importálása sikertelen'
+  name: Modpack importálása
   success: '{modpack} importálása sikeres'
 importResource: Forrás importálása
 install: Telepítés
@@ -440,6 +441,9 @@ instanceTemplate:
 instanceUpdate:
   basic: Beállítás frissítése
   files: Fájl frissítések
+  loaderChanged: |-
+    Ennek a példánynak a modloadere megváltozott. 
+    A régi modloader {modloader}, az új modloader pedig {newModloader}.
   title: Példány frissítése
   update: Frissítés indítása
 instances:
@@ -459,7 +463,7 @@ instances:
   addVanilla: Létrehozás vanilla-szerű Minecraftból
   addVanillaDescription: >-
     Importálás a közös .minecraft mappából. Ez duplikálja az eredeti
-    játékprofilt az FMCL-be.
+    játékprofilt az XMCL-be.
   choose: Játék kiválasztása
   importFolder: Importálás mappából
   importFolderDescription: Minecraft importálása a Launcherbe
@@ -679,7 +683,7 @@ modInstall:
   install: Telepítés
   installHint: Telepíti a {file} fájlt a {dependencies} függőségekkel együtt
   installed: Telepítve
-  noVersionSupported: A mod nem támogatja az aktuális Minecraft verziót
+  noVersionSupported: A Mod csak a Minecraftot támogatja {supported}.
   recommendation: >-
     Fedezze fel a {first} vagy {second} modokat a {modrinth} és a {curseforge}
     oldalon!
@@ -941,6 +945,12 @@ multiplayer:
   joinManual: Csatlakozás
   joinOrCreateGroup: Csatlakozás/Csoport létrehozása
   joinOrCreateGroupHint: Csoport azonosító kérése barátaidtól vagy csoport létrehozása
+  kernel: P2P kernel
+  kernelDescription: >-
+    Használjon natív WebRTC-t vagy node-datachannel-t. 
+
+    Csak akkor váltsa ezt, ha a p2p kapcsolata valamikor összeomlik az
+    indítóablakban.
   leaveGroup: Csoport elhagyása
   localToken: Helyi token
   manualConnect: Manuális csatlakozás
@@ -1186,7 +1196,7 @@ setting:
   developerModeDescription: Fejlesztői mód a saját írt mod tesztelésére irányul
   disableTelemetry: Telemetria kikapcsolása
   disableTelemetryDescription: >-
-    Az FMCL összegyűjti a játékindítási és a felhasználói bejelentkezési
+    Az XMCL összegyűjti a játékindítási és a felhasználói bejelentkezési
     eseményeket.
   enableDiscord: Discord státusz engedélyezése
   enableDiscordDescription: Ez folyamatosan frissíti az launcher állapotát a discordra.
@@ -1264,7 +1274,7 @@ setup:
     name: '@:setting.appearance'
   dataRoot:
     description: >-
-      Az adatgyökér nem egy közös .minecraft könyvtár. Mivel az FMCL adatok
+      Az adatgyökér nem egy közös .minecraft könyvtár. Mivel az XMCL adatok
       könyvtárszerkezet különbözik a vanilla könyvtárszerkezettől, nem
       javasoljuk, hogy a a közös .minecraft könyvtárat adatgyökérként használni.
     drives: Ajánlott helyek
@@ -1303,7 +1313,7 @@ setup:
     name: Nyelv beállítása
   path: Jelenlegi útvonal
   title: >-
-    Üdvözöljük az X Minecraft Launcherben. Mielőtt elkezdenéd, szükségünk van
+    Üdvözöljük az Flame Launcherben. Mielőtt elkezdenéd, szükségünk van
     arra, hogy 
 shaderPack:
   deletion: Shader Pack törlése
@@ -1353,7 +1363,7 @@ theme:
   selectImage: Válassza a Kép lehetőséget
   selectMusic: Válassza a Zene lehetőséget
   selectVideo: Válassza a Videó lehetőséget
-title: X Minecraft Launcher
+title: Flame Launcher
 transportType:
   host: Kiszolgáló jelölt
   prflx: Peer Reflexív jelölt

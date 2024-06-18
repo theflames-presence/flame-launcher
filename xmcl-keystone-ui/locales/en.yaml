@@ -311,6 +311,7 @@ help: Help
 home: Home
 importModpack:
   failed: Import {modpack} failed
+  name: Import Modpack
   success: Import {modpack} succeed
 importResource: Import Resource
 install: Install
@@ -430,6 +431,9 @@ instanceTemplate:
 instanceUpdate:
   basic: Setting Update
   files: File Updates
+  loaderChanged: >-
+    The modloader of this instance has been changed. The old modloader is
+    {modloader}, and the new modloader is {newModloader}.
   title: Update Instance
   update: Start Update
 instances:
@@ -651,7 +655,6 @@ mod:
   switchDefaultSource: Default Mod Source
   toUpdate: '{count} to update'
 modInstall:
-  recommendation: Explore the {first} or {second} mods in {modrinth} and {curseforge}!
   checkUpgrade: Check Mods Update
   checkedUpgrade: Upgrade checked
   currentVersion: Selected Version
@@ -659,7 +662,8 @@ modInstall:
   install: Install
   installHint: Will install {file} file with {dependencies} dependencies
   installed: Installed
-  noVersionSupported: Mod does not support current Minecraft version
+  noVersionSupported: Mod only support Minecraft {supported}.
+  recommendation: Explore the {first} or {second} mods in {modrinth} and {curseforge}!
   search: Search Result
   searchHint: Search and select project
   source: Mod Source
@@ -910,6 +914,10 @@ multiplayer:
   joinManual: Join
   joinOrCreateGroup: Join/Create Group
   joinOrCreateGroupHint: Get group id from your friends or create a group
+  kernel: P2P Kernel
+  kernelDescription: >-
+    Use either native WebRTC or node-datachannel. Only switch this when your p2p
+    connection sometime crash the launcher window.
   leaveGroup: Leave group
   localToken: Local Token
   manualConnect: Manually Connect
@@ -1233,7 +1241,7 @@ setup:
     name: '@:setting.appearance'
   dataRoot:
     description: >-
-      The data root is not a common .minecraft directory. Since FMCL data
+      The data root is not a common .minecraft directory. Since XMCL data
       directory structure is different from vanilla, we do not recommend to use
       the common .minecraft directory as a data root.
     drives: Recommend Locations

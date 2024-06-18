@@ -12,7 +12,6 @@ thumbs.db
 *.bin
 /temp
 xmcl-electron-app/build/appx
-Run Visual Studio.cmd
 .env
 
 p2p.network

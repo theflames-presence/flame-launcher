@@ -1,5 +1,5 @@
 import { Plugin, build as esbuild } from 'esbuild'
-import { join } from 'path'
+import { basename, join } from 'path'
 import { cleanUrl } from './util'
 /**
  * Resolve the import of preload and emit it as single chunk of js file in rollup.
@@ -16,20 +16,13 @@ export default function createPreloadPlugin(preloadSrc: string): Plugin {
       build.onLoad({ filter: /^.+\?preload$/g }, async ({ path }) => {
         const absoltePath = cleanUrl(path)
         const result = await esbuild({
+          ...build.initialOptions,
           bundle: true,
           metafile: true,
-          define: build.initialOptions.define,
           entryNames: '[dir]/[name]-preload',
           entryPoints: [absoltePath],
           treeShaking: true,
           write: true,
-          outdir: build.initialOptions.outdir,
-          absWorkingDir: build.initialOptions.outdir,
-          platform: 'node',
-          external: build.initialOptions.external,
-          sourceRoot: build.initialOptions.sourceRoot,
-          sourcemap: build.initialOptions.sourcemap,
-          format: build.initialOptions.format,
         })
         const resultFile = Object.keys(result.metafile?.outputs || {}).filter(v => v.endsWith('.js'))[0]
         const watching = Object.keys(result.metafile?.inputs || {})
@@ -37,8 +30,8 @@ export default function createPreloadPlugin(preloadSrc: string): Plugin {
           errors: result.errors,
           warnings: result.warnings,
           contents: build.initialOptions.plugins!.find(v => v.name === 'dev')
-            ? `export default ${JSON.stringify(join(build.initialOptions.outdir!, resultFile))}`
-            : `import { join } from 'path'; export default join(__dirname, ${JSON.stringify(resultFile)})`,
+            ? `export default ${JSON.stringify(join(build.initialOptions.outdir!, basename(resultFile)))}`
+            : `import { join } from 'path'; export default join(__dirname, ${JSON.stringify(basename(resultFile))})`,
           watchFiles: build.initialOptions.plugins!.find(v => v.name === 'dev') ? watching : undefined,
         }
       })

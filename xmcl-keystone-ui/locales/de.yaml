@@ -346,6 +346,7 @@ help: Referenz.
 home: Startseite
 importModpack:
   failed: Importieren fehlgeschlagen {modpack}
+  name: Modpack importieren
   success: Import von {modpack} erfolgreich abgeschlossen
 importResource: Importieren einer Ressource
 install: Installieren Sie
@@ -470,6 +471,11 @@ instanceTemplate:
 instanceUpdate:
   basic: Aktualisieren Sie Ihre Einstellungen
   files: Dateien aktualisieren
+  loaderChanged: >-
+    Der Modloader dieser Instanz wurde geändert. 
+
+    Der alte Modloader ist {modloader} und der neue Modloader ist
+    {newModloader}.
   title: Aktualisieren Sie Ihre Instanz
   update: Aktualisierung beginnen
 instances:
@@ -489,7 +495,7 @@ instances:
   addVanilla: Erstellen Sie mit Vanilla Minecraft
   addVanillaDescription: |-
     Importieren Sie aus dem gemeinsamen .minecraft-Ordner. 
-    Dadurch wird das ursprüngliche Spielprofil in die FMCL kopiert.
+    Dadurch wird das ursprüngliche Spielprofil in die XMCL kopiert.
   choose: Spiel auswählen
   importFolder: Importieren aus einem Ordner
   importFolderDescription: Minecraft in den Launcher importieren
@@ -720,7 +726,7 @@ modInstall:
   install: Installieren Sie
   installHint: Die Datei wird installiert {file} mit Süchten {dependencies} Abhängigkeiten
   installed: Installiert
-  noVersionSupported: Die Mod unterstützt nicht die aktuelle Version von Minecraft
+  noVersionSupported: Mod unterstützt nur Minecraft {supported}.
   recommendation: Entdecken Sie die {first} oder {second} Mods in {modrinth} und {curseforge}!
   search: Suchergebnis
   searchHint: Projektsuche und -auswahl
@@ -979,6 +985,12 @@ multiplayer:
   joinOrCreateGroupHint: >-
     Erhalten Sie eine Gruppen-ID von Ihren Freunden oder erstellen Sie eine
     Gruppe
+  kernel: P2P-Kernel
+  kernelDescription: >-
+    Verwenden Sie entweder natives WebRTC oder Node-Datachannel. 
+
+    Ändern Sie dies nur, wenn Ihre P2P-Verbindung irgendwann das Startfenster
+    zum Absturz bringt.
   leaveGroup: Verlassen Sie die Gruppe
   localToken: Lokaler Token
   manualConnect: Manuelle Verbindung
@@ -1230,7 +1242,7 @@ setting:
     Der Entwicklermodus ist dazu gedacht, die von Ihnen geschriebene Mod zu
     testen.
   disableTelemetry: Telemetrie ausschalten
-  disableTelemetryDescription: FMCL sammelt die Ereignisse des Spielstarts und der Benutzeranmeldung.
+  disableTelemetryDescription: XMCL sammelt die Ereignisse des Spielstarts und der Benutzeranmeldung.
   enableDedicatedGPUOptimization: Weisen Sie eine dedizierte GPU zu
   enableDedicatedGPUOptimizationDescription: Diese Option weist dem Minecraft-Prozess eine dedizierte GPU zu.
   enableDiscord: Discord-Präsenz einschalten (Discord-Spielstatus)
@@ -1315,7 +1327,7 @@ setup:
     name: '@:setting.appearance'
   dataRoot:
     description: |-
-      Der Datenstamm ist kein normales .minecraft-Verzeichnis. Da die FMCL-Daten
+      Der Datenstamm ist kein normales .minecraft-Verzeichnis. Da die XMCL-Daten
        Verzeichnisstruktur von Vanilla abweicht, empfehlen wir nicht die Verwendung des
        das übliche .minecraft-Verzeichnis als Datenstamm zu verwenden.
     drives: Empfohlene Orte
@@ -1363,7 +1375,7 @@ setup:
     language: Sprache.
     name: Sprache einstellen
   path: Aktueller Pfad
-  title: Willkommen beim X Minecraft Launcher. Bevor wir beginnen, brauchen wir Sie
+  title: Willkommen beim Flame Launcher. Bevor wir beginnen, brauchen wir Sie
 shaderPack:
   deletion: Shader löschen
   deletionHint: >-
@@ -1404,7 +1416,7 @@ theme:
   selectImage: Bild auswählen
   selectMusic: Wählen Sie Musik
   selectVideo: Wählen Sie Video
-title: X Minecraft Launcher
+title: Flame Launcher
 transportType:
   host: Gastgeber-Kandidat
   prflx: Gastgeber-Peer Reflexive

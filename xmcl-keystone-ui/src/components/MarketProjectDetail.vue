@@ -150,7 +150,9 @@
                 {{
                   versions.length > 0 ?
                     t('modInstall.installHint', { file: 1, dependencies: dependencies.filter(d => d.type === 'required').length })
-                    : t('modInstall.noVersionSupported')
+                    : t('modInstall.noVersionSupported', {
+                      supported: supportedVersions?.join(', ')
+                    })
                 }}
               </div>
             </div>
@@ -203,7 +205,7 @@
                     outlined
                     hide-details
                   >
-                    <span class="max-w-40 xl:max-w-50 overflow-hidden overflow-ellipsis whitespace-nowrap 2xl:max-w-full">
+                    <span class="xl:max-w-50 max-w-40 overflow-hidden overflow-ellipsis whitespace-nowrap 2xl:max-w-full">
 
                       {{ selectedVersion?.name }}
                     </span>
@@ -379,8 +381,10 @@
           </v-card-text>
           <div
             v-else-if="detail.htmlContent"
+            data-description-div
             class="markdown-body select-text whitespace-normal"
             :class="{ 'project-description': curseforge }"
+            @click="onDescriptionDivClicked"
             v-html="detail.htmlContent"
           />
           <template v-else-if="detail.description.includes('§')">
@@ -652,6 +656,7 @@ const props = defineProps<{
   loadingDependencies?: boolean
   loadingVersions: boolean
   selectedInstalled: boolean
+  supportedVersions?: string[]
   noDelete?: boolean
   noEnabled?: boolean
   hasMore: boolean
@@ -670,6 +675,7 @@ const emit = defineEmits<{
   (event: 'open-dependency', dep: ProjectDependency): void
   (event: 'select:category', category: string): void
   (event: 'refresh'): void
+  (event: 'description-link-clicked', e: MouseEvent, href: string): void
 }>()
 
 export interface ProjectDependency {
@@ -829,10 +835,6 @@ watch(() => props.versions, (vers) => {
 
 const showDependencies = ref(false)
 
-const onSwitchVersion = () => {
-
-}
-
 const installed = computed(() => props.versions.find(v => v.installed))
 const notInstalled = computed(() => props.versions.filter(v => !v.installed))
 
@@ -856,6 +858,26 @@ const imageDialog = injection(kImageDialog)
 const onShowImage = (img: ModGallery) => {
   imageDialog.show(img.url, { description: img.description, date: img.date })
 }
+
+// Content clicked
+function onDescriptionDivClicked(e: MouseEvent) {
+  const isHTMLElement = (e: unknown): e is HTMLElement => {
+    return !!e && e instanceof HTMLElement
+  }
+  let ele = e.target
+  while (isHTMLElement(ele) && !ele.attributes.getNamedItem('data-description-div')) {
+    if (ele.tagName === 'A') {
+      const href = ele.getAttribute('href')
+
+      if (href) {
+        emit('description-link-clicked', e, href)
+        break
+      }
+    }
+    ele = ele.parentElement
+  }
+}
+
 </script>
 
 <style>

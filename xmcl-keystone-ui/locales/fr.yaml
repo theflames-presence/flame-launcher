@@ -353,6 +353,7 @@ help: Aider
 home: Accueil
 importModpack:
   failed: Échec de l'importation de {modpack}
+  name: Importer un pack de modules
   success: L'importation de {modpack} a réussi
 importResource: Importer une ressource
 install: Installer
@@ -475,6 +476,11 @@ instanceTemplate:
 instanceUpdate:
   basic: Mise à jour des Paramètres
   files: Mise à jour des Fichiers
+  loaderChanged: >-
+    Le modloader de cette instance a été modifié. 
+
+    L'ancien modloader est {modloader} et le nouveau modloader est
+    {newModloader}.
   title: Mettre à jour l'Instance
   update: Démarrer la Mise à Jour
 instances:
@@ -710,6 +716,7 @@ mod:
 modInstall:
   install: Installer
   installed: Installé
+  noVersionSupported: Le mod prend uniquement en charge Minecraft {supported}.
   recommendation: "Explorez les mods {first} ou {second} dans {modrinth} et {curseforge}\_!"
   search: Résultats
   searchHint: Rechercher et sélectionner un projet
@@ -952,6 +959,12 @@ multiplayer:
   joinManual: Rejoindre
   joinOrCreateGroup: Rejoindre/Créer un groupe
   joinOrCreateGroupHint: Obtenez l'identifiant de groupe de vos amis ou créez un groupe
+  kernel: Noyau P2P
+  kernelDescription: >-
+    Utilisez soit WebRTC natif, soit node-datachannel. 
+
+    Ne changez cette option que lorsque votre connexion P2P plante parfois la
+    fenêtre du lanceur.
   leaveGroup: Quitter le groupe
   localToken: Token local
   manualConnect: Connecter manuellement
@@ -1193,7 +1206,7 @@ setting:
   developerModeDescription: Le mode développeur vise à tester votre propre mod
   disableTelemetry: Désactiver la télémétrie
   disableTelemetryDescription: >-
-    FMCL collectera les événements de lancement du jeu et de connexion de
+    XMCL collectera les événements de lancement du jeu et de connexion de
     l'utilisateur.
   enableDedicatedGPUOptimization: Attribuer un GPU dédié
   enableDedicatedGPUOptimizationDescription: Cette option attribuera un GPU dédié au processus Minecraft.
@@ -1277,7 +1290,7 @@ setup:
   dataRoot:
     description: >-
       La racine des données n'est pas un répertoire .minecraft commun. Étant
-      donné que la structure du répertoire de données FMCL est différente de
+      donné que la structure du répertoire de données XMCL est différente de
       celle vanilla, nous ne recommandons pas d'utiliser le répertoire commun
       .minecraft comme racine de données.
     drives: Recommander des emplacements
@@ -1319,7 +1332,7 @@ setup:
     name: choisir la langue
   path: Chemin actuel
   title: |-
-    Bienvenue dans le X Minecraft Launcher. 
+    Bienvenue dans le Flame Launcher. 
     Avant de commencer, veuillez :
 shaderPack:
   deletion: Supprimer le shaderpack
@@ -1364,7 +1377,7 @@ theme:
   selectImage: Sélectionnez une image
   selectMusic: Sélectionnez la musique
   selectVideo: Sélectionnez la vidéo
-title: X Minecraft Launcher
+title: Flame Launcher
 transportType:
   host: Candidat Hôte
   prflx: Candidat Peer Reflexive
