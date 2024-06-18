@@ -211,6 +211,10 @@ async function get(url: string, fd: number, destination: string, headers: Record
       await finished(writable)
     }
   } catch (e) {
+    const err = e as any
+    if (!err.stack) {
+      err.stack = new Error().stack
+    }
     return e
   }
 }
@@ -224,9 +228,12 @@ function computeRanges(metadata: Metadata | undefined, rangePolicy: RangePolicy)
 
 function getUrl(metadata: Metadata | undefined, original: string) {
   if (!metadata || !metadata.pathname || !metadata.origin) return original
-  const url = new URL(metadata.origin)
-  url.pathname = metadata.pathname
-  return url.toString()
+  try {
+    const url = new URL(metadata.pathname, metadata.origin)
+    return url.toString()
+  } catch {
+    return original
+  }
 }
 
 /**
@@ -342,6 +349,10 @@ export async function download(options: DownloadOptions) {
         await datasync(fd)
       } catch (e) {
         noErrors = false
+        const err = e as any
+        if (!err.stack) {
+          err.stack = new Error().stack
+        }
         aggregate.push(decorate(e, 'datasync'))
       }
 

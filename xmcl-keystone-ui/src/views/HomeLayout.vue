@@ -46,7 +46,7 @@ import HomeLogDialog from './HomeLogDialog.vue'
 const router = useRouter()
 
 router.afterEach((r) => {
-  document.title = `FMCL KeyStone - ${r.fullPath}`
+  document.title = `XMCL KeyStone - ${r.fullPath}`
   if (containerRef.value) {
     containerRef.value.scrollTop = 0
   }

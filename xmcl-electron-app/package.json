@@ -2,7 +2,7 @@
     "name": "fmcl",
     "private": true,
     "main": "./index.js",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "author": "aislxflames <proarghaop@gmail.com>",
     "description": "A great minecraft launcher in the future",
     "license": "MIT",
@@ -25,6 +25,7 @@
         "lint:fix": "npm run lint -- --fix"
     },
     "devDependencies": {
+        "app-builder-lib": "~24",
         "@electron/rebuild": "^3.6.0",
         "@types/electron-devtools-installer": "^2.2.2",
         "@types/fs-extra": "~11",
@@ -62,7 +63,7 @@
         "fs-extra": "^10.1.0",
         "graceful-fs": "^4.2.10",
         "lodash.debounce": "^4.0.8",
-        "node-datachannel": "0.7.0",
+        "node-datachannel": "0.9.1",
         "node-disk-info": "^1.3.0",
         "original-fs": "^1.2.0",
         "semver": "^7.5.4",
