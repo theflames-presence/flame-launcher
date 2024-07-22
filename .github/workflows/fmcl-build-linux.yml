@@ -10,8 +10,8 @@ on:
       - 'xmcl-keystone-ui/**'
       - 'xmcl-electron-app/**'
       - 'package.json'
-  workflow_dispatch:
-     
+      - '.github/**'     
+      
 jobs:
 
   build:
@@ -33,44 +33,39 @@ jobs:
         node-version: 16
         cache: 'pnpm'
 
-    - name: Clone Repository
-      run: git clone --recurse-submodules https://github.com/aislxflames/flame-launcher ~/flame-launcher
+    - name: Install
+      run: pnpm install
 
-    - name: Install Dependencies
+    - name: Build all
       run: |
-        cd ~/flame-launcher
-        pnpm install
-
-    - name: Build Renderer
-      run: |
-        cd ~/flame-launcher
-        pnpm build:renderer
-
-    - name: Build All
-      run: |
-        cd ~/flame-launcher
-        pnpm build:all
-
+        pnpm run --prefix xmcl-keystone-ui build
+        pnpm run --prefix xmcl-electron-app build:all
+      env:
+        BUILD_NUMBER: ${{ secrets.FMCL_VERSION }}
+        NODE_OPTIONS: --max-old-space-size=32768
+        NODE_ENV: production
+        CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_TOKEN }}
+        
     - name: FMCL-x64-Upload-Deb
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Deb
-        path: ~/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-amd64.deb
+        path: src\output\fmcl-${{ secrets.FMCL_VERSION }}-amd64.deb
       
     - name: FMCL-x32-Upload-Deb
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-LINUX-x32-v${{ secrets.FMCL_VERSION }}-Deb
-        path: ~/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.deb
+        path: src\output\fmcl-${{ secrets.FMCL_VERSION }}-arm64.deb
         
     - name: FMCL-x64-Upload-Zip
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Zip
-        path: ~/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-x64.tar.xz
+        path: src\output\xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-x64.tar.xz
       
     - name: FMCL-x32-Upload-Zip
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-LINUX-x32-v${{ secrets.FMCL_VERSION }}-Zip
-        path: ~/flame-launcher/xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.tar.xz
+        path: src\output\xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.tar.xz
