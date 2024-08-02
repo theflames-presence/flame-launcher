@@ -17,6 +17,6 @@ task:
   continue: Megjelenítés launcherben
   fail: Egy feladat meghiúsult
   success: Egy feladat sikeres
-title: Dynamic Launcher
+title: Flame Launcher
 urlFailed: Ismeretlen url {url}. Kérlek ellenőrizd az url-t vagy lépj kapcsolatba a fejlesztővel!
 urlSuccess: Sikerült! Most már bezárhatod ezt az ablakot, és visszatérhetsz a launcherhez!

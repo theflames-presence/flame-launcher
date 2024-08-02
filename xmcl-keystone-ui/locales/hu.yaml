@@ -1313,7 +1313,7 @@ setup:
     name: Nyelv beállítása
   path: Jelenlegi útvonal
   title: >-
-    Üdvözöljük az Dynamic Launcherben. Mielőtt elkezdenéd, szükségünk van
+    Üdvözöljük az Flame Launcherben. Mielőtt elkezdenéd, szükségünk van
     arra, hogy 
 shaderPack:
   deletion: Shader Pack törlése
@@ -1363,7 +1363,7 @@ theme:
   selectImage: Válassza a Kép lehetőséget
   selectMusic: Válassza a Zene lehetőséget
   selectVideo: Válassza a Videó lehetőséget
-title: Dynamic Launcher
+title: Flame Launcher
 transportType:
   host: Kiszolgáló jelölt
   prflx: Peer Reflexív jelölt

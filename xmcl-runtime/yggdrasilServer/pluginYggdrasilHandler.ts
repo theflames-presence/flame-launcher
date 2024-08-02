@@ -87,7 +87,7 @@ export const pluginYggdrasilHandler: LauncherAppPlugin = (app) => {
           meta: {
             implementationName: 'xmcl-offline-server',
             implementationVersion: '0.0.1',
-            serverName: 'Dynamic Launcher Offline Server',
+            serverName: 'Flame Launcher Offline Server',
           },
           skinDomains: [
             'localhost',

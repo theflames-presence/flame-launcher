@@ -1,9 +1,9 @@
 {
     "name": "@xmcl/runtime",
     "private": true,
-    "version": "1.0",
-    "author": "ninja <ninjaopyt15@gmail.com>",
-    "description": "The runtime for Dynamic Launcher in nodejs",
+    "version": "1.0.8",
+    "author": "aislx <proarghaop@gmail.com>",
+    "description": "The runtime for Flame Launcher in nodejs",
     "license": "MIT",
     "main": "index.ts",
     "type": "module",
