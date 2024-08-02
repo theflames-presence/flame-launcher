@@ -1375,7 +1375,7 @@ setup:
     language: Sprache.
     name: Sprache einstellen
   path: Aktueller Pfad
-  title: Willkommen beim Flame Launcher. Bevor wir beginnen, brauchen wir Sie
+  title: Willkommen beim Dynamic Launcher. Bevor wir beginnen, brauchen wir Sie
 shaderPack:
   deletion: Shader löschen
   deletionHint: >-
@@ -1416,7 +1416,7 @@ theme:
   selectImage: Bild auswählen
   selectMusic: Wählen Sie Musik
   selectVideo: Wählen Sie Video
-title: Flame Launcher
+title: Dynamic Launcher
 transportType:
   host: Gastgeber-Kandidat
   prflx: Gastgeber-Peer Reflexive

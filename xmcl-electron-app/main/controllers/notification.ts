@@ -5,7 +5,7 @@ import { ControllerPlugin } from './plugin'
 export const notificationSetupPlugin: ControllerPlugin = function (this: ElectronController) {
   this.app.once('engine-ready', () => {
     if (this.app.platform.os === 'windows') {
-      app.setAppUserModelId('Flame Launcher')
+      app.setAppUserModelId('Dynamic Launcher')
     }
   })
 }
