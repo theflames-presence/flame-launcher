@@ -1250,7 +1250,7 @@ setup:
     name: Установить язык
   path: Текущий путь
   title: >-
-    Добро пожаловать в Flame Launcher. Перед запуском нам необходимо,
+    Добро пожаловать в Dynamic Launcher. Перед запуском нам необходимо,
     чтобы вы 
 shaderPack:
   deletion: Удалить шейдер
@@ -1291,7 +1291,7 @@ theme:
   selectImage: Выберите изображение
   selectMusic: Выберите музыку
   selectVideo: Выберите видео
-title: Flame Launcher
+title: Dynamic Launcher
 transportType:
   host: Кандидат Host
   prflx: Кандидат Peer Reflexive

@@ -49,7 +49,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
     const minMemory: number | undefined = options.minMemory
     const maxMemory: number | undefined = options.maxMemory
 
-    const launcherName = `Flame Launcher (${this.app.version})`
+    const launcherName = `Dynamic Launcher (${this.app.version})`
     /**
      * Build launch condition
      */

@@ -25,7 +25,7 @@ async function writeMimeList(mimesAppsList: string) {
 async function ensureDesktopFile(homePath: string, exePath: string, assigned: boolean) {
   const desktopFile = join(homePath, '.local', 'share', 'applications', 'xmcl.desktop')
   if (existsSync(desktopFile) || !assigned) {
-    await writeFile(desktopFile, `[Desktop Entry]\nName=Flame Launcher\nExec=${exePath} %u\nIcon=${exePath}\nType=Application\nMimeType=x-scheme-handler/xmcl;`)
+    await writeFile(desktopFile, `[Desktop Entry]\nName=Dynamic Launcher\nExec=${exePath} %u\nIcon=${exePath}\nType=Application\nMimeType=x-scheme-handler/xmcl;`)
   }
 }
 

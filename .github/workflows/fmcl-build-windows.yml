@@ -62,13 +62,13 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-WINDOWS-x64-v${{ secrets.FMCL_VERSION }}-App
-        path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
+        path: src\output\Dynamic-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
 
     - name: FMCL-x32-Upload-App
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-WINDOWS-x32-v${{ secrets.FMCL_VERSION }}-App
-        path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
+        path: src\output\Dynamic-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
 
     - name: FMCL-x64-Upload-Archive
       uses: actions/upload-artifact@v3
@@ -121,8 +121,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-new-release.outputs.upload_url }}
-        asset_path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
-        asset_name: Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
+        asset_path: src\output\Dynamic-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
+        asset_name: Dynamic-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
         asset_content_type: application/exe
     
     - name: FMCL-x32-Upload App to Github 
@@ -132,9 +132,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-new-release.outputs.upload_url }}
-        asset_path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
-        asset_name: Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
+        asset_path: src\output\Dynamic-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
+        asset_name: Dynamic-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
         asset_content_type: application/exe
 
-    - name: Publish to WinGet
-      run: wingetcreate.exe update --submit --token ${{ secrets.GITHUB_TOKEN }} --urls https://github.com/aislxflames/flame-launcher/releases/download/v1.0.8/Flame-Launcher.-v1.0.8.-setup-x64.exe --version 1.0.8 aislx.FlameLauncher
+  
