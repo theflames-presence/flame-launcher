@@ -984,7 +984,7 @@ setup:
     language: Idioma
     name: Establecer Idioma
   path: Ruta Actual
-  title: 'Bienvenido a Dynamic Launcher. Antes de comenzar, necesitamos que '
+  title: 'Bienvenido a Flame Launcher. Antes de comenzar, necesitamos que '
 shaderPack:
   deletion: Eliminar Pack de Shaders
   deletionHint: Esto eliminará el archivo del pack de shaders {path} y no se podrá deshacer.
@@ -1022,7 +1022,7 @@ theme:
   selectImage: Seleccionar imagen
   selectMusic: Seleccionar música
   selectVideo: Seleccionar vídeo
-title: Dynamic Launcher
+title: Flame Launcher
 transportType:
   host: Candidato de Anfitrión
   prflx: Candidato Reflexivo de Par

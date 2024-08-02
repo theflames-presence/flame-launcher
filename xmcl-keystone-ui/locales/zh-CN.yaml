@@ -1226,7 +1226,7 @@ setup:
     language: 当前语言
     name: 设置语言
   path: 当前位置
-  title: 欢迎使用 Dynamic Launcher。在开始前，需要您先
+  title: 欢迎使用 Flame Launcher。在开始前，需要您先
 shaderPack:
   deletion: 删除光影包
   deletionHint: 这将把光影包文件 {path} 永久删除。

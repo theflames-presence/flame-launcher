@@ -2,7 +2,7 @@
     "name": "fmcl",
     "private": true,
     "main": "./index.js",
-    "version": "1.0",
+    "version": "1.0.8",
     "author": "aislxflames <proarghaop@gmail.com>",
     "description": "A great minecraft launcher in the future",
     "license": "MIT",
