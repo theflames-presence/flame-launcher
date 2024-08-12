@@ -36,7 +36,7 @@ Looking for Deno version? Check out [discord_rpc_deno](https://github.com/xhaype
 import { Client } from "@xhayper/discord-rpc";
 
 const client = new Client({
-    clientId: "1195395448446406758"
+    clientId: "123456789012345678"
 });
 
 client.on("ready", () => {

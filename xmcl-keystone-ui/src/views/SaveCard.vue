@@ -1,11 +1,9 @@
 <template>
   <v-card
-    v-draggable-card
     v-data-transfer:id="source.name"
     v-data-transfer-image="icon"
     hover
     outlined
-    draggable
     class="dark:white--text draggable-card p-2"
     style="margin-top: 10px; transition-duration: 0.2s; margin-bottom: 20px"
     @dragstart="onDragStart"
@@ -14,7 +12,6 @@
     <div class="flex items-center gap-4">
       <img
         ref="icon"
-        v-fallback-img="unknownPack"
         class="rounded-lg object-contain"
         :src="source.icon"
         width="80px"
@@ -28,7 +25,7 @@
         <div class="flex gap-2">
           <AvatarChip
             small
-            avatar="http://launcher/icons/minecraft"
+            :avatar="BuiltinImages.minecraft"
             :text="`Minecraft ${source.gameVersion}`"
           />
 
@@ -82,16 +79,17 @@
 </template>
 
 <script lang=ts setup>
-import { BaseServiceKey, InstanceSaveMetadata } from '@xmcl/runtime-api'
+import { BaseServiceKey, InstanceSave } from '@xmcl/runtime-api'
 import unknownPack from '@/assets/unknown_pack.png'
 import { useService } from '@/composables'
 import { vFallbackImg } from '../directives/fallbackImage'
 import { vDataTransfer, vDataTransferImage, vDraggableCard } from '../directives/draggableCard'
 import AvatarChip from '@/components/AvatarChip.vue'
+import { BuiltinImages } from '@/constant'
 
 const props = defineProps<{
   exportSave(path:string): void
-  source: InstanceSaveMetadata
+  source: InstanceSave
 }>()
 
 const emit = defineEmits(['dragstart', 'dragend', 'remove'])

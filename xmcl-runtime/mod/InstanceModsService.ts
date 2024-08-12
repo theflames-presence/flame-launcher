@@ -1,15 +1,18 @@
 import { InstanceModsService as IInstanceModsService, ResourceService as IResourceService, InstallModsOptions, InstanceModUpdatePayload, InstanceModUpdatePayloadAction, InstanceModsServiceKey, InstanceModsState, MutableState, PartialResourceHash, Resource, ResourceDomain, getInstanceModStateKey, isModResource } from '@xmcl/runtime-api'
-import { ensureDir, rename, stat, unlink } from 'fs-extra'
+import { emptyDir, ensureDir, rename, stat, unlink } from 'fs-extra'
+import debounce from 'lodash.debounce'
 import watch from 'node-watch'
 import { dirname, join } from 'path'
 import { Inject, LauncherAppKey } from '~/app'
-import { ResourceService } from '~/resource'
+import { kResourceWorker, ResourceService } from '~/resource'
 import { shouldIgnoreFile } from '~/resource/core/pathUtils'
 import { AbstractService, ExposeServiceKey, ServiceStateManager } from '~/service'
 import { AnyError, isSystemError } from '~/util/error'
 import { LauncherApp } from '../app/LauncherApp'
 import { AggregateExecutor } from '../util/aggregator'
 import { linkWithTimeoutOrCopy, readdirIfPresent } from '../util/fs'
+import { ModrinthV2Client } from '@xmcl/modrinth'
+import { CurseforgeV1Client } from '@xmcl/curseforge'
 
 /**
  * Provide the abilities to import mods and resource packs files to instance
@@ -27,6 +30,91 @@ export class InstanceModsService extends AbstractService implements IInstanceMod
         path: instancePath,
       })
     })
+  }
+
+  async refreshMetadata(instancePath: string): Promise<void> {
+    const stateManager = await this.app.registry.get(ServiceStateManager)
+    const state: MutableState<InstanceModsState> | undefined = await stateManager.get(getInstanceModStateKey(instancePath))
+    if (state) {
+      await state.revalidate()
+      const modrinthClient = await this.app.registry.getOrCreate(ModrinthV2Client)
+      const curseforgeClient = await this.app.registry.getOrCreate(CurseforgeV1Client)
+      const worker = await this.app.registry.getOrCreate(kResourceWorker)
+
+      const onRefreshModrinth = async (all: Resource[]) => {
+        try {
+          const versions = await modrinthClient.getProjectVersionsByHash(all.map(v => v.hash))
+          const options = Object.entries(versions).map(([hash, version]) => {
+            const f = all.find(f => f.hash === hash)
+            if (f) return { hash: f.hash, metadata: { modrinth: { projectId: version.project_id, versionId: version.id } } }
+            return undefined
+          }).filter((v): v is any => !!v)
+          if (options.length > 0) {
+            await this.resourceService.updateResources(options)
+            state.instanceModUpdates([[options, InstanceModUpdatePayloadAction.Update]])
+          }
+        } catch (e) {
+          this.error(e as any)
+        }
+      }
+      const onRefreshCurseforge = async (all: Resource[]) => {
+        try {
+          const chunkSize = 8
+          const allChunks = [] as Resource[][]
+          for (let i = 0; i < all.length; i += chunkSize) {
+            allChunks.push(all.slice(i, i + chunkSize))
+          }
+
+          const allPrints: Record<number, Resource> = {}
+          for (const chunk of allChunks) {
+            const prints = (await Promise.all(chunk.map(async (v) => ({ fingerprint: await worker.fingerprint(v.path), file: v }))))
+            for (const { fingerprint, file } of prints) {
+              if (fingerprint in allPrints) {
+                this.error(new Error(`Duplicated fingerprint ${fingerprint} for ${file.path} and ${allPrints[fingerprint].path}`))
+                continue
+              }
+              allPrints[fingerprint] = file
+            }
+          }
+          const result = await curseforgeClient.getFingerprintsMatchesByGameId(432, Object.keys(allPrints).map(v => parseInt(v, 10)))
+          const options = [] as { hash: string; metadata: { curseforge: { projectId: number; fileId: number } } }[]
+          for (const f of result.exactMatches) {
+            const r = allPrints[f.file.fileFingerprint] || Object.values(allPrints).find(v => v.hash === f.file.hashes.find(a => a.algo === 1)?.value)
+            if (r) {
+              r.metadata.curseforge = { projectId: f.file.modId, fileId: f.file.id }
+              options.push({
+                hash: r.hash,
+                metadata: {
+                  curseforge: { projectId: f.file.modId, fileId: f.file.id },
+                },
+              })
+            }
+          }
+
+          if (options.length > 0) {
+            await this.resourceService.updateResources(options)
+            state.instanceModUpdates([[options, InstanceModUpdatePayloadAction.Update]])
+          }
+        } catch (e) {
+          this.error(e as any)
+        }
+      }
+
+      const refreshCurseforge: Resource[] = []
+      const refreshModrinth: Resource[] = []
+      for (const mod of state.mods.filter(v => !v.metadata.curseforge || !v.metadata.modrinth)) {
+        if (!mod.metadata.curseforge) {
+          refreshCurseforge.push(mod)
+        }
+        if (!mod.metadata.modrinth) {
+          refreshModrinth.push(mod)
+        }
+      }
+      await Promise.allSettled([
+        refreshCurseforge.length > 0 ? onRefreshCurseforge(refreshCurseforge) : undefined,
+        refreshModrinth.length > 0 ? onRefreshModrinth(refreshModrinth) : undefined,
+      ])
+    }
   }
 
   async showDirectory(path: string): Promise<void> {
@@ -61,6 +149,7 @@ export class InstanceModsService extends AbstractService implements IInstanceMod
 
       const state = new InstanceModsState()
       const pending: Set<string> = new Set()
+      const basePath = join(instancePath, 'mods')
 
       const processUpdate = defineAsyncOperation(async (filePath: string, retryLimit = 7) => {
         try {
@@ -96,6 +185,26 @@ export class InstanceModsService extends AbstractService implements IInstanceMod
           this.warn(`Cannot remove the mod ${filePath} as it's not found in memory cache!`)
         }
       }
+      const revalidate = async () => {
+        const files = await readdirIfPresent(basePath)
+        const expectFiles = files.filter((file) => !shouldIgnoreFile(file)).map((file) => join(basePath, file))
+        const current = state.mods.length
+        // Find differences
+        const currentFiles = state.mods.map(r => r.path)
+        const added = expectFiles.filter(f => !currentFiles.includes(f))
+        const removed = currentFiles.filter(f => !expectFiles.includes(f))
+        if (current !== expectFiles.length || added.length > 0 || removed.length > 0) {
+          this.log(`Instance mods count mismatch: ${current} vs ${expectFiles.length}`)
+          if (added.length > 0) {
+            this.log(`Instance mods added: ${added.length}`)
+            for (const f of added) { processUpdate(f) }
+          }
+          if (removed.length > 0) {
+            this.log(`Instance mods removed: ${removed.length}`)
+            for (const f of removed) { processRemove(f) }
+          }
+        }
+      }
 
       const listener = this.resourceService as IResourceService
       const onResourceUpdate = (res: PartialResourceHash[]) => {
@@ -108,15 +217,15 @@ export class InstanceModsService extends AbstractService implements IInstanceMod
       listener
         .on('resourceUpdate', onResourceUpdate)
 
-      const basePath = join(instancePath, 'mods')
       await ensureDir(basePath)
       await this.resourceService.whenReady(ResourceDomain.Mods)
+
       const scan = async (dir: string) => {
         const files = (await readdirIfPresent(dir))
           .filter((file) => !shouldIgnoreFile(file))
           .map((file) => join(dir, file))
 
-        const peekCount = 100
+        const peekCount = 128
         const peekChunks = files.slice(0, peekCount)
         for (const file of files.slice(peekCount)) {
           processUpdate(file)
@@ -127,14 +236,26 @@ export class InstanceModsService extends AbstractService implements IInstanceMod
       }
       state.mods = await scan(basePath)
 
+      let events = 0
       const watcher = watch(basePath, async (event, filePath) => {
         if (shouldIgnoreFile(filePath) || filePath === basePath) return
+
+        events++
+        debouncedRevalidate()
+
         if (event === 'update') {
           processUpdate(filePath)
         } else {
           processRemove(filePath)
         }
       })
+
+      const debouncedRevalidate = debounce(() => {
+        if (events > 10) {
+          revalidate()
+        }
+        events = 0
+      }, 500)
 
       watcher.on('close', () => {
         this.log(`Unwatch on instance mods: ${basePath}`)
@@ -146,27 +267,7 @@ export class InstanceModsService extends AbstractService implements IInstanceMod
         watcher.close()
         listener.removeListener('resourceAdd', onResourceUpdate)
           .removeListener('resourceUpdate', onResourceUpdate)
-      }, async () => {
-        // relvaidate
-        const files = await readdirIfPresent(basePath)
-        const expectFiles = files.filter((file) => !shouldIgnoreFile(file)).map((file) => join(basePath, file))
-        const current = state.mods.length
-        if (current !== expectFiles.length) {
-          this.log(`Instance mods count mismatch: ${current} vs ${expectFiles.length}`)
-          // Find differences
-          const currentFiles = state.mods.map(r => r.path)
-          const added = expectFiles.filter(f => !currentFiles.includes(f))
-          const removed = currentFiles.filter(f => !expectFiles.includes(f))
-          if (added.length > 0) {
-            this.log(`Instance mods added: ${added.length}`)
-            for (const f of added) { processUpdate(f) }
-          }
-          if (removed.length > 0) {
-            this.log(`Instance mods removed: ${removed.length}`)
-            for (const f of removed) { processRemove(f) }
-          }
-        }
-      }]
+      }, revalidate]
     })
   }
 
@@ -231,6 +332,7 @@ export class InstanceModsService extends AbstractService implements IInstanceMod
         this.warn(`Skip to disable disabled mod file on ${resource.path}!`)
       } else {
         promises.push(rename(resource.path, resource.path + '.disabled').catch(e => {
+          this.warn(e)
           // if (e.code === 'ENOENT') {
           //   // Force remove
           //   this.state.instanceModRemove([resource])
@@ -271,5 +373,25 @@ export class InstanceModsService extends AbstractService implements IInstanceMod
     }
     await Promise.all(promises)
     this.log(`Finish to uninstall ${mods.length} from ${path}`)
+  }
+
+  async installToServerInstance(options: InstallModsOptions): Promise<void> {
+    const modsDir = join(options.path, 'server', 'mods')
+    await ensureDir(modsDir)
+    await emptyDir(modsDir)
+    await this.install({ ...options, path: join(options.path, 'server') })
+  }
+
+  async getServerInstanceMods(path: string): Promise<Array<{ fileName: string; ino: number }>> {
+    const result: Array<{ fileName: string; ino: number }> = []
+
+    const modsDir = join(path, 'server', 'mods')
+    const files = await readdirIfPresent(modsDir)
+    for (const file of files) {
+      const fstat = await stat(join(modsDir, file))
+      result.push({ fileName: file, ino: fstat.ino })
+    }
+
+    return result
   }
 }

@@ -45,7 +45,7 @@
       >
         <v-list-item-icon>
           <v-icon
-            :size="28"
+            :size="30"
           >
             store
           </v-icon>
@@ -141,7 +141,7 @@ function goMultiplayer() {
 
 <style scoped>
 .sidebar {
-  min-width: 80px;
+  min-width: 90px;
   max-height: 100%;
   display: flex;
   flex-direction: column;
@@ -165,15 +165,15 @@ function goMultiplayer() {
 }
 
 .sidebar .theme--dark.v-list-item--active:hover:before {
-  opacity: .5;
+  opacity: .1;
 }
 
 .sidebar .theme--light.v-list-item--active:before {
-  opacity: .25;
+  opacity: .1;
   background-color: gray;
 }
 
 .avatar .v-list-group__header.v-list-item--active:not(:hover):not(:focus):before {
-  opacity: .24;
+  opacity: .1;
 }
 </style>

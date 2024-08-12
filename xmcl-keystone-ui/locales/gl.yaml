@@ -4,14 +4,22 @@ AppAddInstanceDialog:
     O rematou a descarga do paquete de mods {name}. ¿Queres crear unha instancia
     para el?
 AppShareInstanceDialog:
+  alterDownloadDescription: >-
+    Se non queres desordenar a instancia actual. 
+
+    Tamén podes crear unha nova instancia a partir da configuración do teu
+    compañeiro. 
+
+    Fai clic no botón de abaixo para crear unha instancia.
   baseInfo: Configuración Básica
   cancelShare: Cancelar Compartir
   description: >-
     Despois de compartir, outros compañeiros poderan descargar os archivos do
     xogo que compartiste a través do teu PC.
-  downloadDescription: >-
-    Verifique os arquivos que o seu compañeiro lle proporcionou. Seleccione o
-    arquivo que desexa descargar.
+  downloadDescription: |-
+    Verifique os ficheiros que che proporcionou o teu compañeiro. 
+    Seleccione o ficheiro que quere descargar. 
+    Colocarase na instancia actual {name}.
   downloadNotifyTitle: Descargar instancia de {user}
   downloadTitle: Descargar arquivos de outros compañeiros
   downloadToLocal: Descargar a instancia actual
@@ -95,6 +103,7 @@ browseApp:
   delete: Borrar
   launch: Iniciar e configurar como predeterminado
 cancel: Cancelar
+color: Cor
 confirm: Comezar
 copyClipboard:
   success: Copiar o portapapeis
@@ -228,16 +237,34 @@ diagnosis:
     name: Falta o arquivo de índice de activos de {version}.
 disable: Desactivar
 downloadUpdate: Descargar actualización
+env:
+  select:
+    all: Seleccionar todo
+    fit: Seleccione Axustar
+    none: Seleccione Ningún
 errors:
   NotFoundError: 404 non atopado
+eula:
+  body: >-
+    Marcando o botón da caixa de verificación, estás a indicar o teu acordo co
+    {eula} de Minecraft.
 importModpack:
   name: Importar Modpack
+instance:
+  changeIcon: Cambiar icona
+  iconHint: A icona pode ser un ficheiro ou unha ligazón URL de Internet.
+  launchServer: Inicia o servidor localhost
+  prependCommand: Comando anteposto
+  prependCommandHint: Isto antepoñerá este comando antes de todos os comandos de inicio
 instanceUpdate:
   loaderChanged: |-
     Cambiouse o modloader desta instancia. 
     O modloader antigo é {modloader} e o novo modloader é {newModloader}.
 instances:
   addServerDescription: Isto creará un xogo que se lanzará directamente ao servidor.
+  folderSetting: Configuración do cartafol
+launch:
+  killServer: Eliminar o servidor Localhost
 launchBlocked:
   launchSpawnProcessFailed:
     description: |-
@@ -249,10 +276,49 @@ me:
   modpacks: Os meus Modpacks
   versions: Versións instaladas
 mod:
+  denseView: Vista Densa
+  mods: '{count} Mods'
   searchOnCurseforge: Busca {name} en curseforge
 modInstall:
+  archived: >-
+    {name} foi arquivado. 
+
+    {name} non recibirá máis actualizacións a non ser que o autor decida
+    desarquivar o proxecto.
+  checkDependencies: Comproba as dependencias
+  checkedDependencies: Dependencias verificadas
+  installDependencies: Instalar dependencias que faltan
   noVersionSupported: Só os mods son compatibles con Minecraft {supported}.
   recommendation: Explora as modificacións {first} ou {second} en {modrinth} e {curseforge}!
+modrinth:
+  categories:
+    128x: 128x
+    16x: 16x
+    256x: 256x
+    32x: 32x
+    512x+: 512x+
+    64x: 64x
+    8x-: 8x-
+    bukkit: Bukkit
+    bungeecord: Bungeecord
+    fabric: Fabric
+    folia: Folia
+    forge: Forge
+    iris: Iris
+    liteloader: Liteloader
+    minecraft: Minecraft
+    optifine: Optifine
+    paper: Paper
+    purpur: Purpur
+    quilt: Quilt
+    rift: Rift
+    spigot: Spigot
+    sponge: Sponge
+    velocity: Velocity
+    waterfall: Waterfall
+  projectType:
+    mod: Mod
+    shader: Shader
 multiplayer:
   kernel: Núcleo P2P
   kernelDescription: >-
@@ -260,11 +326,33 @@ multiplayer:
 
     Cambia isto só cando a túa conexión p2p nalgún momento falla a xanela do
     lanzador.
+  sharingNotificationBody: >-
+    Podes descargar ou crear unha instancia desde a configuración compartida de
+    {name}.
+  sharingNotificationTitle: Un compañeiro está compartindo a configuración do xogo
+neoForgedVersion:
+  name: NeoForged
+ok: ОК
 resourcepack:
   independent: A instancia utiliza o cartafol do paquete de recursos independente
+  searchOnModrinth: '@:mod.searchOnModrinth'
   shared: A instancia utiliza o cartafol do paquete de recursos compartidos
 save:
+  cheat: Trampa
+  createNew: Crea un mundo novo
+  gameMode: modo de xogo
+  independent: A instancia utiliza un cartafol de gardados independentes
+  levelName: Nome do nivel
+  search: Busca Gardas
+  selected: arquivo local
+  shared: A instancia utiliza o cartafol de gardados compartidos
   showDirectory: Mostrar o directorio de gardar
+  unselected: arquivo compartido
+saves: {}
+server:
+  maxPlayers: Máximo xogadores
+  nogui: Sen servidor Gui
+  onlineMode: Modo en liña
 setting:
   backgroundColorAbove: Mostra a cor de fondo como superposición
   backgroundColorAboveDescription: Isto fará que se mostre a cor de fondo sobre a imaxe ou o vídeo de fondo.
@@ -292,6 +380,9 @@ setting:
   themeShare: Compartir tema
   themeShareDescription: Podes compartir o tema co teu amigo.
   update: Actualizar
+setup:
+  appearance:
+    name: '@:setting.appearance'
 shared:
   accept: Aceptar
 task:
@@ -308,6 +399,9 @@ theme:
   selectImage: Seleccione Imaxe
   selectMusic: Seleccione Música
   selectVideo: Seleccione Vídeo
+turnRegion:
+  fr: Francia
+  po: Polonia
 tutorial:
   hideNewsHeaderDescription: |-
     Podes ver o Showacse de noticias á esquerda. 
@@ -328,3 +422,8 @@ tutorial:
   storeSearchResultDescription: Verá todos os resultados da busca listados aquí.
 update:
   goOfficialWebDownload: Volve descargar no sitio web oficial
+user:
+  profile: Profile
+versionType:
+  alpha: Alpha
+  beta: Beta

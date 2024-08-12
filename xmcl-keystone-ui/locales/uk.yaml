@@ -5,14 +5,19 @@ AppAddInstanceDialog:
   downloadedNotification: Модпак {name} встановлен. Зробити для нього екземпляр?
   serverTitle: Введіть адресу вашого сервера
 AppShareInstanceDialog:
+  alterDownloadDescription: |-
+    Якщо ви не хочете зіпсувати поточний екземпляр. 
+    Ви також можете створити новий екземпляр із конфігурації свого вузла. 
+    Натисніть кнопку нижче, щоб створити екземпляр.
   baseInfo: Базове налаштування
   cancelShare: Не розповсюджувати
   description: >-
     Після того як ви поділілись профілем, інші користувачі зможуть встановлювати
     ці файли через ваш ПК.
-  downloadDescription: >-
-    Перевірте файли, якими поділився ващ товариш. Оберіть потрібні файли для
-    встановлювання.
+  downloadDescription: |-
+    Будь ласка, перевірте файли, надані вам колегою. 
+    Виберіть файл, який хочете завантажити. 
+    Його буде розміщено в поточному екземплярі {name}.
   downloadNotifyTitle: Встановити екземпляр від {user}
   downloadTitle: Встановити файли з інших пірів
   downloadToLocal: Встановити в поточний екземпляр
@@ -80,7 +85,7 @@ HomeSyncDialogPush:
   upload: Завантажити екземпляр
 SettingMigrationDialog:
   selectRootDirectory: Виберіть кореневий каталог
-add: Добавить
+add: Додати
 ago:
   day: '{duration} день | {duration} дні'
   hour: '{duration} година | {duration} години'
@@ -100,6 +105,7 @@ browseApp:
 cancel: Відміна
 checkUpdate:
   name: Перевірити оновлення
+color: колір
 confirm: Запуск
 copyClipboard:
   success: Копіювати в буфер обміну
@@ -111,6 +117,7 @@ curseforge:
   downloadOnly: Завантажити
   file:
     gameVersion: Версія гри
+    modLoader: Мод Loader
   install: Встановити
   installTo: Встановити в {path}
   installToStorage: Встановити у сховище
@@ -124,6 +131,24 @@ curseforge:
   search: Пошук
   totalDownloads: Усього скачувань
 curseforgeCard: {}
+curseforgeCategory:
+  API and Library: API и бібліотеки
+  Addons: Addons
+  Adventure and RPG: Пригоди та RPG
+  Animated: Анімація
+  Cosmetic: Зовнішній вид/декор
+  Fabric: Fabric
+  FancyMenu: FancyMenu
+  MCreator: MCreator
+  Modded World: Мод для мирів
+  Modern: Сучасний
+  QoL: QoL
+  Quests: Квести
+  Redstone: Redstone
+  Skyblock: SkyBlock
+  Small / Light: Трішки
+  Steampunk: Steampunk
+  Vanilla+: Ванила+
 dataMigration:
   apply: Застосувати налаштування
   directoryCriteriaHint: Переконайтеся, що новий каталог є ПУСТИМ каталогом!
@@ -219,9 +244,15 @@ duration:
   day: '{duration} день | {duration} дні'
   hour: '{duration} година | {duration} години'
   minute: '{duration} хвилина | {duration} хвилини'
+  'no': Ні
   second: '{duration} секунда | {duration} секунди'
 edit: Редагувати
 enable: Увімкнути
+env:
+  select:
+    all: Вибрати все
+    fit: Виберіть Fit
+    none: Виберіть Немає
 error:
   name: Помилка | Помилки
 errors:
@@ -244,6 +275,8 @@ errors:
   HeadersTimeoutError: Вийшов час очікування HTTP Header
   NotFoundError: 404 Не знайдено
   SocketError: Помилка сокету сервера
+eula:
+  body: Установивши прапорець, ви підтверджуєте свою згоду з {eula} Minecraft.
 exception:
   http: >-
     HTTP-запит з {url} не виконано. Код стану {statusCode}. {code}. Повторіть
@@ -317,7 +350,7 @@ importModpack:
 importResource: Імпорт ресурсу
 install: Встановити
 installAssets:
-  asset: Встановити Asset {hash}
+  asset: Установіть {count} ресурсів
   assetIndex: Перевірити індексний файл assets
   name: Встановити файли Asset
 installAuthlibInjector: Встановити authlib-injector
@@ -369,6 +402,7 @@ installVersion:
   name: Встановити клієнт Minecraft {version}
 instance:
   addServer: Добавить сервер
+  changeIcon: Змінити значок
   current: Поточний екземпляр
   delete: Видалити гру
   deleteHint: Дані екземпляра будуть переміщені з диска назавжди. Як зробити Цей?
@@ -380,10 +414,12 @@ instance:
     конфігурації.
   gameVersion: Версія гри
   icon: Значок профілю
+  iconHint: Піктограмою може бути файл або URL-адреса-посилання в Інтернеті.
   iconUrl: Значок Url
   includeVersion: Увімкнути версію | Вмикати версії
   lastPlayed: Востаннє грали
   launchArguments: Попередній перегляд аргументів запуску
+  launchServer: Запустіть локальний сервер
   mcOptions: Параметри Minecraft
   mcOptionsHint: Додаткові інструкції із запуску Minecraft
   name: Ім'я профілю
@@ -391,6 +427,8 @@ instance:
   neverPlayed: Ніколи не грав
   openCrashReportFolder: Відкрити папку звітів про збої
   openLogFolder: Відкрити папку логів
+  prependCommand: Команда «Початок».
+  prependCommandHint: Це додасть цю команду перед усіма командами запуску
   requireName: Ім'я обов'язкове
   showInstance: Показати папку гри
   versionHint: Версія Minecraft для цієї гри
@@ -455,8 +493,9 @@ instances:
   addVanilla: Створюйте з ванільного Minecraft
   addVanillaDescription: |-
     Імпорт із загальної папки .minecraft. 
-    Це призведе до копіювання оригінального профілю гри в XMCL.
+    Це призведе до копіювання оригінального профілю гри в FMCL.
   choose: Виберіть Гра
+  folderSetting: Параметри папки
   importFolder: Імпорт із папки
   importFolderDescription: Імпорт Minecraft до лаунчера
   loadingFiles: Завантаження файлів Modpack
@@ -487,6 +526,7 @@ labyMod:
 launch:
   cancel: Відхильнути
   kill: Зупинити
+  killServer: Закрийте локальний сервер
   launch: Почати
 launchBlocked:
   ignore: Примусовий запуск
@@ -636,6 +676,7 @@ mod:
     його? | Ви витратите цей мод и ці метадані назавжди. Впевнені що хочете це
     зробити?
   deletionRestHint: И ще {rest} модів...
+  denseView: Щільний вид
   dropHint: Перетягніть мод .jar/.litemod сюди для імпорту.
   enabled: 'Модів включенно: {count}'
   filter: Фільтр модов
@@ -644,6 +685,7 @@ mod:
   incompatible: Несумістні мод.
   manage: Управління модами
   maybeCompatible: Можливо сумісний.
+  mods: '{count} модів'
   name: Мод | Моди
   noModLoaderHint: Не забудьте увімкнути модлоадер для використання модів!
   openLink: Відкрити посилання на мод {url}
@@ -657,11 +699,19 @@ mod:
   switchDefaultSource: Джерело модифікації за замовчуванням
   toUpdate: '{count} на оновлення'
 modInstall:
+  archived: >-
+    {name} заархівовано. 
+
+    {name} не отримуватиме подальших оновлень, якщо автор не вирішить
+    розархівувати проект.
+  checkDependencies: Перевірити залежності
   checkUpgrade: Перевірте оновлення модифікацій
+  checkedDependencies: Перевірені залежності
   checkedUpgrade: Оновлення перевірено
   currentVersion: Обрана версія
   dependencyHint: Встановлено іншу версію {version}
   install: Встановити
+  installDependencies: Встановити відсутні залежності
   installHint: Буде встановлено файл {file} з залежностями {dependencies} залежностей
   installed: Встановлено
   noVersionSupported: Мод підтримує тільки Minecraft {supported}.
@@ -673,6 +723,7 @@ modInstall:
   upgrade: Оновлення модифікацій
 modSearchType:
   all: Всі
+  installed: Встановленно
   local: Кеш на диску
 modified:
   reset: Скидання
@@ -715,6 +766,7 @@ modrinth:
     16x: 16x
     256x: 256x
     32x: 32x
+    48x: 48x
     512x+: 512x+
     64x: 64x
     8x-: 8x-
@@ -770,6 +822,7 @@ modrinth:
     modloader: ModLoader
     multiplayer: Мережева гра
     name: Категорії
+    neoforge: NeoForge
     optifine: Optifine
     optimization: Оптимізація
     paper: Paper
@@ -939,6 +992,10 @@ multiplayer:
   sendTokenToRemote: Надіслати токен на віддалений
   share: Поділитись конфігурацією екземпляра
   sharing: Обмін файлами...
+  sharingNotificationBody: >-
+    Ви можете завантажити або створити екземпляр зі спільної конфігурації
+    {name}.
+  sharingNotificationTitle: Одноранговий користувач ділиться конфігурацією гри
   start: Почати
   startNewP2PConnection: Натисніть «Почати», щоб створити нове однорангове з'єднання
 myStuff: Мої матеріали
@@ -1008,8 +1065,11 @@ refresh: Оновити
 refreshResource: Оновити ресурси
 remove: Видалити
 resourcepack:
+  available: Доступно
+  searchOnModrinth: '@:mod.searchOnModrinth'
   shared: Екземпляр використовує спільну папку пакета ресурсів
 save:
+  cheat: Обман
   copy:
     cancel: Скасувати копіювання
     confirm: Почати копіювання
@@ -1026,6 +1086,7 @@ save:
     fromProfile: З інших екземплярів
     fromResource: З керованих ресурсів
     title: Імпорт збереження з керованого джерела
+  createNew: Створити Новий Світ
   createdWorlds: 'Ваших світів: {count}'
   deleteHint: |-
     Ця операція не може бути скасована. Ви назавжди втратите дані збереження.
@@ -1036,12 +1097,20 @@ save:
   export: Експорт збереження
   exportMessage: Експорт збереження у zip
   exportTitle: Експорт збереження
+  gameMode: режим гри
   import: Імпорт збереження
   importMessage: Імпорт збереження з zip
   importTitle: Імпорт збереження
+  independent: Примірник використовує незалежну папку збереження
+  levelName: Назва рівня
   manage: Управління збереженнями
   name: Збереження | Збереження
+  search: Пошук Зберігає
+  selected: місцевий архів
+  shared: Екземпляр використовує спільну папку збереження
   showDirectory: Показати каталог збереження
+  unselected: спільний архів
+saves: {}
 screenshots:
   empty: У вас немає скріншотів
   goto: Відкрити папку
@@ -1056,8 +1125,11 @@ server:
   host: Хост
   hostHint: Хост (з портом) сервера
   ipAddress: IP-адрес
+  maxPlayers: Максимальна кількість гравців
   motd: Опис сервера
   name: Сервер | Сервера
+  nogui: Немає графічного інтерфейсу сервера
+  onlineMode: Онлайн режим
   ping: Пінг
   pings: Пінги
   players: Гравці
@@ -1137,7 +1209,7 @@ setting:
   developerMode: Режим розробника
   developerModeDescription: Режим розробника призначений для тестування написаного вами мода
   disableTelemetry: Вимкнути телеметрію
-  disableTelemetryDescription: XMCL збиратиме події запуску гри та входу користувача у гру.
+  disableTelemetryDescription: FMCL збиратиме події запуску гри та входу користувача у гру.
   enableDedicatedGPUOptimization: Призначити виділений графічний процесор
   enableDedicatedGPUOptimizationDescription: Ця опція призначить виділений графічний процесор для процесу Minecraft.
   enableDiscord: Увімкнути Discord Presence(Статус гри в Discord)
@@ -1220,7 +1292,7 @@ setup:
     name: '@:setting.appearance'
   dataRoot:
     description: |-
-      Корінь даних – це не звичайний каталог .minecraft. Оскільки дані XMCL
+      Корінь даних – це не звичайний каталог .minecraft. Оскільки дані FMCL
        структура каталогів відрізняється від ванільної, ми не рекомендуємо використовувати
        загальний каталог .minecraft як корінь даних.
     drives: Рекомендовані місця
@@ -1326,6 +1398,9 @@ transportType:
   prflx: Кандидат Peer Reflexive
   relay: Кандидат Relay
   srflx: Кандидат Server Reflexive
+turnRegion:
+  fr: Франція
+  po: Польща
 tutorial:
   feedbackDescription: Якщо у вас виникли проблеми, натисніть цю кнопку, щоб надіслати відгук!
   hideNewsHeaderDescription: |-

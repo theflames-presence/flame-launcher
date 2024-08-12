@@ -8,6 +8,8 @@
         <v-btn
           v-shared-tooltip="_ => t('setting.checkUpdate')"
           icon
+          :loading="checkingUpdate"
+          @click="checkUpdate"
         >
           <v-icon>refresh</v-icon>
         </v-btn>
@@ -84,7 +86,7 @@ import { vSharedTooltip } from '@/directives/sharedTooltip'
 import SettingHeader from '@/components/SettingHeader.vue'
 
 const { show: showUpdateInfo } = useDialog('update-info')
-const disableUpdate = true // state.env !== 'raw'
+const disableUpdate = false // state.env !== 'raw'
 const { updateInfo, updateStatus, checkUpdate, checkingUpdate, version } = useUpdateSettings()
 const hasNewUpdate = computed(() => updateInfo.value?.name !== version.value)
 const installing = useServiceBusy(BaseServiceKey, 'quitAndInstall')

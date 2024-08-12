@@ -50,6 +50,15 @@ export const windowController: ControllerPlugin = function (this: ElectronContro
     const window = BrowserWindow.fromWebContents(event.sender)
     return window?.isMaximized()
   })
+  ipcMain.handle('flash-frame', (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender)
+    if (window) {
+      window.flashFrame(true)
+      window.once('focus', () => {
+        window.flashFrame(false)
+      })
+    }
+  })
   ipcMain.handle('control', (event, operation: Operation) => {
     const window = BrowserWindow.fromWebContents(event.sender)
     if (window) {
@@ -87,7 +96,11 @@ export const windowController: ControllerPlugin = function (this: ElectronContro
           }
           return false
         case Operation.Close:
-          window.close()
+          if (this.parking) {
+            window.hide()
+          } else {
+            window.close()
+          }
           return true
       }
     }

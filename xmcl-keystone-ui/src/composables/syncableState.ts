@@ -9,8 +9,11 @@ export function useState<T extends object>(fetcher: (abortSignal: AbortSignal) =
 
   const state = ref<MutableState<T> | undefined>()
   const error = ref(undefined as any)
+  let controller: AbortController | undefined
   const mutate = async (onCleanup?: (abort: () => void) => void) => {
+    controller?.abort()
     const abortController = new AbortController()
+    controller = abortController
     const { signal } = abortController
     let data: MutableState<T> | undefined
     onCleanup?.(() => {
@@ -41,9 +44,9 @@ export function useState<T extends object>(fetcher: (abortSignal: AbortSignal) =
     }
   }
   watchEffect(mutate)
-  const revalidateCall = () => {
+  const revalidateCall = async () => {
     if (isValidating.value) return
-    state.value?.revalidate()
+    await state.value?.revalidate()
   }
   useEventListener(document, 'visibilitychange', revalidateCall, false)
   useEventListener(window, 'focus', revalidateCall, false)
@@ -51,5 +54,6 @@ export function useState<T extends object>(fetcher: (abortSignal: AbortSignal) =
     isValidating,
     state,
     error,
+    revalidate: revalidateCall,
   }
 }

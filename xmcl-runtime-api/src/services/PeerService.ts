@@ -21,12 +21,15 @@ export class PeerState {
   connections = [] as Peer[]
   validIceServers = [] as string[]
   ips = [] as string[]
+  turnservers = {} as Record<string, string>
   group = ''
   groupState: 'connecting' | 'connected' | 'closing' | 'closed' = 'closed'
   groupError?: Error
 
   natDeviceInfo?: NatDeviceInfo
   natType: NatType = 'Unknown'
+
+  exposedPorts: [number, number][] = []
 
   natDeviceSet(device: NatDeviceInfo) {
     this.natDeviceInfo = device
@@ -166,6 +169,14 @@ export class PeerState {
   ipsSet(ips: string[]) {
     this.ips = ips
   }
+
+  turnserversSet(meta: Record<string, string>) {
+    this.turnservers = meta
+  }
+
+  exposedPortsSet(ports: [number, number][]) {
+    this.exposedPorts = ports
+  }
 }
 
 export interface ShareInstanceOptions {
@@ -183,6 +194,10 @@ export interface PeerService extends GenericEventEmitter<PeerServiceEvents> {
     * Share the instance to other peers
     */
   shareInstance(options: ShareInstanceOptions): Promise<void>
+
+  exposePort(port: number, protocol: number): Promise<void>
+
+  unexposePort(port: number): Promise<void>
 }
 
 export const PeerServiceKey: ServiceKey<PeerService> = 'PeerServiceKey'

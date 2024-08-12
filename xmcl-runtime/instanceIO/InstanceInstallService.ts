@@ -33,6 +33,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
     const {
       path: instancePath,
       files,
+      id,
     } = options
 
     await writeInstallProfile(instancePath, files)
@@ -63,13 +64,14 @@ export class InstanceInstallService extends AbstractService implements IInstance
         await this.all(tasks, { throwErrorImmediately: false })
         await handler.postprocess(modrinthClient)
       })
-    }, { instance: instancePath })
+    }, { instance: instancePath, id })
 
     try {
       await this.submit(updateInstanceTask)
       await removeInstallProfile(instancePath)
     } catch (e) {
-      await writeInstallProfile(instancePath, files)
+      const unfinished = files.filter(f => !handler.finished.has(f))
+      await writeInstallProfile(instancePath, unfinished)
       throw Object.assign(e as any, {
         name: (e as any).name === 'Error' ? 'InstallInstanceFilesError' : (e as any).name,
         installInstance: {
