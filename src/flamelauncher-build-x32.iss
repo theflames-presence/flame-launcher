@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Flame Launcher"
-#define MyAppVersion "1.0.8"
+#define MyAppVersion "1.0.9"
 #define MyAppPublisher "aislxflames"
 #define MyAppURL "https://flamelauncher.my-style.in"
 #define MyAppExeName "Flame Launcher.exe"
