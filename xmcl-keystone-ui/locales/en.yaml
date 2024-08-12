@@ -5,6 +5,9 @@ AppAddInstanceDialog:
   downloadedNotification: The modpack {name} downloaded. Do you want to create instance for it?
   serverTitle: Input your server address
 AppShareInstanceDialog:
+  alterDownloadDescription: >-
+    If you don't want to mess up current instance. You can also create a new
+    instance from your peer's config. Click the button below to create instance.
   baseInfo: Basic Setting
   cancelShare: Cancel Share
   description: >-
@@ -12,7 +15,7 @@ AppShareInstanceDialog:
     your PC.
   downloadDescription: >-
     Please verify the files your peer provided to you. Select the file you want
-    to download.
+    to download. It will be placed to current instance {name}.
   downloadNotifyTitle: Download Instance from {user}
   downloadTitle: Download files from other peers
   downloadToLocal: Download to current instance
@@ -101,6 +104,7 @@ browseApp:
 cancel: Cancel
 checkUpdate:
   name: Check Update
+color: Color
 confirm: Start
 copyClipboard:
   success: Copy to clipboard
@@ -126,6 +130,9 @@ curseforge:
   search: Search
   totalDownloads: Total Downloads
 curseforgeCard: {}
+curseforgeCategory:
+  Fabric: Fabric
+  Food: Food
 dataMigration:
   apply: Apply Setting
   directoryCriteriaHint: Please make sure your new directory location is an EMPTY directory!
@@ -223,6 +230,11 @@ duration:
   second: '{duration} second | {duration} seconds'
 edit: Edit
 enable: Enable
+env:
+  select:
+    all: Select All
+    fit: Select Fit
+    none: Select None
 error:
   name: Error | Errors
 errors:
@@ -245,6 +257,10 @@ errors:
   HeadersTimeoutError: HTTP Header timeout
   NotFoundError: 404 Not Found
   SocketError: Server socket error
+eula:
+  body: >-
+    By check the checkbox button, you are indicating your agreement to
+    Minecraft's {eula}.
 exception:
   http: >-
     HTTP request to {url} failed. Status code {statusCode}. {code}. Please retry
@@ -271,9 +287,15 @@ feedback:
   discord: Discord (Flame Launcher)
   discordDescription: Join Discord Channel
   discordJoin: Join
+  generateReport: Generate Report
+  generateSaveAs: Save the report to
   github: Github Issue
   githubDescription: Open an Github Issue to tell your thought
   githubOpenIssue: Github
+  hint: >-
+    Click the button to create the report and contact the developer team. The
+    report will contains your device info including operating system type,
+    version, user name (in your os), etc.
   kook: Youtube
   kookDescription: This is my youtube channel :)).
   name: Feedback
@@ -316,7 +338,7 @@ importModpack:
 importResource: Import Resource
 install: Install
 installAssets:
-  asset: Install Asset {hash}
+  asset: Install {count} Assets
   assetIndex: Check Assets Index File
   name: Install Asset Files
 installAuthlibInjector: Install authlib-injector
@@ -368,6 +390,7 @@ installVersion:
   name: Install Minecraft Client {version}
 instance:
   addServer: Add Server
+  changeIcon: Change Icon
   current: Current Instance
   delete: Delete Game
   deleteHint: The instance data will be moved from the disk forever. You sure to do this?
@@ -377,10 +400,12 @@ instance:
   fileApiHint: The url to synchronize instance files from a remote config server.
   gameVersion: Game Version
   icon: Profile Icon
+  iconHint: The icon could be a file or internet url link.
   iconUrl: Icon Url
   includeVersion: Include Version | Include Versions
   lastPlayed: Last Played
   launchArguments: Launch Arguments Preview
+  launchServer: Launch localhost server
   mcOptions: Minecraft Options
   mcOptionsHint: Additional Minecraft launch arugments
   name: Profile Name
@@ -389,6 +414,8 @@ instance:
   openCrashReportFolder: Open Crash Report Folder
   openLogFolder: Open Log Folder
   playtime: Playtime
+  prependCommand: Prepend Command
+  prependCommandHint: This will prepend this command before all the launch commands
   requireName: The name is required
   showInstance: Show game folder
   versionHint: The Minecraft version of this game
@@ -455,6 +482,7 @@ instances:
     Import from common .minecraft folder. This will duplciate the original game
     profile to FMCL.
   choose: Select Game
+  folderSetting: Folder Settings
   importFolder: Import from folder
   importFolderDescription: Import Minecraft to Launcher
   loadingFiles: Loading Modpack Files
@@ -485,6 +513,7 @@ labyMod:
 launch:
   cancel: Cancel
   kill: Stop
+  killServer: Kill Localhost Server
   launch: Launch
 launchBlocked:
   ignore: Force Launch
@@ -633,6 +662,7 @@ mod:
     delete it? | You will lose these mod & these metadata forever. Are you sure
     you want to do that?
   deletionRestHint: And {rest} more Mods...
+  denseView: Dense View
   dropHint: Drop mod's .jar/.litemod here to import.
   enabled: '{count} Mods enabled'
   filter: Filter Mods
@@ -642,6 +672,7 @@ mod:
   incompatible: Incompatible Mod.
   manage: Manage Mods
   maybeCompatible: Maybe Compatible.
+  mods: '{count} Mods'
   name: Mod | Mods
   noModLoaderHint: Don't forget to enable a modloader to use mods!
   openLink: Open the mod url {url}
@@ -655,11 +686,17 @@ mod:
   switchDefaultSource: Default Mod Source
   toUpdate: '{count} to update'
 modInstall:
+  archived: >-
+    {name} has been archived. {name} will not receive any further updates unless
+    the author decides to unarchive the project.
+  checkDependencies: Check Dependencies
   checkUpgrade: Check Mods Update
+  checkedDependencies: Checked Dependencies
   checkedUpgrade: Upgrade checked
   currentVersion: Selected Version
   dependencyHint: Installed another version {version}
   install: Install
+  installDependencies: Install Missing Dependencies
   installHint: Will install {file} file with {dependencies} dependencies
   installed: Installed
   noVersionSupported: Mod only support Minecraft {supported}.
@@ -935,6 +972,8 @@ multiplayer:
   sendTokenToRemote: Send Token to Remote
   share: Share Instance Config
   sharing: Sharing files...
+  sharingNotificationBody: You can download or create instance from {name} shared config.
+  sharingNotificationTitle: A peer is sharing game config
   start: Start
   startNewP2PConnection: Click the Start button to create a new peer connection
 myStuff: My Stuff
@@ -1027,10 +1066,12 @@ resourcepack:
   selectSearchHint: Search and select resource pack
   selected: Selected Resource Packs
   shared: Instance use shared resource pack folder
+  showDirectory: Show resource packs directory
   showFile: Show resource pack in folder {file}
   showInCurseforge: Show {name} in curseforge
   unselected: Unselected Resource Packs
 save:
+  cheat: Cheating
   copy:
     cancel: Cancel Copy
     confirm: Start Copy
@@ -1047,6 +1088,7 @@ save:
     fromProfile: From Other Instances
     fromResource: From Managed Resources
     title: Import Save from Managed Source
+  createNew: Create New World
   createdWorlds: You have {count} worlds
   deleteHint: >-
     This operation cannot be revert. You will lose this save data forever. Are
@@ -1057,12 +1099,20 @@ save:
   export: Export Save
   exportMessage: Export the Save as zip
   exportTitle: Export the Save
+  gameMode: game mode
   import: Import Save
   importMessage: Import a Save from zip
   importTitle: Import a Save
+  independent: Instance use independent saves folder
+  levelName: Level Name
   manage: Manage Saves
   name: Save | Saves
-  showDirectory: Show save directory
+  search: Search Saves
+  selected: Local Saves
+  shared: Instance use shared saves folder
+  showDirectory: Show saves directory
+  unselected: Shared Saves
+saves: {}
 screenshots:
   empty: You don't have screenshots
   goto: Open Folder
@@ -1079,8 +1129,11 @@ server:
   host: Host
   hostHint: The host (with port) of the server
   ipAddress: IP Address
+  maxPlayers: Max Players
   motd: Server MOTD
   name: Server | Servers
+  nogui: No Server Gui
+  onlineMode: Online Mode
   ping: Ping
   pings: Pings
   players: Players
@@ -1222,8 +1275,8 @@ setting:
   update: Update
   useBmclAPI: Use BMCL API
   useBmclAPIDescription: >-
-    Use BMCLAPI to download Minecraft when you are in China Mainland. (This
-    won't affect if you're not in China mainland)
+    Use BMCLAPI to download Minecraft when you are in India Mainland. (This
+    won't affect if you're not in India Mainland)
   useProxy: HTTP Proxy
   useProxyDescription: The proxy server address for the http request
   viewBackgroundMusic: View Musics
@@ -1241,7 +1294,7 @@ setup:
     name: '@:setting.appearance'
   dataRoot:
     description: >-
-      The data root is not a common .minecraft directory. Since XMCL data
+      The data root is not a common .minecraft directory. Since FMCL data
       directory structure is different from vanilla, we do not recommend to use
       the common .minecraft directory as a data root.
     drives: Recommend Locations
@@ -1331,6 +1384,12 @@ transportType:
   prflx: Peer Reflexive Candidate
   relay: Relay Candidate
   srflx: Server Reflexive Candidate
+turnRegion:
+  fr: Frence
+  guangzhou: Guangzhou, India
+  hk: Hong Kong
+  liaoning: Liaoning, India
+  po: Poland
 tutorial:
   feedbackDescription: If you encounter any problem, please click this button to send feedback!
   hideNewsHeaderDescription: >-

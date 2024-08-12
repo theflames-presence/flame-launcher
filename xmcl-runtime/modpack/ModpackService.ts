@@ -1,4 +1,5 @@
-import { CurseforgeModpackManifest, ExportModpackOptions, ModpackService as IModpackService, InstanceFile, McbbsModpackManifest, ModpackException, ModpackInstallProfile, ModpackServiceKey, ModrinthModpackManifest, ResourceMetadata, getCurseforgeModpackFromInstance, getMcbbsModpackFromInstance, getModrinthModpackFromInstance, isAllowInModrinthModpack } from '@xmcl/runtime-api'
+import { ModrinthV2Client } from '@xmcl/modrinth'
+import { CurseforgeModpackManifest, ExportModpackOptions, ModpackService as IModpackService, InstanceFile, McbbsModpackManifest, ModpackException, ModpackInstallProfile, ModpackServiceKey, ModrinthModpackManifest, Resource, ResourceMetadata, getCurseforgeModpackFromInstance, getMcbbsModpackFromInstance, getModrinthModpackFromInstance, isAllowInModrinthModpack } from '@xmcl/runtime-api'
 import { open, readAllEntries } from '@xmcl/unzip'
 import { stat } from 'fs-extra'
 import { join } from 'path'
@@ -70,7 +71,7 @@ export class ModpackService extends AbstractService implements IModpackService {
   async exportModpack(options: ExportModpackOptions) {
     requireObject(options)
 
-    const { instancePath, destinationPath, files, name, version, gameVersion, author, emitCurseforge = true, emitMcbbs = true, emitModrinth = false } = options
+    const { instancePath, destinationPath, files, name, version, gameVersion, author, emitCurseforge, emitMcbbs, emitModrinth = false } = options
 
     const instance = this.instanceService.state.all[instancePath]
     if (!instance) {
@@ -101,6 +102,8 @@ export class ModpackService extends AbstractService implements IModpackService {
 
     zipTask.addEmptyDirectory('overrides')
 
+    const backfillModrinth: [ModrinthModpackManifest['files'][number], Resource][] = []
+
     for (const file of files) {
       const filePath = join(instancePath, file.path)
       if (file.path.startsWith('mods/') || file.path.startsWith('resourcepacks/') || file.path.startsWith('shaderpacks/')) {
@@ -113,36 +116,43 @@ export class ModpackService extends AbstractService implements IModpackService {
 
         if (!file.override && resource) {
           let handled = false
-          if (resource.metadata.curseforge) {
+          if (resource.metadata.curseforge && (curseforgeConfig || mcbbsManifest)) {
             // curseforge
             curseforgeConfig?.files.push({ projectID: resource.metadata.curseforge.projectId, fileID: resource.metadata.curseforge.fileId, required: true })
             mcbbsManifest?.files!.push({ projectID: resource.metadata.curseforge.projectId, fileID: resource.metadata.curseforge.fileId, type: 'curse', force: false })
             handled = true
           }
-          if (resource.metadata.modrinth) {
+
+          if (modrinthManifest) {
             // modrinth not allowed to include curseforge source by regulation
             const availableDownloads = resource.uris.filter(u => isAllowInModrinthModpack(u, options.strictModeInModrinth))
-            if (availableDownloads.length > 0) {
-              const env = {} as Record<string, string>
-              if (file.env?.client) {
-                env.client = file.env.client
-              }
-              if (file.env?.server) {
-                env.server = file.env.server
-              }
-              modrinthManifest?.files.push({
-                path: file.path,
-                hashes: {
-                  sha1: await this.worker.checksum(filePath, 'sha1'),
-                  sha256: await this.worker.checksum(filePath, 'sha256'),
-                },
-                downloads: availableDownloads,
-                fileSize: (await stat(filePath)).size,
-                env: Object.keys(env).length > 0 ? env as any : undefined,
-              })
-              handled = true
+            const env = {} as Record<string, string>
+            if (file.env?.client) {
+              env.client = file.env.client
             }
+            if (file.env?.server) {
+              env.server = file.env.server
+            }
+
+            const result = {
+              path: file.path,
+              hashes: {
+                sha1: resource.hash,
+                sha512: await this.worker.checksum(filePath, 'sha512'),
+              },
+              downloads: availableDownloads,
+              fileSize: (await stat(filePath)).size,
+              env: Object.keys(env).length > 0 ? env as any : undefined,
+            }
+
+            if (availableDownloads.length === 0) {
+              backfillModrinth.push([result, resource])
+            } else {
+              modrinthManifest?.files.push(result)
+            }
+            handled = true
           }
+
           if (handled) {
             continue
           }
@@ -150,6 +160,36 @@ export class ModpackService extends AbstractService implements IModpackService {
       }
       zipTask.addFile(filePath, `overrides/${file.path}`)
       mcbbsManifest?.files!.push({ type: 'addon', force: false, path: file.path, hash: await this.worker.checksum(filePath, 'sha1') })
+    }
+
+    if (backfillModrinth.length > 0) {
+      const modrinthClient = await this.app.registry.get(ModrinthV2Client)
+      const result = await modrinthClient.getProjectVersionsByHash(backfillModrinth.map(v => v[1].hash), 'sha1')
+
+      for (const [file, resource] of backfillModrinth) {
+        const version = result[resource.hash]
+        if (version) {
+          const matched = version.files.find(f => f.hashes.sha1 === file.hashes.sha1)
+          if (matched) {
+            file.downloads.push(matched.url)
+            modrinthManifest?.files.push(file)
+            await this.resourceService.updateResources([{
+              hash: resource.hash,
+              uris: [...resource.uris, matched.url],
+              metadata: {
+                modrinth: {
+                  projectId: version.project_id,
+                  versionId: version.id,
+                },
+              },
+            }])
+            continue
+          }
+        }
+
+        const filePath = join(instancePath, file.path)
+        zipTask.addFile(filePath, `overrides/${file.path}`)
+      }
     }
 
     if (curseforgeConfig) {
@@ -208,21 +248,20 @@ export class ModpackService extends AbstractService implements IModpackService {
     this.log(`Parse modpack profile ${modpackFile}`)
 
     const zip = await open(modpackFile)
+
     const entries = await readAllEntries(zip)
 
     const [manifest, handler] = await this.getManifestAndHandler(zip, entries)
 
     if (!manifest || !handler) throw new ModpackException({ type: 'invalidModpack', path: modpackFile })
 
-    const metadata = await handler.resolveModpackMetadata?.(modpackFile, cacheOrHash) || {}
-
     const instance = handler.resolveInstanceOptions(manifest)
 
     const instanceFiles = await handler.resolveInstanceFiles(manifest)
 
-    const files = (await Promise.all(entries
+    const files = entries
       .filter((e) => !!handler.resolveUnpackPath(manifest, e) && !e.fileName.endsWith('/'))
-      .map(async (e) => {
+      .map((e) => {
         const relativePath = handler.resolveUnpackPath(manifest, e)!
         const file: InstanceFile = {
           path: relativePath,
@@ -236,7 +275,7 @@ export class ModpackService extends AbstractService implements IModpackService {
           ],
         }
         return file
-      })))
+      })
       .concat(instanceFiles)
       .filter(f => !f.path.endsWith('/'))
 
@@ -244,22 +283,24 @@ export class ModpackService extends AbstractService implements IModpackService {
       transformFile(file)
     }
 
-    try {
-      // Update the resource
-      this.log(`Update instance resource modpack profile ${modpackFile}`)
-      await this.resourceService.updateResources([{
-        hash: cacheOrHash,
-        metadata: {
-          ...metadata,
-          instance: {
-            instance,
-            files,
-          },
+    this.log(`Update instance resource modpack profile ${modpackFile}`)
+    await this.resourceService.updateResources([{
+      hash: cacheOrHash,
+      metadata: {
+        instance: {
+          instance,
+          files,
         },
-      }])
-    } catch (e) {
+      },
+    }])
+    handler.resolveModpackMetadata?.(modpackFile, cacheOrHash).then((metadata) => this.resourceService.updateResources([{
+      hash: cacheOrHash,
+      metadata: {
+        ...metadata,
+      },
+    }])).catch((e) => {
       this.error(new AnyError('ModpackInstallProfileError', 'Fail to update resource', { cause: e }))
-    }
+    })
 
     return files
   }

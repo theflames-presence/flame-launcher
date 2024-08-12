@@ -88,7 +88,7 @@
         <SetupFooter
           :prev="data.step !== 1"
           next
-          :disabled="hasError"
+          :disabled="data.step === 3 && hasError"
           :loading="data.loading"
           :finish="data.step === 4"
           @prev="prev"
@@ -110,8 +110,6 @@
 
 <script lang=ts setup>
 import { useService } from '@/composables'
-import { useBootstrap } from '@/composables/bootstrap'
-import { kVuetify } from '@/composables/vuetify'
 import { injection } from '@/util/inject'
 import { BaseServiceKey, Drive } from '@xmcl/runtime-api'
 import SetupAppearance from './SetupAppearance.vue'
@@ -119,8 +117,8 @@ import SetDataRoot from './SetupDataRoot.vue'
 import SetupFooter from './SetupFooter.vue'
 import SetupAccount from './SetupAccount.vue'
 import SetLocale from './SetupLocale.vue'
-import { usePreferredDark } from '@vueuse/core'
 import { kSettingsState } from '@/composables/setting'
+import { kTheme } from '@/composables/theme'
 
 const emit = defineEmits(['ready'])
 const { validateDataDictionary } = useService(BaseServiceKey)
@@ -133,7 +131,6 @@ const prev = () => {
 }
 
 const { locale, t } = useI18n()
-const bootstrap = useBootstrap()
 const currentTitle = computed(() => {
   if (data.step === 1) return t('setup.locale.name')
   if (data.step === 2) return t('setup.dataRoot.name')
@@ -176,17 +173,10 @@ watch(() => data.path, (newPath) => {
   })
 })
 
-const vuetify = injection(kVuetify)
-const preferDark = usePreferredDark()
+const { darkTheme } = injection(kTheme)
 
 const updateTheme = (theme: 'dark' | 'system' | 'light') => {
-  if (theme === 'system') {
-    vuetify.theme.dark = preferDark.value
-  } else if (theme === 'dark') {
-    vuetify.theme.dark = true
-  } else if (theme === 'light') {
-    vuetify.theme.dark = false
-  }
+  darkTheme.value = theme
 }
 
 updateTheme(data.theme as any)

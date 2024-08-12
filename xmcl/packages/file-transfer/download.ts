@@ -1,9 +1,9 @@
-import { createWriteStream, rename as srename, unlink as sunlink, stat as sstat, open as sopen, close as sclose, fdatasync } from 'fs'
-import { promisify } from 'util'
+import { fdatasync, close as sclose, open as sopen, rename as srename, stat as sstat, unlink as sunlink, write } from 'fs'
 import { mkdir } from 'fs/promises'
 import { dirname } from 'path'
-import { PassThrough, Transform, Writable, finished as sfinished } from 'stream'
+import { PassThrough, Writable, finished as sfinished } from 'stream'
 import { Agent, Dispatcher, errors, stream } from 'undici'
+import { promisify } from 'util'
 // @ts-ignore
 import { parseRangeHeader } from 'undici/lib/core/util'
 import { AbortSignal } from './abort'
@@ -178,33 +178,33 @@ async function get(url: string, fd: number, destination: string, headers: Record
 
       const length = headers['content-length'] ? parseInt(headers['content-length'] as string) : 0
       const rangeHeader = parseRangeHeader(headers['content-range'])
-      const offset = rangeHeader?.start ?? range?.start
+      const offset = rangeHeader?.start ?? range?.start ?? 0
       const totalLength = rangeHeader?.size ?? 0
 
       let written = 0
-      const transform = new Transform({
-        transform(chunk, encoding, callback) {
-          this.push(chunk)
+      const writable = new Writable({
+        write(chunk, encoding, callback) {
+          write(fd, chunk, 0, chunk.length, offset + written, callback)
           written += chunk.length
           progress(parsedUrl, chunk.length, written, length, totalLength)
+        },
+        writev(chunks, callback) {
+          const buffer = Buffer.concat(chunks.map((c) => c.chunk))
+          write(fd, buffer, 0, buffer.length, offset + written, callback)
+          written += buffer.length
+          progress(parsedUrl, buffer.length, written, length, totalLength)
+        },
+        final(callback) {
+          progress(parsedUrl, 0, written, length, totalLength)
           callback()
         },
         highWaterMark: 1024 * 1024,
-      })
-
-      writable = createWriteStream(destination, {
-        fd,
-        autoClose: false,
         emitClose: false,
-        flags: 'r+',
-        start: offset,
-        highWaterMark: 1024 * 1024,
       })
 
-      transform.pipe(writable)
       progress(parsedUrl, 0, written, length, totalLength)
 
-      return transform
+      return writable
     })
 
     if (writable && !writable.writableFinished) {

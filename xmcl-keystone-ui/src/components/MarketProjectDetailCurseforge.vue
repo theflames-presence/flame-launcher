@@ -6,14 +6,14 @@ import { useCurseforgeChangelog } from '@/composables/curseforgeChangelog'
 import { getCurseforgeDependenciesModel, useCurseforgeTask } from '@/composables/curseforgeDependencies'
 import { kCurseforgeInstaller } from '@/composables/curseforgeInstaller'
 import { useDateString } from '@/composables/date'
-import { useModDetailEnable, useModDetailUpdate } from '@/composables/modDetail'
+import { useProjectDetailEnable, useProjectDetailUpdate } from '@/composables/projectDetail'
 import { useLoading, useSWRVModel } from '@/composables/swrv'
-import { clientCurseforgeV1 } from '@/util/clients'
-import { getCurseforgeFileGameVersions, getCurseforgeRelationType, getCursforgeFileModLoaders } from '@/util/curseforge'
+import { basename } from '@/util/basename'
+import { getCurseforgeFileGameVersions, getCurseforgeRelationType, getCursforgeFileModLoaders, getCursforgeModLoadersFromString, getModLoaderTypesForFile } from '@/util/curseforge'
 import { injection } from '@/util/inject'
 import { ModFile } from '@/util/mod'
 import { ProjectFile } from '@/util/search'
-import { FileModLoaderType, Mod } from '@xmcl/curseforge'
+import { FileModLoaderType, Mod, ModStatus } from '@xmcl/curseforge'
 import { Resource } from '@xmcl/runtime-api'
 
 const props = defineProps<{
@@ -30,7 +30,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (event: 'category', cat: number): void
-  (event: 'install', file: Resource[]): void
   (event: 'uninstall', files: ProjectFile[]): void
   (event: 'enable', file: ProjectFile): void
   (event: 'disable', file: ProjectFile): void
@@ -41,15 +40,10 @@ const { getDateString } = useDateString()
 const curseforgeModId = computed(() => props.curseforgeId)
 
 const { data: curseforgeProject, mutate } = useSWRVModel(getCurseforgeProjectModel(curseforgeModId))
-const curseforgeMod = computed(() => {
-  if (props.curseforge) return props.curseforge
-  if (curseforgeProject.value) return curseforgeProject.value
-  return undefined
-})
 const { data: description, isValidating: isValidatingDescription } = useSWRVModel(getCurseforgeProjectDescriptionModel(curseforgeModId))
 const model = computed(() => {
   const externals: ExternalResource[] = []
-  const mod = curseforgeMod.value
+  const mod = props.curseforge || curseforgeProject.value
   if (mod?.links.issuesUrl) {
     externals.push({
       icon: 'pest_control',
@@ -122,6 +116,13 @@ const model = computed(() => {
       })
     }
   }
+  const mapping = {
+    [FileModLoaderType.Forge]: 'forge',
+    [FileModLoaderType.Fabric]: 'fabric',
+    [FileModLoaderType.Quilt]: 'quilt',
+    [FileModLoaderType.NeoForge]: 'neoforge',
+  } as Record<FileModLoaderType, string>
+  const modLoaders = [...new Set(mod?.latestFilesIndexes.map(v => mapping[v.modLoader]) || [])]
   const detail: ProjectDetail = {
     id: props.curseforgeId.toString(),
     title: mod?.name ?? '',
@@ -133,9 +134,11 @@ const model = computed(() => {
     url: mod?.links.websiteUrl ?? '',
     categories,
     htmlContent: description.value ?? '',
+    modLoaders,
     externals,
     galleries,
     info,
+    archived: ModStatus.Inactive === mod?.status || ModStatus.Abandoned === mod?.status,
   }
   return detail
 })
@@ -191,7 +194,7 @@ const modVersions = computed(() => {
     const mcDep = 'dependencies' in i ? (i as ModFile).dependencies.find(d => d.modId === 'minecraft') : undefined
     versions.push({
       id: i.curseforge?.fileId.toString() ?? '',
-      name: i.resource.name ?? '',
+      name: basename(i.path) ?? '',
       version: i.version,
       disabled: false,
       changelog: undefined,
@@ -199,7 +202,7 @@ const modVersions = computed(() => {
       type: 'release',
       installed: true,
       downloadCount: 0,
-      loaders: (i as ModFile).modLoaders,
+      loaders: 'modLoaders' in i ? (i as ModFile).modLoaders : [],
       minecraftVersion: (mcDep?.semanticVersion instanceof Array ? mcDep.semanticVersion.join(' ') : mcDep?.semanticVersion) ?? mcDep?.versionRange ?? '',
       createdDate: '',
     })
@@ -220,7 +223,7 @@ const onLoadMore = () => {
 const selectedVersion = ref(modVersions.value.find(v => v.installed) ?? modVersions.value[0] as ProjectVersion | undefined)
 provide('selectedVersion', selectedVersion)
 
-const innerUpdating = useModDetailUpdate()
+const innerUpdating = useProjectDetailUpdate()
 
 watch(() => props.curseforge, () => {
   innerUpdating.value = false
@@ -229,7 +232,7 @@ watch(() => props.installed, () => {
   innerUpdating.value = false
 }, { deep: true })
 
-const { enabled, installed, hasInstalledVersion } = useModDetailEnable(
+const { enabled, installed, hasInstalledVersion } = useProjectDetailEnable(
   selectedVersion,
   computed(() => props.installed),
   innerUpdating,
@@ -237,22 +240,17 @@ const { enabled, installed, hasInstalledVersion } = useModDetailEnable(
   (f) => emit('disable', f),
 )
 
-const versionKey = computed(() => files.value.find(f => f.id === Number(selectedVersion.value?.id)))
+const curseforgeFile = computed(() => files.value.find(f => f.id === Number(selectedVersion.value?.id)))
 const { data: deps, error, isValidating: loadingDependencies } = useSWRVModel(
   getCurseforgeDependenciesModel(
-    versionKey,
+    curseforgeFile,
     computed(() => props.gameVersion),
-    computed(() => props.loaders.includes('forge')
-      ? FileModLoaderType.Forge
-      : props.loaders.includes('fabric')
-        ? FileModLoaderType.Fabric
-        : props.loaders.includes('quilt')
-          ? FileModLoaderType.Quilt
-          : FileModLoaderType.Any),
+    // TODO: limit the modloaders
+    computed(() => curseforgeFile.value ? getModLoaderTypesForFile(curseforgeFile.value).values().next().value : FileModLoaderType.Any),
   ),
 )
 
-const dependencies = computed(() => !versionKey.value
+const dependencies = computed(() => !curseforgeFile.value
   ? []
   : deps.value?.map((resolvedDep) => {
     const task = useCurseforgeTask(computed(() => resolvedDep.file.id))
@@ -279,6 +277,7 @@ const dependencies = computed(() => !versionKey.value
       version: resolvedDep.file.displayName,
       description: resolvedDep.file.fileName,
       type: getCurseforgeRelationType(resolvedDep.type),
+      parent: resolvedDep.parent?.name ?? '',
       installedVersion: computed(() => file.value?.version),
       installedDifferentVersion: computed(() => otherFile.value?.version),
       progress: computed(() => task.value ? task.value.progress / task.value.total : -1),
@@ -325,7 +324,7 @@ const installDependency = async (dep: ProjectDependency) => {
   }
 }
 
-const onDelete = async () => {
+const onDelete = () => {
   innerUpdating.value = true
   emit('uninstall', props.installed)
 }
@@ -340,35 +339,6 @@ const onRefresh = () => {
 }
 
 const modrinthId = computed(() => props.modrinth || props.allFiles.find(v => v.curseforge?.projectId === props.curseforgeId && v.modrinth)?.modrinth?.projectId)
-
-function onDescriptionLinkClicked(e: MouseEvent, href: string) {
-  const url = new URL(href)
-  if ((url.host === 'www.curseforge.com' || url.host === 'curseforge.com') && url.pathname.startsWith('/minecraft')) {
-    const slug = url.pathname.split('/')[3] ?? ''
-    let domain: string = ''
-    if (url.pathname.startsWith('/minecraft/mc-mods/')) {
-      domain = 'mods'
-    } else if (url.pathname.startsWith('/texture-packs/')) {
-      domain = 'resourcepacks'
-    } else if (url.pathname.startsWith('/modpacks')) {
-      domain = 'modpacks'
-    }
-
-    if (domain && domain !== 'modpacks' && slug) {
-      clientCurseforgeV1.searchMods({ slug, pageSize: 4 }).then((result) => {
-        const id = result.data[0]?.id
-        if (id) {
-          push({ query: { ...currentRoute.query, id: `curseforge:${id}` } })
-        } else {
-          window.open(href, '_blank')
-        }
-      })
-      e.preventDefault()
-      e.stopPropagation()
-    }
-  }
-}
-
 </script>
 <template>
   <MarketProjectDetail
@@ -396,6 +366,5 @@ function onDescriptionLinkClicked(e: MouseEvent, href: string) {
     @install-dependency="installDependency"
     @select:category="emit('category', Number($event))"
     @refresh="onRefresh"
-    @description-link-clicked="onDescriptionLinkClicked"
   />
 </template>

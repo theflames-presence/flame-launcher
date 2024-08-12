@@ -1,19 +1,17 @@
 <script setup lang="ts">
 import MarketProjectDetail, { ProjectDependency } from '@/components/MarketProjectDetail.vue'
 import { ProjectVersion as ProjectDetailVersion } from '@/components/MarketProjectDetailVersion.vue'
-import { useModDetailEnable, useModDetailUpdate } from '@/composables/modDetail'
 import { getModrinthDependenciesModel } from '@/composables/modrinthDependencies'
 import { kModrinthInstaller } from '@/composables/modrinthInstaller'
-import { getModrinthProjectModel, useModrinthProject } from '@/composables/modrinthProject'
+import { useModrinthProject } from '@/composables/modrinthProject'
 import { useModrinthProjectDetailData, useModrinthProjectDetailVersions } from '@/composables/modrinthProjectDetailData'
 import { getModrinthVersionModel, useModrinthTask } from '@/composables/modrinthVersions'
+import { useProjectDetailEnable, useProjectDetailUpdate } from '@/composables/projectDetail'
 import { useLoading, useSWRVModel } from '@/composables/swrv'
 import { kSWRVConfig } from '@/composables/swrvConfig'
-import { clientModrinthV2 } from '@/util/clients'
 import { injection } from '@/util/inject'
 import { ProjectFile } from '@/util/search'
-import { getSWRV } from '@/util/swrvGet'
-import { ModrinthV2Client, SearchResultHit } from '@xmcl/modrinth'
+import { SearchResultHit } from '@xmcl/modrinth'
 import { Resource } from '@xmcl/runtime-api'
 
 const props = defineProps<{
@@ -63,7 +61,7 @@ const dependencies = computed(() => {
   if (!version.value) return []
   if (!deps.value) return []
 
-  return deps.value.map(({ recommendedVersion, versions, project, type }) => {
+  return deps.value.map(({ recommendedVersion, versions, project, type, parent }) => {
     // TODO: optimize this perf
     const file = computed(() => {
       for (const file of props.allFiles) {
@@ -89,6 +87,7 @@ const dependencies = computed(() => {
       version: recommendedVersion.name,
       description: recommendedVersion.files[0].filename,
       type,
+      parent: parent?.title ?? '',
       installedVersion: computed(() => file.value?.version),
       installedDifferentVersion: computed(() => otherFile.value?.version),
       progress: computed(() => task.value ? task.value.progress / task.value.total : -1),
@@ -97,7 +96,7 @@ const dependencies = computed(() => {
   }) ?? []
 })
 
-const innerUpdating = useModDetailUpdate()
+const innerUpdating = useProjectDetailUpdate()
 watch(() => props.modrinth, () => {
   innerUpdating.value = false
 })
@@ -143,7 +142,7 @@ const onInstallDependency = async (dep: ProjectDependency) => {
   }
 }
 
-const { enabled, installed, hasInstalledVersion } = useModDetailEnable(
+const { enabled, installed, hasInstalledVersion } = useProjectDetailEnable(
   selectedVersion,
   computed(() => props.installed),
   innerUpdating,
@@ -151,7 +150,7 @@ const { enabled, installed, hasInstalledVersion } = useModDetailEnable(
   f => emit('disable', f),
 )
 
-const onDelete = async () => {
+const onDelete = () => {
   innerUpdating.value = true
   emit('uninstall', props.installed)
 }
@@ -163,28 +162,12 @@ const onOpenDependency = (dep: ProjectDependency) => {
 
 const curseforgeId = computed(() => props.curseforge || props.allFiles.find(v => v.modrinth?.projectId === props.projectId && v.curseforge)?.curseforge?.projectId)
 
-function onDescriptionLinkClicked(e: MouseEvent, href: string) {
-  const url = new URL(href)
-  if (url.host === 'modrinth.com') {
-    const slug = url.pathname.split('/')[2] ?? ''
-    let domain: string = ''
-    if (url.pathname.startsWith('/mod/')) {
-      domain = 'mods'
-    } else if (url.pathname.startsWith('/shaders/')) {
-      domain = 'shaderpacks'
-    } else if (url.pathname.startsWith('/resourcepacks/')) {
-      domain = 'resourcepacks'
-    } else if (url.pathname.startsWith('/modpacks')) {
-      domain = 'modpacks'
-    }
-
-    if (domain !== 'modpacks' && slug && domain) {
-      push({ query: { ...currentRoute.query, id: `modrinth:${slug}` } })
-      e.preventDefault()
-      e.stopPropagation()
-    }
-  }
-}
+const archived = computed(() => {
+  return project.value?.status === 'archived'
+})
+// watchEffect(() => {
+//   console.log(project.value.status)
+// })
 
 </script>
 
@@ -212,6 +195,5 @@ function onDescriptionLinkClicked(e: MouseEvent, href: string) {
     @install-dependency="onInstallDependency"
     @select:category="emit('category', $event)"
     @refresh="refresh()"
-    @description-link-clicked="onDescriptionLinkClicked"
   />
 </template>

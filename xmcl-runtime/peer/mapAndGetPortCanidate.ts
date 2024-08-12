@@ -21,13 +21,13 @@ export async function exposeLocalPort(priv: number, pub: number) {
   if (!await isSupported()) return false
   const ip = await getNatAddress()
   const mappings = [{
-    description: `XMCL Multiplayer - udp - ${priv} - ${pub}`,
+    description: `FMCL Multiplayer - udp - ${priv} - ${pub}`,
     protocol: 'udp',
     private: priv,
     public: pub,
     ttl: 24 * 60 * 60,
   }, {
-    description: `XMCL Multiplayer - tcp - ${priv} - ${pub}`,
+    description: `FMCL Multiplayer - tcp - ${priv} - ${pub}`,
     protocol: 'tcp',
     private: priv,
     public: pub,
@@ -35,7 +35,7 @@ export async function exposeLocalPort(priv: number, pub: number) {
   }] as UpnpMapOptions[]
 
   const currentMappings = await getMappings()
-  const existedMappings = currentMappings.filter(m => m.description.indexOf('XMCL Multiplayer') !== -1 &&
+  const existedMappings = currentMappings.filter(m => m.description.indexOf('FMCL Multiplayer') !== -1 &&
     m.private.port === priv &&
     m.private.host === ip &&
     m.public.port === pub &&
@@ -54,14 +54,14 @@ export async function exposeLocalPort(priv: number, pub: number) {
       // Table is full
       const candidates = getUnmapCandidates(currentMappings, mappings)
       for (const c of candidates) {
-        await unmap(c).catch(() => {})
+        await unmap(c).catch(() => { })
       }
       await Promise.all(mappings.map(n => map(n)))
     } else if (err.detail?.UPnPError && err.detail.UPnPError.errorCode === 718) {
       // Conflict
       const candidates = getUnmapCandidates(currentMappings, mappings)
       for (const c of candidates) {
-        await unmap(c).catch(() => {})
+        await unmap(c).catch(() => { })
       }
       await Promise.all(mappings.map(n => map(n)))
     } else {

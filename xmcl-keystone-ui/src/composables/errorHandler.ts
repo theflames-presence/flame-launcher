@@ -5,7 +5,6 @@ import { useExceptionHandler } from '@/composables/exception'
 import { useLocaleError } from './error'
 
 export function useDefaultErrorHandler(notify: Notify) {
-  const { t } = useI18n()
   const { show } = useDialog('feedback')
   const tError = useLocaleError()
   useExceptionHandler(HTTPException, (e) => {
@@ -16,7 +15,6 @@ export function useDefaultErrorHandler(notify: Notify) {
       more() {
         show()
       },
-      full: true,
     })
   })
 }

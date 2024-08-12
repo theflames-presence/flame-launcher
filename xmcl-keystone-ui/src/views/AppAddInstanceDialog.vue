@@ -2,7 +2,7 @@
   <v-dialog
     v-model="isShown"
     width="900"
-    :persistent="!loading"
+    :persistent="true"
   >
     <v-toolbar
       elevation="4"
@@ -47,7 +47,7 @@
             @select="onSelectType"
           />
           <AppLoadingCircular
-            v-if="tStep === 'create' &&loading"
+            v-if="tStep === 'create' && loading"
             :texts="[t('instances.loadingFiles') + '...']"
           />
           <StepChoice
@@ -121,9 +121,11 @@ import StepServer from '@/components/StepServer.vue'
 import StepperFooter from '@/components/StepperFooter.vue'
 import { useService } from '@/composables'
 import { kInstance } from '@/composables/instance'
-import { kInstanceVersionDiagnose } from '@/composables/instanceVersionDiagnose'
+import { kInstanceVersionInstall } from '@/composables/instanceVersionInstall'
 import { kInstances } from '@/composables/instances'
 import { kJavaContext } from '@/composables/java'
+import { useNotifier } from '@/composables/notifier'
+import { kPeerShared } from '@/composables/peers'
 import { kUserContext } from '@/composables/user'
 import { getFTBTemplateAndFile } from '@/util/ftb'
 import { injection } from '@/util/inject'
@@ -133,8 +135,6 @@ import StepTemplate from '../components/StepTemplate.vue'
 import { useDialog } from '../composables/dialog'
 import { kInstanceCreation, useInstanceCreation } from '../composables/instanceCreation'
 import { AddInstanceDialogKey } from '../composables/instanceTemplates'
-import { useNotifier } from '@/composables/notifier'
-import { kPeerShared } from '@/composables/peers'
 
 const type = ref(undefined as 'modrinth' | 'mmc' | 'server' | 'vanilla' | 'manual' | 'template' | undefined)
 const manifests = ref([] as CreateInstanceManifest[])
@@ -296,7 +296,7 @@ provide(kInstanceCreation, creation)
 
 // Install
 const router = useRouter()
-const { fix } = injection(kInstanceVersionDiagnose)
+const { fix } = injection(kInstanceVersionInstall)
 const onCreate = async () => {
   await create((newPath) => {
     path.value = newPath
@@ -381,7 +381,6 @@ onPeerService('share', (event) => {
     notify({
       level: 'info',
       title: t('AppShareInstanceDialog.instanceShare', { user: conn.userInfo.name }),
-      full: true,
       more() {
         if (!isShown.value && event.manifest) {
           show({ type: 'manifest', manifest: event.manifest })

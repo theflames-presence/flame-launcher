@@ -404,7 +404,7 @@ export function useTheme(framework: Framework, { addMedia, removeMedia, exportTh
     colors.darkWarningColor = '#FB8C00'
     colors.darkSuccessColor = '#4CAF50'
     colors.darkAccentColor = '#00e676'
-    colors.darkCardColor = '#0c0c0ccc'
+    colors.darkCardColor = '#00000024'
   }
 
   function resetLightToDefault() {

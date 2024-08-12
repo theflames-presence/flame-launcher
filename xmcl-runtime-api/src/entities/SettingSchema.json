@@ -126,7 +126,7 @@
             }
         },
         "globalFastLaunch": {
-            "default": false,
+            "default": true,
             "type": "boolean"
         },
         "globalHideLauncher": {
@@ -145,16 +145,20 @@
             "default": false,
             "type": "boolean"
         },
+        "globalPrependCommand": {
+            "default": "",
+            "type": "string"
+        },
         "discordPresence": {
             "default": true,
             "type": "boolean"
         },
         "developerMode": {
-            "default": false,
+            "default": true,
             "type": "boolean"
         },
         "disableTelemetry": {
-            "default": false,
+            "default": true,
             "type": "boolean"
         },
         "linuxTitlebar": {
@@ -176,6 +180,7 @@
         "developerMode",
         "disableTelemetry",
         "discordPresence",
+        "enableDedicatedGPUOptimization",
         "globalAssignMemory",
         "globalDisableAuthlibInjector",
         "globalDisableElyByAuthlib",
@@ -184,11 +189,11 @@
         "globalMaxMemory",
         "globalMcOptions",
         "globalMinMemory",
+        "globalPrependCommand",
         "globalShowLog",
         "globalVmOptions",
         "httpProxy",
         "httpProxyEnabled",
-        "enableDedicatedGPUOptimization",
         "linuxTitlebar",
         "locale",
         "maxSockets",

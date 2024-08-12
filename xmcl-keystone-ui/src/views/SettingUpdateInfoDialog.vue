@@ -7,7 +7,7 @@
     <v-card
       v-if="updateInfo"
       outlined
-      class="visible-scroll max-h-90vh overflow-auto"
+      class="visible-scroll max-h-90vh overflow-auto flex flex-col"
     >
       <v-alert
         v-if="isAppX"
@@ -22,7 +22,7 @@
       <v-card-subtitle>
         {{ getLocalDateString(updateInfo.date) }}
       </v-card-subtitle>
-      <v-card-text class="markdown-body">
+      <v-card-text class="markdown-body flex flex-col overflow-auto">
         <div v-html="body" />
       </v-card-text>
       <v-alert
@@ -93,25 +93,19 @@
       hover
 
       style="width: 100%"
-      to="https://github.com/aislxflames/flame-launcher/releases"
+      to="https://github.com/voxelum/x-minecraft-launcher/releases"
       target="browser"
       push
     >
-      <v-container fill-height>
-        <v-layout
-          fill-height
-          justify-space-around
-          align-center
-        >
-          <h3 v-if="!checkingUpdate">
-            {{ t('launcherUpdate.noUpdateAvailable') }}
-          </h3>
-          <v-progress-circular
-            v-else
-            indeterminate
-          />
-        </v-layout>
-      </v-container>
+      <div class="m-8 flex h-full items-center justify-around">
+        <h3 v-if="!checkingUpdate">
+          {{ t('launcherUpdate.noUpdateAvailable') }}
+        </h3>
+        <v-progress-circular
+          v-else
+          indeterminate
+        />
+      </div>
     </v-card>
   </v-dialog>
 </template>
@@ -136,7 +130,12 @@ const downloadingUpdate = useServiceBusy(BaseServiceKey, 'downloadUpdate')
 const { state } = injection(kSettingsState)
 const updateInfo = computed(() => state.value?.updateInfo)
 const updateStatus = computed(() => state.value?.updateStatus)
-const body = computed(() => state.value?.updateInfo?.useAutoUpdater ? state.value?.updateInfo.body : render(state.value?.updateInfo?.body ?? ''))
+function renderUpdate() {
+  const body = state.value?.updateInfo?.body ?? ''
+  const transformed = body.replace(/## \[(.+)\]\(#.+\)/g, (str, v) => `## ${v}`)
+  return render(transformed)
+}
+const body = computed(() => state.value?.updateInfo?.useAutoUpdater ? state.value?.updateInfo.body : renderUpdate())
 const env = useEnvironment()
 const isAppX = computed(() => env.value?.env === 'appx')
 const isAppImage = computed(() => env.value?.env === 'appimage')
@@ -148,10 +147,10 @@ const hintRedownload = computed(() =>
 )
 
 const openOfficialWebsite = () => {
-  window.open('https://flamelauncher.my-style.in', 'browser')
+  window.open('https://xmcl.app', 'browser')
 }
 const openGithub = () => {
-  window.open('https://github.com/aislxflames/flame-launcher/releases', 'browser')
+  window.open('https://github.com/voxelum/x-minecraft-launcher/releases', 'browser')
 }
 </script>
 
