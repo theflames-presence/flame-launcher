@@ -17,10 +17,10 @@
     >
       <template #left>
         <div
-          class="flex flex-grow-0 items-center px-4"
+          v-if="items.length > 0"
+          class="flex flex-grow-0 items-center "
         >
           <slot
-            v-if="items.length > 0"
             name="actions"
           />
         </div>
@@ -33,15 +33,19 @@
           :item-height="itemHeight"
           @scroll="onScroll"
         >
-          <template #default="{ item }">
+          <template #default="{ item, index }">
             <slot
               name="item"
               :item="item"
+              :index="index"
               :has-update="typeof item === 'string' ? false : !!plans[item.id]"
               :checked="typeof item === 'string' ? false : (selections[item.id] || false)"
               :selection-mode="typeof item === 'string' ? false : (selectionMode && item.installed && item.installed.length > 0)"
-              :selected="typeof item === 'string' ? false : ((selectedItem && selectedItem.id === item.id) || false)"
-              :on="{ click: () => onSelect(item) }"
+              :selected="typeof item === 'string' ? false : ((selectedItem && (selectedItem.id === item.id) || selections[item.id]) || false)"
+              :on="{
+                // @ts-ignore
+                click: (event) => onSelect(event, item)
+              }"
             />
           </template>
         </v-virtual-scroll>
@@ -51,6 +55,7 @@
         />
         <slot
           v-else-if="items.length === 0"
+          class="responsive-container"
           name="placeholder"
         />
       </template>
@@ -85,12 +90,14 @@ const props = defineProps<{
   plans: Record<string, UpgradePlan>
   items: (ProjectEntry | string)[]
   itemHeight: number
+  selectionMode?: boolean
   loading?: boolean
   error?: any
 }>()
 const emit = defineEmits<{
   (event: 'load'): void
   (event: 'drop', e: DragEvent): void
+  (event: 'update:selectionMode', v: boolean): void
 }>()
 
 const selectedId = useQuery('id')
@@ -115,7 +122,10 @@ const selectedModrinthId = computed(() => {
   if (id && id?.startsWith('modrinth:')) {
     return id.substring('modrinth:'.length)
   }
-  return selectedItem.value?.modrinthProjectId || selectedItem.value?.modrinth?.project_id || ''
+  const item = selectedItem.value
+  return item?.modrinthProjectId ||
+    item?.modrinth?.project_id ||
+    ''
 })
 const selectedCurseforgeId = computed(() => {
   const id = selectedId.value
@@ -125,8 +135,39 @@ const selectedCurseforgeId = computed(() => {
   return selectedItem.value?.curseforgeProjectId || selectedItem.value?.curseforge?.id || undefined
 })
 
-const onSelect = (i: ProjectEntry) => {
-  selectedId.value = i.id
+const onSelect = (event: MouseEvent, i: ProjectEntry) => {
+  if (props.selectionMode && i.installed.length > 0) {
+    // if ctrl is pressed
+    if (event.ctrlKey) {
+      selections.value = {
+        ...selections.value,
+        [i.id]: !selections.value[i.id],
+      }
+    } else if (event.shiftKey) {
+      // Select all items between the last selected item and this item
+      const list = props.items
+      const lastIndex = list.findIndex((item) => typeof item === 'object' && item.id === selectedId.value)
+      const currentIndex = list.findIndex((item) => typeof item === 'object' && item.id === i.id)
+      const start = Math.min(lastIndex, currentIndex)
+      const end = Math.max(lastIndex, currentIndex)
+      const _selections: Record<string, boolean> = {}
+      for (let i = start; i <= end; i++) {
+        const item = list[i]
+        if (typeof item === 'object') {
+          _selections[item.id] = true
+        }
+      }
+      selections.value = _selections
+    } else {
+      selectedId.value = i.id
+      selections.value = {
+        [i.id]: true,
+      }
+    }
+  } else {
+    selectedId.value = i.id
+    selections.value = {}
+  }
 }
 
 const onScroll = (e: Event) => {
@@ -137,14 +178,13 @@ const onScroll = (e: Event) => {
   }
 }
 
-const selectionMode = ref(false)
-const selections = ref({} as Record<string, boolean>)
+const selections = inject('selections', () => ref({} as Record<string, boolean>), true)
 const onKeyPress = (e: KeyboardEvent) => {
   // ctrl+a
   if (e.ctrlKey && e.key === 'a') {
     e.preventDefault()
     e.stopPropagation()
-    selectionMode.value = true
+    emit('update:selectionMode', true)
 
     const _selections: Record<string, boolean> = {}
     for (const item of props.items) {
@@ -157,7 +197,7 @@ const onKeyPress = (e: KeyboardEvent) => {
   }
   // esc
   if (e.key === 'Escape') {
-    selectionMode.value = false
+    emit('update:selectionMode', false)
     selections.value = {}
   }
 }
@@ -171,17 +211,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.search-text {
-  display: none;
-}
-
-@container (min-width: 260px) {
-  .search-text {
-    display: block;
-  }
-}
-
-.responsive-header {
+.responsive-container {
   container-type: size;
   width: 100%;
 }

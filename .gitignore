@@ -12,7 +12,7 @@ thumbs.db
 *.bin
 /temp
 xmcl-electron-app/build/appx
-.env
+
 
 p2p.network
 

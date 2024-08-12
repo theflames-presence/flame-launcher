@@ -5,14 +5,25 @@ AppAddInstanceDialog:
   downloadedNotification: Modpack {name} ist installiert. Soll ich eine Instanz dafür erstellen?
   serverTitle: Geben Sie Ihre Serveradresse ein
 AppShareInstanceDialog:
+  alterDownloadDescription: >-
+    Wenn Sie die aktuelle Instanz nicht durcheinander bringen möchten. 
+
+    Sie können auch eine neue Instanz aus der Konfiguration Ihres Peers
+    erstellen. 
+
+    Klicken Sie auf die Schaltfläche unten, um eine Instanz zu erstellen.
   baseInfo: Grundlegende Einrichtung
   cancelShare: Verteilen Sie nicht
   description: >-
     Nachdem Sie Ihr Profil freigegeben haben, können andere Benutzer die diese
     Dateien über Ihren PC installieren.
   downloadDescription: >-
-    Überprüfen Sie die Dateien, die Ihr Freund freigegeben hat. Wählen Sie die
-    Dateien aus, die Sie installieren möchten.
+    Bitte überprüfen Sie die Dateien, die Ihnen Ihr Kollege zur Verfügung
+    gestellt hat. 
+
+    Wählen Sie die Datei aus, die Sie herunterladen möchten. 
+
+    Es wird in der aktuellen Instanz {name} platziert.
   downloadNotifyTitle: Installieren Sie eine Instanz von {user}
   downloadTitle: Dateien von anderen Peers installieren
   downloadToLocal: Installation in der Streaming-Instanz
@@ -107,6 +118,7 @@ browseApp:
 cancel: Stornierung.
 checkUpdate:
   name: Nach Aktualisierungen suchen
+color: Farbe
 compatibleDetail: {}
 confirm: Start
 copyClipboard:
@@ -137,6 +149,15 @@ curseforge:
   totalDownloads: Downloads insgesamt
   worlds: {}
 curseforgeCard: {}
+curseforgeCategory:
+  Fabric: Fabric
+  FancyMenu: FancyMenu
+  MCreator: MCreator
+  QoL: QoL
+  Redstone: Redstone
+  Skyblock: SkyBlock
+  Steampunk: Steampunk
+  Vanilla+: Vanilla+
 dataMigration:
   apply: Einstellungen anwenden
   directoryCriteriaHint: Stellen Sie sicher, dass der neue Katalog ein LEERER Katalog ist!
@@ -247,6 +268,11 @@ duration:
   second: '{duration} zweite | {duration} zweiten'
 edit: bearbeiten
 enable: Aktivieren Sie
+env:
+  select:
+    all: Wählen Sie Alle
+    fit: Wählen Sie „Anpassen“.
+    none: Nichts ausgewählt
 error:
   name: Fehler | Fehler
 errors:
@@ -277,6 +303,10 @@ errors:
   HeadersTimeoutError: HTTP-Header-Zeitüberschreitung ist aufgetreten
   NotFoundError: 404 Nicht gefunden
   SocketError: Server-Socket-Fehler
+eula:
+  body: >-
+    Indem Sie das Kontrollkästchen aktivieren, erklären Sie sich mit der {eula}
+    von Minecraft einverstanden.
 exception:
   http: >-
     HTTP-Anfrage von {url} fehlgeschlagen. Statuscode {statusCode}. {code}.
@@ -351,7 +381,7 @@ importModpack:
 importResource: Importieren einer Ressource
 install: Installieren Sie
 installAssets:
-  asset: Asset setzen {hash}
+  asset: Installieren Sie {count} Assets
   assetIndex: Prüfen Sie die Asset-Indexdatei
   name: Asset-Dateien installieren
 installAuthlibInjector: Installieren Sie  authlib-injector
@@ -403,6 +433,7 @@ installVersion:
   name: Installieren Sie den Minecraft-Client {version}
 instance:
   addServer: Server hinzufügen
+  changeIcon: Icon ändern
   current: Aktuelle Instanz
   delete: Deinstallieren Sie das Spiel
   deleteHint: >-
@@ -416,10 +447,12 @@ instance:
     Konfiguration.
   gameVersion: Version des Spiels
   icon: Profil-Symbol
+  iconHint: Das Symbol könnte eine Datei oder ein Internet-URL-Link sein.
   iconUrl: Url-Symbol
   includeVersion: Version freigeben | Versionen freigeben
   lastPlayed: Das letzte Mal spielten sie
   launchArguments: Vorschau der Startargumente
+  launchServer: Starten Sie den Localhost-Server
   mcOptions: Minecraft Einstellungen
   mcOptionsHint: Zusätzliche Anweisungen zum Starten von Minecraft
   name: Profilname
@@ -427,6 +460,8 @@ instance:
   neverPlayed: Nie gespielt
   openCrashReportFolder: Öffnen Sie den Ordner mit den Absturzberichten
   openLogFolder: Öffnen Sie den Ordner logs
+  prependCommand: Befehl voranstellen
+  prependCommandHint: Dadurch wird dieser Befehl allen Startbefehlen vorangestellt
   requireName: Name ist erforderlich
   showInstance: Spieleordner anzeigen
   versionHint: Minecraft Version für dieses Spiel
@@ -495,8 +530,9 @@ instances:
   addVanilla: Erstellen Sie mit Vanilla Minecraft
   addVanillaDescription: |-
     Importieren Sie aus dem gemeinsamen .minecraft-Ordner. 
-    Dadurch wird das ursprüngliche Spielprofil in die XMCL kopiert.
+    Dadurch wird das ursprüngliche Spielprofil in die FMCL kopiert.
   choose: Spiel auswählen
+  folderSetting: Ordnereinstellungen
   importFolder: Importieren aus einem Ordner
   importFolderDescription: Minecraft in den Launcher importieren
   loadingFiles: Laden von Modpack-Dateien
@@ -528,6 +564,7 @@ labyMod:
 launch:
   cancel: Ablehnen
   kill: Stopp
+  killServer: Töte den Localhost-Server
   launch: Los geht's
 launchBlocked:
   ignore: Erzwungener Start
@@ -686,7 +723,7 @@ minecraftVersion:
   empty: Kann keine Version von Minecraft herunterladen
   name: Minecraft-Version
   release: Freigabe
-  showAlpha: Schnappschuss anzeigen
+  showAlpha: Schnappschuss snapshot
   snapshot: Snapshot
 mod:
   acceptVersion: Akzeptieren {version}
@@ -698,6 +735,7 @@ mod:
     dass Sie sie löschen wollen? | Du wirst diese Mod und ihre Metadaten für
     immer verschwinden lassen. Sind Sie sicher, dass Sie dies tun wollen?
   deletionRestHint: Und der {rest} der Mods...
+  denseView: Dichte Sicht
   dropHint: Ziehen Sie die .jar/.litemod-Mod hierher und importieren Sie sie.
   enabled: 'Inklusive Mods: {count}'
   filter: Mod-Filter
@@ -706,6 +744,7 @@ mod:
   incompatible: Inkompatible Mods.
   manage: Mods verwalten
   maybeCompatible: Möglicherweise kompatibel.
+  mods: '{count} Mods'
   name: Mods | Mods
   noModLoaderHint: Vergessen Sie nicht, den Modloader zu aktivieren, um Mods zu verwenden!
   openLink: Link zur Mod öffnen {url}
@@ -719,11 +758,19 @@ mod:
   switchDefaultSource: Quelle der Standardänderung
   toUpdate: '{count} zu aktualisieren'
 modInstall:
+  archived: >-
+    {name} wurde archiviert. 
+
+    {name} erhält keine weiteren Updates, es sei denn, der Autor beschließt, das
+    Projekt aus der Archivierung zu entfernen.
+  checkDependencies: Abhängigkeiten prüfen
   checkUpgrade: Prüfen Sie auf Aktualisierungen von Änderungen
+  checkedDependencies: Überprüfte Abhängigkeiten
   checkedUpgrade: Aktualisierung geprüft
   currentVersion: Ausgewählte Version
   dependencyHint: Eine andere Version ist installiert {version}
   install: Installieren Sie
+  installDependencies: Fehlende Abhängigkeiten installieren
   installHint: Die Datei wird installiert {file} mit Süchten {dependencies} Abhängigkeiten
   installed: Installiert
   noVersionSupported: Mod unterstützt nur Minecraft {supported}.
@@ -781,6 +828,7 @@ modrinth:
     16x: 16x
     256x: 256x
     32x: 32x
+    48x: 48x
     512x+: 512x+
     64x: 64x
     8x-: 8x-
@@ -836,6 +884,7 @@ modrinth:
     modloader: ModLoader
     multiplayer: Multiplayer-Spiel
     name: Kategorien.
+    neoforge: NeoForge
     optifine: Optifine
     optimization: Optimierung
     paper: Paper
@@ -1010,6 +1059,10 @@ multiplayer:
   sendTokenToRemote: Senden eines Tokens an eine entfernte
   share: die Instanzkonfiguration freigeben
   sharing: Filesharing...
+  sharingNotificationBody: >-
+    Sie können eine Instanz aus der freigegebenen Konfiguration „{name}“
+    herunterladen oder erstellen.
+  sharingNotificationTitle: Ein Peer teilt die Spielkonfiguration
   start: Los geht's
   startNewP2PConnection: Klicken Sie auf Start, um eine neue Peer-to-Peer-Verbindung zu erstellen
 myStuff: Meine Materialien
@@ -1107,6 +1160,7 @@ resourcepack:
   showInCurseforge: anzeigen {name} in curseforge
   unselected: Unausgewählte Texturpakete
 save:
+  cheat: Schummeln
   copy:
     cancel: Kopie abbrechen
     confirm: Kopieren beginnen
@@ -1123,6 +1177,7 @@ save:
     fromProfile: Aus anderen Beispielen
     fromResource: Aus verwalteten Ressourcen
     title: Importieren einer Sicherung aus einer verwalteten Quelle
+  createNew: Erschaffe eine neue Welt
   createdWorlds: 'Ihre Welten: {count}'
   deleteHint: >-
     Dieser Vorgang kann nicht abgebrochen werden. Die gespeicherten Daten gehen
@@ -1134,12 +1189,20 @@ save:
   export: Ausfuhr von Konservierungsmitteln
   exportMessage: Exportieren und Speichern als Zip
   exportTitle: Ausfuhr von Konservierungsmitteln
+  gameMode: Spielmodus
   import: Importieren einer Speicherung
   importMessage: Importieren eines Spielstands aus einer Zip-Datei
   importTitle: Importieren einer Speicherung
+  independent: Instanz verwendet unabhängigen Speicherordner
+  levelName: Ebenenname
   manage: Verwaltung der Reservate
   name: Speichern | Speichern
+  search: Suche nach Speichern
+  selected: lokales Archiv
+  shared: Instanz verwendet freigegebenen Speicherordner
   showDirectory: Speicherverzeichnis anzeigen
+  unselected: gemeinsames Archiv
+saves: {}
 screenshots:
   empty: Sie haben keine Bildschirmfotos
   goto: Öffnen Sie den Ordner
@@ -1156,8 +1219,11 @@ server:
   host: Gastgeber
   hostHint: Server-Host (mit Port)
   ipAddress: IP-Adressen
+  maxPlayers: Maximale Spieleranzahl
   motd: Beschreibung des Servers
   name: Server | Server
+  nogui: Keine Server-GUI
+  onlineMode: Onlinemodus
   ping: Ping
   pings: Pings
   players: Spieler.
@@ -1242,7 +1308,7 @@ setting:
     Der Entwicklermodus ist dazu gedacht, die von Ihnen geschriebene Mod zu
     testen.
   disableTelemetry: Telemetrie ausschalten
-  disableTelemetryDescription: XMCL sammelt die Ereignisse des Spielstarts und der Benutzeranmeldung.
+  disableTelemetryDescription: FMCL sammelt die Ereignisse des Spielstarts und der Benutzeranmeldung.
   enableDedicatedGPUOptimization: Weisen Sie eine dedizierte GPU zu
   enableDedicatedGPUOptimizationDescription: Diese Option weist dem Minecraft-Prozess eine dedizierte GPU zu.
   enableDiscord: Discord-Präsenz einschalten (Discord-Spielstatus)
@@ -1327,7 +1393,7 @@ setup:
     name: '@:setting.appearance'
   dataRoot:
     description: |-
-      Der Datenstamm ist kein normales .minecraft-Verzeichnis. Da die XMCL-Daten
+      Der Datenstamm ist kein normales .minecraft-Verzeichnis. Da die FMCL-Daten
        Verzeichnisstruktur von Vanilla abweicht, empfehlen wir nicht die Verwendung des
        das übliche .minecraft-Verzeichnis als Datenstamm zu verwenden.
     drives: Empfohlene Orte
@@ -1412,6 +1478,7 @@ task:
   nTaskRunning: 'Begonnene Aufgaben: {count}'
   name: Aufgaben Aufgabenя
   pause: Pause
+  searchOnModrinth: '@:mod.searchOnModrinth'
 theme:
   selectImage: Bild auswählen
   selectMusic: Wählen Sie Musik
@@ -1422,6 +1489,9 @@ transportType:
   prflx: Gastgeber-Peer Reflexive
   relay: Gastgeber-Relay
   srflx: Gastgeber-Server Reflexive
+turnRegion:
+  fr: Frankreich
+  po: Polen
 tutorial:
   feedbackDescription: >-
     Wenn Sie Probleme haben, klicken Sie auf diese Schaltfläche, um eine

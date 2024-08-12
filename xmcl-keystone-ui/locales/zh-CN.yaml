@@ -7,10 +7,14 @@ AppAddInstanceDialog:
   downloadedNotification: '{name} 整合包下载完成，您想要现在创建吗？'
   serverTitle: 输入您的服务器地址
 AppShareInstanceDialog:
+  alterDownloadDescription: |-
+    如果您不想搞乱当前实例。
+    您还可以从对等方的配置创建一个新实例。
+    单击下面的按钮创建实例。
   baseInfo: 分享的基本配置
   cancelShare: 取消分享
   description: 分享后，您的联机伙伴将可以下载您分享的游戏资源
-  downloadDescription: 请选择从您的小伙伴那下载的文件。文件将下载到当前实例中。
+  downloadDescription: 请选择从您的小伙伴那下载的文件。文件将下载到当前实例 {name} 中。
   downloadTitle: 从其他玩家那获得游戏资源
   downloadToLocal: 下载到当前实例中
   filesToDownload: 选择您想下载的文件
@@ -92,6 +96,7 @@ browseApp:
 cancel: 取消
 checkUpdate:
   name: 检查更新
+color: 颜色
 confirm: 开始
 copyClipboard:
   success: 复制到剪贴板
@@ -260,6 +265,11 @@ duration:
   second: '{duration} 秒'
 edit: 编辑
 enable: 启用
+env:
+  select:
+    all: 全选
+    fit: 选择匹配的
+    none: 全不选
 error:
   name: 错误 | 错误
 errors:
@@ -277,6 +287,8 @@ errors:
   HeadersTimeoutError: 等待 HTTP 头信息超时
   NotFoundError: 404 未找到资源
   SocketError: 服务器连接断开
+eula:
+  body: 选中复选框按钮即表示您同意 Minecraft 的 {eula}。
 exception:
   http: '{url} 的 HTTP 请求失败。状态码 {statusCode}。{code}，请重试或检查您的网络。如果此问题持续出现，请联系开发团队。'
 existed: 已导入过的
@@ -300,9 +312,12 @@ feedback:
   discord: Discord
   discordDescription: 加入 Discord 频道
   discordJoin: 加入
+  generateReport: 生成报告
+  generateSaveAs: 将报告保存在
   github: Github Issue
   githubDescription: 通过 Github Issue 来反馈您的想法
   githubOpenIssue: Github
+  hint: 点击生成报告按钮并联系开发团队。这个报告会包含你的设备信息，如操作系统，版本，操作系统的用户名等。
   kook: Kook
   kookDescription: 加入 Kook (国外请选 Discord)
   name: 反馈
@@ -341,7 +356,7 @@ importModpack:
 importResource: 导入资源
 install: 安装
 installAssets:
-  asset: 下载资源文件 {hash}
+  asset: 下载 {count} 个资源文件
   assetIndex: 下载资源文件目录
   name: 下载游戏资源文件
 installAuthlibInjector: 安装 authlib-injector
@@ -393,6 +408,7 @@ installVersion:
   name: 安装{id}的游戏本体
 instance:
   addServer: 添加服务器
+  changeIcon: 更改图标
   current: 当前实例
   delete: 删除游戏
   deleteHint: 游戏数据将完全被移除。您确定继续此操作吗？
@@ -402,10 +418,12 @@ instance:
   fileApiHint: 用于远程同步实例文件的链接
   gameVersion: 游戏版本
   icon: 实例图标
+  iconHint: 该图标可以是文件或互联网 URL 链接。
   iconUrl: 图片 URL
   includeVersion: 包含游戏版本
   lastPlayed: 上次游玩
   launchArguments: 启动命令预览
+  launchServer: 启动本地服务端
   mcOptions: Minecraft 启动选项
   mcOptionsHint: 额外的 Minecraft 启动参数
   name: 名称
@@ -413,6 +431,8 @@ instance:
   neverPlayed: 从未游玩
   openLogFolder: 打开日志文件夹
   playtime: 游玩时长
+  prependCommand: 前置命令
+  prependCommandHint: 这将在所有启动命令之前添加此命令
   requireName: 必须填写名称
   showInstance: 打开文件夹
   versionHint: 此游戏使用的 Minecraft 版本
@@ -473,8 +493,9 @@ instances:
   addVanilla: 从原版 Minecraft 创建
   addVanillaDescription: |-
     从通用 .minecraft 文件夹导入。
-    这会将原始游戏配置文件复制到 XMCL。
+    这会将原始游戏配置文件复制到 FMCL。
   choose: 选择游戏
+  folderSetting: 文件夹设置
   importFolder: 从文件夹导入
   importFolderDescription: 导入 Minecraft 到启动器
   loadingFiles: 加载整合包文件
@@ -505,6 +526,7 @@ labyMod:
 launch:
   cancel: 中止
   kill: 停止
+  killServer: 停止本地服务器
   launch: 启动
 launchBlocked:
   ignore: 强制启动
@@ -633,6 +655,7 @@ mod:
   deletion: 删除模组
   deletionHint: 您将移除这个模组的文件和信息。您确定吗？| 您将移除这些模组的文件和信息。您确定吗？
   deletionRestHint: 等 {rest} 个模组……
+  denseView: 简略模式
   dropHint: 将模组 Jar 文件拖入此处来导入
   enabled: 一共启用了 {count} 个模组
   filter: 筛选模组
@@ -641,6 +664,7 @@ mod:
   incompatible: 可能不兼容当前版本。
   manage: 管理模组
   maybeCompatible: 也许兼容于当前版本。
+  mods: '{count} 个模组'
   name: 模组 | 模组
   noModLoaderHint: 请不要忘记选择模组加载器来加载模组
   openLink: 打开模组链接 {url}
@@ -652,14 +676,20 @@ mod:
   showFile: 打开模组所在位置 {file}
   showInCurseforge: 在 Curseforge 上显示该模组
   showInModrinth: 在 Modrinth 中显示 {name}
-  switchDefaultSource: 实例默认模组下载源
+  switchDefaultSource: 本地模组默认显示为
   toUpdate: '{count} 个有新版本'
 modInstall:
+  archived: |-
+    {name} 已存档。
+    除非作者决定取消存档该项目，否则 {name} 将不会收到任何进一步的更新。
+  checkDependencies: 检查依赖关系
   checkUpgrade: 检查模组更新
+  checkedDependencies: 已检查依赖关系
   checkedUpgrade: 已刷新更新列表
   currentVersion: 已选版本
   dependencyHint: 安装了其他版本 {version}
   install: 安装
+  installDependencies: 安装缺少的依赖项
   installHint: 安装 {file} 个文件和 {dependencies} 个依赖文件
   installed: 已安装
   noVersionSupported: Mod 仅支持 Minecraft {supported}。
@@ -915,6 +945,8 @@ multiplayer:
   sendTokenToRemote: 将本地令牌给您的联机伙伴
   share: 分享启动配置
   sharing: 正在共享游戏配置...
+  sharingNotificationBody: 您可以从 {name} 共享配置下载或创建实例。
+  sharingNotificationTitle: 同伴正在共享游戏配置
   start: 开始
   startNewP2PConnection: 点击开始按钮来新建一个新的点对点连接
 myStuff: 个人中心
@@ -996,6 +1028,7 @@ resourcepack:
   showInCurseforge: 在 Curseforge 中显示 {name}
   unselected: 未选资源包
 save:
+  cheat: 作弊
   copy:
     cancel: 取消复制
     confirm: 开始复制
@@ -1010,6 +1043,7 @@ save:
     fromProfile: 来自其他启动配置
     fromResource: 来自已导入资源
     title: 从已有资源导入存档
+  createNew: 新存档
   createdWorlds: 创建了 {count} 个世界
   deleteHint: 该操作不可逆，您将永远失去这个存档的记录，您确定要删除此存档吗？
   deleteTitle: 删除该存档
@@ -1018,12 +1052,20 @@ save:
   export: 导出地图
   exportMessage: 将存档导出为 Zip
   exportTitle: 导出存档
+  gameMode: 游戏模式
   import: 从文件导入
   importMessage: 将 Zip 存档导入
   importTitle: 导入存档
+  independent: 实例使用独立的存档文件夹
+  levelName: 关卡名称
   manage: 管理存档
   name: 地图存档 | 地图存档
+  search: 搜索地图
+  selected: 本地存档
+  shared: 实例使用共享存档文件夹
   showDirectory: 显示保存目录
+  unselected: 共享的存档
+saves: {}
 screenshots:
   empty: 您还没有截图
   goto: 显示文件夹
@@ -1040,8 +1082,11 @@ server:
   host: 服务器地址
   hostHint: 服务器的 IP 地址（和端口号）
   ipAddress: IP 地址
+  maxPlayers: 最大玩家数
   motd: 服务器 MOTD
   name: 服务器名
+  nogui: 隐藏服务器 GUI
+  onlineMode: 在线模式 (只允许正版)
   ping: Ping 服务器
   pings: 延迟
   players: 玩家
@@ -1117,11 +1162,11 @@ setting:
   developerMode: 开发者模式
   developerModeDescription: 开发者模式旨在帮助您测试自己写的模组
   disableTelemetry: 关闭遥测
-  disableTelemetryDescription: XMCL 会收集游戏启动以及用户登录事件
+  disableTelemetryDescription: FMCL 会收集游戏启动以及用户登录事件
   enableDedicatedGPUOptimization: 分配专用 GPU
   enableDedicatedGPUOptimizationDescription: 此选项将为 Minecraft 进程分配专用 GPU。
   enableDiscord: 启用 Discord Presence
-  enableDiscordDescription: 根据 XMCL 实时更新 Discord 的状态
+  enableDiscordDescription: 根据 FMCL 实时更新 Discord 的状态
   general: 基本设置
   githubRelease: Github
   globalSetting: 全局实例设置
@@ -1196,7 +1241,7 @@ setup:
   appearance:
     name: '@:setting.appearance'
   dataRoot:
-    description: 数据存储目录不是常规的 .minecraft 目录。因为 XMCL 的数据目录格式特殊，不建议将常规 .minecraft 目录设置为数据目录。
+    description: 数据存储目录不是常规的 .minecraft 目录。因为 FMCL 的数据目录格式特殊，不建议将常规 .minecraft 目录设置为数据目录。
     drives: 推荐路径
     name: 设置数据存储目录
   defaultLayoutDescription: |-
@@ -1241,6 +1286,8 @@ shaderPack:
   selectSearchHint: 查看已选择的光影包
   showDirectory: 显示光影文件夹
   showFile: 在文件夹中显示此光影包
+shared:
+  accept: 接受
 store:
   explore: 探索
   latestMinecraft: 使用近期 Minecraft 版本
@@ -1278,6 +1325,12 @@ transportType:
   prflx: 同伴反射地址
   relay: 转发地址
   srflx: 服务端反射地址
+turnRegion:
+  fr: 法国
+  guangzhou: 广州
+  hk: 香港
+  liaoning: 辽宁
+  po: 波兰
 tutorial:
   feedbackDescription: 如果您遇到了问题，请点击这个按钮来联系开发团队。
   hideNewsHeaderDescription: |-

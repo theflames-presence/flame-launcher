@@ -35,8 +35,8 @@ export const config = {
   artifactName: 'fmcl-${version}-${platform}-${arch}.${ext}',
   appx: {
     displayName: 'Flame Launcher (Beta)',
-    applicationId: 'CI010.FMCL',
-    identityName: '22961CI010.FMCL',
+    applicationId: 'AISLX.FMCL',
+    identityName: '22961AISLX.FMCL',
     backgroundColor: 'transparent',
     publisher: 'CN=DAFB9390-F5BD-4F94-828C-242F8DAA6FDE',
     publisherDisplayName: 'AISLX',
@@ -90,7 +90,7 @@ export const config = {
     executableName: 'fmcl',
     desktop: {
       MimeType: 'x-scheme-handler/xmcl',
-      StartupWMClass: 'xmcl',
+      StartupWMClass: 'fmcl',
     },
     category: 'Game',
     icon: 'icons/dark.icns',

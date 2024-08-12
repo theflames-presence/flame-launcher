@@ -1,7 +1,6 @@
-import { kVuetify } from '@/composables/vuetify'
 import { i18n } from '@/i18n'
 import { vuetify } from '@/vuetify'
-import 'virtual:windi.css'
+import 'virtual:uno.css'
 import Vue, { h } from 'vue'
 import App from './App.vue'
 import { baseService } from './baseService'
@@ -19,7 +18,6 @@ const app = new Vue(defineComponent({
   vuetify,
   i18n,
   setup(props, context) {
-    provide(kVuetify, vuetify.framework)
     provide(kTheme, useTheme(vuetify.framework, new ServiceFactoryImpl().getService(ThemeServiceKey)))
 
     baseService.call('getSettings').then(state => state).then(state => {

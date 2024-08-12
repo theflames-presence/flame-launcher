@@ -32,7 +32,7 @@
           <v-btn
             text
             target="browser"
-            href="https://github.com/Voxelum/x-minecraft-launcher/issues/new"
+            href="https://github.com/aislxflames/flame-launcher/issues/new"
           >
             {{ t('feedback.githubOpenIssue') }}
           </v-btn>
@@ -47,18 +47,6 @@
             {{ t('feedback.qqDescription', { number: 858391850 }) }}
           </v-list-item-subtitle>
         </v-list-item-content>
-
-        <v-list-item-action>
-          <v-btn
-            text
-            href="https://jq.qq.com/?_wv=1027&k=5Py5zM1"
-          >
-            {{ t('feedback.qqEnterGroup') }}
-          </v-btn>
-        </v-list-item-action>
-      </v-list-item>
-      <v-list-item>
-        <v-list-item-content>
           <v-list-item-title>{{ t('feedback.kook') }}</v-list-item-title>
           <v-list-item-subtitle
             style="max-width: 80%"
@@ -67,15 +55,6 @@
           </v-list-item-subtitle>
         </v-list-item-content>
 
-        <v-list-item-action>
-          <v-btn
-            text
-            target="browser"
-            href="https://kook.top/gqjSHh"
-          >
-            {{ t('feedback.qqEnterGroup') }}
-          </v-btn>
-        </v-list-item-action>
       </v-list-item>
 
       <v-list-item>
@@ -92,7 +71,7 @@
           <v-btn
             text
             target="browser"
-            href="https://discord.gg/W5XVwYY7GQ"
+            href="https://discord.gg/CsaBbjjaPv"
           >
             {{ t('feedback.discordJoin') }}
           </v-btn>

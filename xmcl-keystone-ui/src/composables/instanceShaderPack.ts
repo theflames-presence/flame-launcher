@@ -1,24 +1,33 @@
-import { GameOptionsState, Instance, InstanceOptionsServiceKey, InstanceShaderPacksServiceKey, RuntimeVersions } from '@xmcl/runtime-api'
+import { GameOptionsState, Instance, InstanceOptionsServiceKey, InstanceShaderPacksServiceKey, Resource, RuntimeVersions } from '@xmcl/runtime-api'
 import { useService } from './service'
 import { InjectionKey, Ref } from 'vue'
 import { useRefreshable } from './refreshable'
 import { FabricModMetadata } from '@xmcl/mod-parser'
 import { ModFile } from '@/util/mod'
 import useSWRV from 'swrv'
+import { ProjectFile } from '@/util/search'
+import { BuiltinImages } from '@/constant'
 
 export const kInstanceShaderPacks: InjectionKey<ReturnType<typeof useInstanceShaderPacks>> = Symbol('InstanceShaderPacks')
+
+export interface InstanceShaderFile extends ProjectFile {
+  /**
+   * Backed resource
+   */
+  resource: Resource
+}
 
 export function useInstanceShaderPacks(instancePath: Ref<string>, runtime: Ref<RuntimeVersions>, mods: Ref<ModFile[]>, gameOptions: Ref<GameOptionsState | undefined>) {
   const { link, scan } = useService(InstanceShaderPacksServiceKey)
   const { editOculusShaderOptions, getOculusShaderOptions, getIrisShaderOptions, editIrisShaderOptions, getShaderOptions, editShaderOptions } = useService(InstanceOptionsServiceKey)
 
   const linked = ref(false)
-  const { refresh, refreshing } = useRefreshable(async () => {
-    if (!instancePath.value) return
-    linked.value = await link(instancePath.value)
+  const { refresh, refreshing } = useRefreshable<string>(async (path) => {
+    if (!path) return
+    linked.value = await link(path)
 
     if (!linked.value) {
-      await scan(instancePath.value)
+      await scan(path)
     }
   })
   const shaderMod = computed(() => {
@@ -28,7 +37,7 @@ export function useInstanceShaderPacks(instancePath: Ref<string>, runtime: Ref<R
         id: 'optifine',
         name: 'Optifine',
         version: runtime.value.optifine,
-        icon: 'http://launcher/icons/optifine',
+        icon: BuiltinImages.optifine,
       }
     }
     const shader = mods.value.find(m => {
