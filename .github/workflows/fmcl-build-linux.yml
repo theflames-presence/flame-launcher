@@ -50,28 +50,28 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Deb
-        path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-amd64.deb
+        path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-amd64.deb
       
     - name: FMCL-x32-Upload-Deb
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-LINUX-x32-v${{ secrets.FMCL_VERSION }}-Deb
-        path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-arm64.deb
+        path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.deb
 
     - name: FMCL-x64-Upload-Appimage
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Appimage
-        path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-x86_64.AppImage
+        path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-x86_64.AppImage
                   
     - name: FMCL-x64-Upload-Zip
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Zip
-        path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-x64.tar.xz
+        path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-x64.tar.xz
       
     - name: FMCL-x32-Upload-Zip
       uses: actions/upload-artifact@v3
       with:
         name: FMCL-LINUX-x32-v${{ secrets.FMCL_VERSION }}-Zip
-        path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-arm64.tar.xz
+        path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.tar.xz
