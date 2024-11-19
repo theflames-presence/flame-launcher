@@ -436,6 +436,8 @@ instance:
   changeIcon: Icon ändern
   current: Aktuelle Instanz
   delete: Deinstallieren Sie das Spiel
+  deleteFailed: Instanz konnte nicht gelöscht werden
+  deleteFailedPermission: Ein anderes Programm hat die Datei belegt
   deleteHint: >-
     Die Instanzdaten werden dauerhaft von der Festplatte entfernt. Wie ist dies
     zu tun?
@@ -453,6 +455,12 @@ instance:
   lastPlayed: Das letzte Mal spielten sie
   launchArguments: Vorschau der Startargumente
   launchServer: Starten Sie den Localhost-Server
+  linkFileDesc: >-
+    Dadurch wird die lokale {file} der Instanz mit der globalen {file}
+    überschrieben. 
+
+    Sind Sie sicher, dass Sie es verlinken?
+  linkFileTitle: Sind Sie sicher, dass Sie {file} verlinken?
   mcOptions: Minecraft Einstellungen
   mcOptionsHint: Zusätzliche Anweisungen zum Starten von Minecraft
   name: Profilname
@@ -464,6 +472,14 @@ instance:
   prependCommandHint: Dadurch wird dieser Befehl allen Startbefehlen vorangestellt
   requireName: Name ist erforderlich
   showInstance: Spieleordner anzeigen
+  useSharedOptions: Verwenden Sie gemeinsame Spieleinstellungen
+  useSharedOptionsDesc: >-
+    Dadurch wird die Datei „options.txt“ mit einer instanzübergreifenden Datei
+    verknüpft
+  useSharedServersList: Verwenden Sie die Liste der gemeinsam genutzten Server
+  useSharedServersListDesc: >-
+    Dadurch wird die Datei „servers.dat“ mit einer instanzübergreifenden Datei
+    verknüpft
   versionHint: Minecraft Version für dieses Spiel
   vmOptions: JVM-Parameter
   vmOptionsHint: Zusätzliche Argumente, die an die JVM übergeben werden
@@ -471,6 +487,9 @@ instanceAge:
   older: Alte
   threeDay: Innerhalb von drei Tagen
   today: Heute.
+instanceDiscover:
+  gameFolder: Entdecken Sie {count} Spielordner
+  instanceFolder: '{count} Instanzen gefunden'
 instanceFileOperation:
   add: hinzufügen
   backup-add: Ersetzen (Reserve)
@@ -515,23 +534,27 @@ instanceUpdate:
   update: Aktualisierung beginnen
 instances:
   add: Ein Spiel erstellen
+  addCurseForgeDescription: |-
+    Aus dem Curseforge-Datenordner importieren. 
+    Sie müssen den Stammdatenordner von Curseforge auswählen
   addDescription: Erstellen Sie eine neue Instanz von Grund auf
   addMMCDescription: |-
-    Importieren Sie eine bestehende MultiMC-Instanz. 
-    Sie müssen den Ordner der MultiMC-Instanz auswählen.
+    Vorhandene MultiMC-Instanz importieren. 
+    Sie müssen den Datenordner von MultiMC auswählen.
   addManually: Manuell erstellen
   addModrinthDescription: |-
-    Importieren Sie eine bestehende Modrinth-Instanz. 
-    Sie müssen den Ordner der Modrinth-Instanz auswählen.
+    Vorhandene Modrinth-Instanz importieren. 
+    Sie müssen den Modrinth-Stammdatenordner auswählen.
   addServer: Vom Server aus erstellen
   addServerDescription: Dadurch wird das Spiel direkt auf dem Server gestartet.
-  addTemplate: Aus einer Vorlage erstellen
+  addTemplate: Aus heruntergeladenem Modpack erstellen
   addTemplateDescription: Import aus einem heruntergeladenen Modpack
   addVanilla: Erstellen Sie mit Vanilla Minecraft
   addVanillaDescription: |-
     Importieren Sie aus dem gemeinsamen .minecraft-Ordner. 
-    Dadurch wird das ursprüngliche Spielprofil in die FMCL kopiert.
+    Dadurch wird das ursprüngliche Spielprofil in die XMCL kopiert.
   choose: Spiel auswählen
+  fix: Repariere es
   folderSetting: Ordnereinstellungen
   importFolder: Importieren aus einem Ordner
   importFolderDescription: Minecraft in den Launcher importieren
@@ -566,6 +589,7 @@ launch:
   kill: Stopp
   killServer: Töte den Localhost-Server
   launch: Los geht's
+  launchAnyway: Trotzdem starten
 launchBlocked:
   ignore: Erzwungener Start
   launchGeneralException:
@@ -737,13 +761,26 @@ mod:
   deletionRestHint: Und der {rest} der Mods...
   denseView: Dichte Sicht
   dropHint: Ziehen Sie die .jar/.litemod-Mod hierher und importieren Sie sie.
+  duplicatedDetected: '{count} duplizierte Mods'
+  duplicatedDetectedDescription: |-
+    Mods mit derselben Mod-ID, aber unterschiedlichen Dateien gefunden. 
+    Dies könnte zum Absturz von Minecraft führen. 
+    Bitte wählen Sie die Datei aus, die Sie behalten möchten.
   enabled: 'Inklusive Mods: {count}'
   filter: Mod-Filter
   groupInstalled: Gruppensatz Mods
   hideIncompatible: Inkompatible Änderungen ausblenden
   incompatible: Inkompatible Mods.
+  incompatibleHint: Schauen Sie sich Ihren Mod-Kompatibilitätsbericht an
+  incompatibleHintDescription: |-
+    Möglicherweise fehlen einige Mod-Abhängigkeiten. 
+    Oder einige Abhängigkeitsversionen stimmen nicht überein.
   manage: Mods verwalten
   maybeCompatible: Möglicherweise kompatibel.
+  modloaderSelectHint: |-
+    Der Mod unterstützt folgende Mod-Loader. 
+    Bitte wählen Sie eines zur Installation aus.
+  modloaderSelectNotSupported: '{modloader} für Minecraft {minecraft} nicht gefunden'
   mods: '{count} Mods'
   name: Mods | Mods
   noModLoaderHint: Vergessen Sie nicht, den Modloader zu aktivieren, um Mods zu verwenden!
@@ -777,12 +814,18 @@ modInstall:
   recommendation: Entdecken Sie die {first} oder {second} Mods in {modrinth} und {curseforge}!
   search: Suchergebnis
   searchHint: Projektsuche und -auswahl
+  skipVersion: Überspringen Sie die Mods mit einer anderen Minecraft-Version
   source: Quelle.
   switch: Version ändern
   upgrade: Aktualisierung der Änderungen
 modSearchType:
   all: Alle
   local: Cache auf dem Datenträger
+modUpgradePolicy:
+  curseforge: Zuerst Curseforge
+  curseforgeOnly: Nur Curseforge
+  modrinth: Modrinth zuerst
+  modrinthOnly: Nur Modrinth
 modified:
   reset: Zurücksetzen
   save: Speichern Sie
@@ -1007,6 +1050,8 @@ multiplayer:
 
     Feld unten eingeben. Klicken Sie auf die Schaltfläche Bestätigen, um die
     Verbindung herzustellen.
+  exposedPortDescription: Der Port, den Sie anderen Peers zugänglich gemacht haben
+  exposedPorts: Weitergeleitete Ports
   gatheringIce: >
     "Warten Sie, bis der ICE-Server genügend Informationen über Sie gesammelt
     hat
@@ -1046,6 +1091,7 @@ multiplayer:
   name: Multiplayer über ein lokales Netzwerk
   networkInfo: Informationen über das Netzwerk
   next: Nächste.
+  otherExposedPortDescription: Das Portvorwort von {user}
   placeholder: >-
     Schließe dich anderen Leuten an, um Minecraft in deinem lokalen Netzwerk zu
     spielen Netzwerk!
@@ -1202,6 +1248,7 @@ save:
   shared: Instanz verwendet freigegebenen Speicherordner
   showDirectory: Speicherverzeichnis anzeigen
   unselected: gemeinsames Archiv
+  useCurrent: Aktuelle Welt verwenden
 saves: {}
 screenshots:
   empty: Sie haben keine Bildschirmfotos
@@ -1308,7 +1355,7 @@ setting:
     Der Entwicklermodus ist dazu gedacht, die von Ihnen geschriebene Mod zu
     testen.
   disableTelemetry: Telemetrie ausschalten
-  disableTelemetryDescription: FMCL sammelt die Ereignisse des Spielstarts und der Benutzeranmeldung.
+  disableTelemetryDescription: XMCL sammelt die Ereignisse des Spielstarts und der Benutzeranmeldung.
   enableDedicatedGPUOptimization: Weisen Sie eine dedizierte GPU zu
   enableDedicatedGPUOptimizationDescription: Diese Option weist dem Minecraft-Prozess eine dedizierte GPU zu.
   enableDiscord: Discord-Präsenz einschalten (Discord-Spielstatus)
@@ -1340,6 +1387,7 @@ setting:
     alle Rechner
      insgesamt. 0 bedeutet keine Einschränkungen.
   maxSocketsTitle: Maximale Anzahl von HTTP-Sockets
+  migrateFromOther: Von einem anderen Launcher importieren
   name: Globale Einstellungen | Globale Einstellungen
   network: Netzwerkeinstellungen
   officialWebsite: Офіційний сайт
@@ -1393,7 +1441,7 @@ setup:
     name: '@:setting.appearance'
   dataRoot:
     description: |-
-      Der Datenstamm ist kein normales .minecraft-Verzeichnis. Da die FMCL-Daten
+      Der Datenstamm ist kein normales .minecraft-Verzeichnis. Da die XMCL-Daten
        Verzeichnisstruktur von Vanilla abweicht, empfehlen wir nicht die Verwendung des
        das übliche .minecraft-Verzeichnis als Datenstamm zu verwenden.
     drives: Empfohlene Orte
@@ -1453,9 +1501,16 @@ shaderPack:
   enabled: Shader-Pack aktiviert
   manage: Shader verwalten
   name: Shader
+  noShaderMod: Kein Shader-Mod installiert
+  noShaderModHint: Sie können Shader nicht ohne Shader-Mod verwenden
+  noShaderModInstallHint: >-
+    Sie müssen einen der folgenden Mods installieren, um das Shader-Paket zu
+    laden.
   showFile: Відкрити цей шейдер у папці
 shared:
   accept: Akzeptieren
+  keepSelected: Ausgewählt behalten
+  skipForNow: Überspringen Sie es vorerst
 summery: Sommer
 tag:
   create: Einen Tag erstellen

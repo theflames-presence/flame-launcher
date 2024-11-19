@@ -1,4 +1,4 @@
-import { readdir } from 'fs-extra'
+import { lstat, readdir } from 'fs-extra'
 import { join } from 'path'
 
 export async function getMojangJavaPaths() {
@@ -18,6 +18,11 @@ export async function getOrcaleJavaPaths() {
 export async function getOpenJdkPaths() {
   const files = await readdir('C:\\Program Files\\AdoptOpenJDK').catch(() => [])
   return files.map(f => join('C:\\Program Files\\AdoptOpenJDK', f, 'bin', 'java.exe'))
+}
+
+export async function getZuluJdkPath() {
+  const files = await readdir('C:\\Program Files\\Zulu').catch(() => [])
+  return files.map(f => join('C:\\Program Files\\Zulu', f, 'bin', 'java.exe'))
 }
 
 export async function getJavaPathsLinux() {

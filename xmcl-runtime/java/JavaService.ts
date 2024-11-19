@@ -1,10 +1,10 @@
 import { JavaVersion } from '@xmcl/core'
 import { DEFAULT_RUNTIME_ALL_URL, JavaRuntimeManifest, JavaRuntimeTargetType, JavaRuntimes, installJavaRuntimeTask, parseJavaVersion, resolveJava, scanLocalJava } from '@xmcl/installer'
 import { JavaService as IJavaService, Java, JavaRecord, JavaSchema, JavaServiceKey, JavaState, MutableState, Settings } from '@xmcl/runtime-api'
-import { chmod, ensureFile, readFile } from 'fs-extra'
+import { chmod, ensureFile, readFile, stat } from 'fs-extra'
 import { dirname, join } from 'path'
 import { Inject, LauncherAppKey, PathResolver, kGameDataPath } from '~/app'
-import { GFW } from '~/gfw'
+import { GFW, kGFW } from '~/gfw'
 import { JavaValidation, validateJavaPath } from '~/java'
 import { kDownloadOptions } from '~/network'
 import { ExposeServiceKey, ServiceStateManager, Singleton, StatefulService } from '~/service'
@@ -15,7 +15,7 @@ import { readdirIfPresent } from '../util/fs'
 import { requireString } from '../util/object'
 import { SafeFile, createSafeFile } from '../util/persistance'
 import { ensureClass, getJavaArch } from './detectJVMArch'
-import { getJavaPathsLinux, getJavaPathsOSX, getMojangJavaPaths, getOpenJdkPaths, getOrcaleJavaPaths } from './javaPaths'
+import { getJavaPathsLinux, getJavaPathsOSX, getMojangJavaPaths, getOpenJdkPaths, getOrcaleJavaPaths, getZuluJdkPath } from './javaPaths'
 
 @ExposeServiceKey(JavaServiceKey)
 export class JavaService extends StatefulService<JavaState> implements IJavaService {
@@ -25,7 +25,7 @@ export class JavaService extends StatefulService<JavaState> implements IJavaServ
     @Inject(Settings) private settings: Settings,
     @Inject(ServiceStateManager) store: ServiceStateManager,
     @Inject(kTaskExecutor) private submit: TaskFn,
-    @Inject(GFW) private gfw: GFW,
+    @Inject(kGFW) private gfw: GFW,
     @Inject(kGameDataPath) private getPath: PathResolver,
   ) {
     super(app, () => store.registerStatic(new JavaState(), JavaServiceKey), async () => {
@@ -290,6 +290,7 @@ export class JavaService extends StatefulService<JavaState> implements IJavaServ
           ...await getMojangJavaPaths(),
           ...await getOrcaleJavaPaths(),
           ...await getOpenJdkPaths(),
+          ...await getZuluJdkPath(),
         )
       } else if (this.app.platform.os === 'linux') {
         commonLocations.push(...await getJavaPathsLinux())
@@ -304,7 +305,17 @@ export class JavaService extends StatefulService<JavaState> implements IJavaServ
     } else {
       this.log(`Re-validate cached ${this.state.all.length} java locations.`)
       const javas: JavaRecord[] = []
+      const visited = new Set<number>()
       for (let i = 0; i < this.state.all.length; ++i) {
+        const ino = await stat(this.state.all[i].path).then(s => s.ino, (e) => undefined)
+        if (!ino) {
+          javas.push({ ...this.state.all[i], valid: false })
+          continue
+        }
+        if (visited.has(ino)) {
+          continue
+        }
+        visited.add(ino)
         const result = await resolveJava(this.state.all[i].path)
         if (result) {
           javas.push({ ...result, valid: true, arch: this.state.all[i].arch ?? await getJavaArch(this, result.path) })

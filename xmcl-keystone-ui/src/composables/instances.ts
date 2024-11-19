@@ -1,7 +1,7 @@
+import { useEventBus, useLocalStorage } from '@vueuse/core'
 import { EditInstanceOptions, Instance, InstanceSchema, InstanceServiceKey, InstanceState } from '@xmcl/runtime-api'
 import { DeepPartial } from '@xmcl/runtime-api/src/util/object'
 import { InjectionKey, set } from 'vue'
-import { useLocalStorageCacheStringValue } from './cache'
 import { useService } from './service'
 import { useState } from './syncableState'
 
@@ -13,48 +13,68 @@ export const kInstances: InjectionKey<ReturnType<typeof useInstances>> = Symbol(
 export function useInstances() {
   const { createInstance, getSharedInstancesState, editInstance, deleteInstance, validateInstancePath } = useService(InstanceServiceKey)
   const { state, isValidating, error } = useState(getSharedInstancesState, class extends InstanceState {
+    constructor() {
+      super()
+      this.all = markRaw({})
+      this.instances = markRaw([])
+    }
+
+    override instanceRemove(path: string): void {
+      delete this.all[path]
+      this.instances = markRaw(this.instances.filter(i => i.path !== path))
+    }
+
     override instanceAdd(instance: Instance) {
       if (!this.all[instance.path]) {
-        const object = {
+        const object = markRaw({
           ...instance,
-        }
+        })
         this.all[instance.path] = object
-        this.instances = [...this.instances, this.all[instance.path]]
+        this.instances = markRaw([...this.instances, this.all[instance.path]])
       }
     }
 
     override instanceEdit(settings: DeepPartial<InstanceSchema> & { path: string }) {
       const inst = this.instances.find(i => i.path === (settings.path))!
       if ('showLog' in settings) {
-        set(inst, 'showLog', settings.showLog)
+        inst.showLog = settings.showLog
       }
       if ('hideLauncher' in settings) {
-        set(inst, 'hideLauncher', settings.hideLauncher)
+        inst.hideLauncher = settings.hideLauncher
       }
       if ('fastLaunch' in settings) {
-        set(inst, 'fastLaunch', settings.fastLaunch)
+        inst.fastLaunch = settings.fastLaunch
       }
       if ('maxMemory' in settings) {
-        set(inst, 'maxMemory', settings.maxMemory)
+        inst.maxMemory = settings.maxMemory
       }
       if ('minMemory' in settings) {
-        set(inst, 'minMemory', settings.minMemory)
+        inst.minMemory = settings.minMemory
       }
       if ('assignMemory' in settings) {
-        set(inst, 'assignMemory', settings.assignMemory)
+        inst.assignMemory = settings.assignMemory
       }
       if ('vmOptions' in settings) {
-        set(inst, 'vmOptions', settings.vmOptions)
+        inst.vmOptions = settings.vmOptions
       }
       if ('mcOptions' in settings) {
-        set(inst, 'mcOptions', settings.mcOptions)
+        inst.mcOptions = settings.mcOptions
       }
       super.instanceEdit(settings)
+
+      const idx = this.instances.indexOf(inst)
+      this.instances = markRaw([...this.instances.slice(0, idx), inst, ...this.instances.slice(idx + 1)])
     }
   })
   const instances = computed(() => state.value?.instances ?? [])
-  const _path = useLocalStorageCacheStringValue('selectedInstancePath', '' as string)
+  const _path = useLocalStorage('selectedInstancePath', '' as string)
   const path = ref('')
+
+  const migrationBus = useEventBus<{ oldRoot: string; newRoot: string }>('migration')
+
+  migrationBus.once((e) => {
+    _path.value = _path.value.replace(e.oldRoot, e.newRoot)
+  })
 
   async function edit(options: EditInstanceOptions & { instancePath: string }) {
     await editInstance(options)

@@ -111,39 +111,33 @@
 </template>
 
 <script lang=ts setup>
-import { useService, useServiceBusy } from '@/composables'
 import { useEnvironment } from '@/composables/environment'
 import { useMarkdown } from '@/composables/markdown'
-import { kSettingsState } from '@/composables/setting'
+import { kSettingsState, kUpdateSettings } from '@/composables/setting'
 import { getLocalDateString } from '@/util/date'
 import { injection } from '@/util/inject'
-import { BaseServiceKey } from '@xmcl/runtime-api'
 import { useDialog } from '../composables/dialog'
 
 const { isShown } = useDialog('update-info')
 const { t } = useI18n()
 const { render } = useMarkdown()
-const installing = useServiceBusy(BaseServiceKey, 'quitAndInstall')
-const { downloadUpdate, quitAndInstall } = useService(BaseServiceKey)
-const checkingUpdate = useServiceBusy(BaseServiceKey, 'checkUpdate')
-const downloadingUpdate = useServiceBusy(BaseServiceKey, 'downloadUpdate')
 const { state } = injection(kSettingsState)
-const updateInfo = computed(() => state.value?.updateInfo)
-const updateStatus = computed(() => state.value?.updateStatus)
+const {
+  installing, downloadingUpdate, checkingUpdate, updateInfo, updateStatus,
+  downloadUpdate, quitAndInstall,
+} = injection(kUpdateSettings)
+
 function renderUpdate() {
   const body = state.value?.updateInfo?.body ?? ''
   const transformed = body.replace(/## \[(.+)\]\(#.+\)/g, (str, v) => `## ${v}`)
   return render(transformed)
 }
-const body = computed(() => state.value?.updateInfo?.useAutoUpdater ? state.value?.updateInfo.body : renderUpdate())
+const body = computed(() => state.value?.updateInfo?.operation === 'autoupdater' ? state.value?.updateInfo.body : renderUpdate())
 const env = useEnvironment()
 const isAppX = computed(() => env.value?.env === 'appx')
 const isAppImage = computed(() => env.value?.env === 'appimage')
 const hintRedownload = computed(() =>
-  !isAppX.value &&
-  !isAppImage.value &&
-  !updateInfo.value?.useAutoUpdater &&
-  !updateInfo.value?.incremental,
+  state.value?.updateInfo?.operation === 'manual',
 )
 
 const openOfficialWebsite = () => {

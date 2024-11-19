@@ -34,9 +34,9 @@ export const config = {
   }],
   artifactName: 'fmcl-${version}-${platform}-${arch}.${ext}',
   appx: {
-    displayName: 'Flame Launcher (Beta)',
-    applicationId: 'AISLX.FMCL',
-    identityName: '22961AISLX.FMCL',
+    displayName: 'Flame Launcher',
+    applicationId: 'fmcl',
+    identityName: 'fmcl',
     backgroundColor: 'transparent',
     publisher: 'CN=DAFB9390-F5BD-4F94-828C-242F8DAA6FDE',
     publisherDisplayName: 'AISLX',
@@ -63,14 +63,16 @@ export const config = {
     darkModeSupport: true,
     target: [
       {
-        target: 'zip',
-        arch: ['x64', 'arm64'],
-      },
-      {
         target: 'dmg',
-        arch: ['x64'],
+        arch: ['arm64', 'x64'],
       },
     ],
+    extendInfo: {
+      NSMicrophoneUsageDescription: 'A Minecraft mod wants to access your microphone.',
+      NSCameraUsageDescription: 'Please give us access to your camera',
+      'com.apple.security.device.audio-input': true,
+      'com.apple.security.device.camera': true,
+    },
   },
   win: {
     certificateFile: undefined as string | undefined,

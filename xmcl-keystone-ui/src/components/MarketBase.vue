@@ -1,6 +1,7 @@
 <template>
   <div
     class="relative flex h-full select-none flex-col overflow-auto pb-0"
+    style="box-sizing: border-box"
     @wheel.stop
   >
     <v-progress-linear
@@ -18,7 +19,6 @@
       <template #left>
         <div
           v-if="items.length > 0"
-          class="flex flex-grow-0 items-center "
         >
           <slot
             name="actions"

@@ -2,18 +2,17 @@ import { ResolvedVersion, Version } from '@xmcl/core'
 import { CreateInstanceOption, EditInstanceOptions, InstanceService as IInstanceService, Instance, InstanceException, InstanceSchema, InstanceServiceKey, InstanceState, InstancesSchema, MutableState, RuntimeVersions, createTemplate, filterForgeVersion, filterOptifineVersion, getExpectVersion, isFabricLoaderLibrary, isForgeLibrary, isOptifineLibrary } from '@xmcl/runtime-api'
 import filenamify from 'filenamify'
 import { existsSync } from 'fs'
-import { copy, copyFile, ensureDir, readdir, rename, rm, stat } from 'fs-extra'
+import { copy, copyFile, ensureDir, readdir, readlink, rename, rm, stat } from 'fs-extra'
 import { basename, dirname, isAbsolute, join, relative, resolve } from 'path'
 import { Inject, LauncherAppKey, PathResolver, kGameDataPath } from '~/app'
 import { ImageStorage } from '~/imageStore'
 import { VersionMetadataService } from '~/install'
 import { readLaunchProfile } from '~/launchProfile'
-import { ResourceWorker, kResourceWorker } from '~/resource'
 import { ExposeServiceKey, ServiceStateManager, Singleton, StatefulService } from '~/service'
 import { AnyError } from '~/util/error'
 import { validateDirectory } from '~/util/validate'
 import { LauncherApp } from '../app/LauncherApp'
-import { exists, isDirectory, isPathDiskRootPath, linkWithTimeoutOrCopy, readdirEnsured } from '../util/fs'
+import { copyPassively, exists, isDirectory, isPathDiskRootPath, linkWithTimeoutOrCopy, readdirEnsured } from '../util/fs'
 import { assignShallow, requireObject, requireString } from '../util/object'
 import { SafeFile, createSafeFile, createSafeIO } from '../util/persistance'
 
@@ -26,11 +25,11 @@ const INSTANCES_FOLDER = 'instances'
 export class InstanceService extends StatefulService<InstanceState> implements IInstanceService {
   protected readonly instancesFile: SafeFile<InstancesSchema>
   protected readonly instanceFile = createSafeIO(InstanceSchema, this)
+  #removeHandlers: Record<string, (() => Promise<void> | void)[]> = {}
 
   constructor(@Inject(LauncherAppKey) app: LauncherApp,
     @Inject(ServiceStateManager) store: ServiceStateManager,
     @Inject(VersionMetadataService) private versionMetadataService: VersionMetadataService,
-    @Inject(kResourceWorker) private worker: ResourceWorker,
     @Inject(kGameDataPath) private getPath: PathResolver,
     @Inject(ImageStorage) private imageStore: ImageStorage,
   ) {
@@ -85,11 +84,6 @@ export class InstanceService extends StatefulService<InstanceState> implements I
       // }
 
       this.state
-        .subscribe('instanceAdd', async (payload: Instance) => {
-          await this.instanceFile.write(join(payload.path, 'instance.json'), payload)
-          // await this.instancesFile.write({ instances: Object.keys(this.state.all).map(normalizeInstancePath), selectedInstance: normalizeInstancePath(this.state.path) })
-          this.log(`Saved new instance ${payload.path}`)
-        })
         .subscribe('instanceEdit', async ({ path }) => {
           const inst = this.state.all[path]
           await this.instanceFile.write(join(path, 'instance.json'), inst)
@@ -126,6 +120,9 @@ export class InstanceService extends StatefulService<InstanceState> implements I
   async loadInstance(path: string) {
     requireString(path)
 
+    // Fix the wrong path if user set the name start/end with space
+    path = path.trim()
+
     if (!isAbsolute(path)) {
       path = this.getPathUnder(path)
     }
@@ -143,6 +140,9 @@ export class InstanceService extends StatefulService<InstanceState> implements I
       this.warn(e)
       return false
     }
+
+    // Fix the wrong path if user set the name start/end with space
+    option.name = option.name.trim()
 
     const name = option.name
     const expectPath = this.getPathUnder(filenamify(name))
@@ -233,6 +233,8 @@ export class InstanceService extends StatefulService<InstanceState> implements I
       instance.server = payload.server
     }
 
+    payload.name = payload.name.trim()
+
     if (!payload.path) {
       instance.path = this.getCandidatePath(payload.name)
     }
@@ -248,8 +250,16 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     instance.icon = payload.icon ?? ''
 
     if (!isPathDiskRootPath(instance.path)) {
-      await ensureDir(instance.path)
+      await ensureDir(instance.path).catch(() => undefined)
     }
+    if (payload.resourcepacks) {
+      await ensureDir(join(instance.path, 'resourcepacks')).catch(() => undefined)
+    }
+    if (payload.shaderpacks) {
+      await ensureDir(join(instance.path, 'shaderpacks')).catch(() => undefined)
+    }
+
+    await this.instanceFile.write(join(instance.path, 'instance.json'), instance)
     this.state.instanceAdd(instance)
 
     this.log('Created instance with option')
@@ -280,6 +290,12 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     let hasShaderpacks = false
     await copy(path, newPath, {
       filter: async (src, dest) => {
+        const linked = await readlink(src).catch(() => '')
+
+        if (linked) {
+          return false
+        }
+
         const relativePath = relative(path, src).replaceAll('\\', '/')
         if (relativePath.startsWith('mods')) {
           hasMods = true
@@ -335,12 +351,22 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     await this.initialize()
     requireString(path)
 
-    this.state.instanceRemove(path)
-
     const isManaged = this.isUnderManaged(path)
     if (isManaged && await exists(path)) {
+      for (const handler of this.#removeHandlers[path] || []) {
+        await handler()
+      }
       await rm(path, { recursive: true, force: true })
     }
+
+    this.state.instanceRemove(path)
+  }
+
+  registerRemoveHandler(path: string, handler: () => Promise<void> | void) {
+    if (!this.#removeHandlers[path]) {
+      this.#removeHandlers[path] = []
+    }
+    this.#removeHandlers[path].push(handler)
   }
 
   /**
@@ -539,9 +565,9 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     }
 
     // copy assets, library and versions
-    await this.worker.copyPassively([
-      { src: resolve(path, 'libraries'), dest: this.getPath('libraries') },
-      { src: resolve(path, 'assets'), dest: this.getPath('assets') },
+    await Promise.all([
+      copyPassively(resolve(path, 'libraries'), this.getPath('libraries')),
+      copyPassively(resolve(path, 'assets'), this.getPath('assets')),
     ])
 
     const versions = await readdir(resolve(path, 'versions')).catch(() => [])

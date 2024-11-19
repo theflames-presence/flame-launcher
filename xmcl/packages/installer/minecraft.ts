@@ -1,10 +1,12 @@
 import { MinecraftFolder, MinecraftLocation, ResolvedLibrary, ResolvedVersion, Version, Version as VersionJson } from '@xmcl/core'
-import { AbortSignal, ChecksumNotMatchError, ChecksumValidatorOptions, DownloadBaseOptions, JsonValidator, ProgressController, Validator, download, getDownloadBaseOptions } from '@xmcl/file-transfer'
-import { AbortableTask, Task, task } from '@xmcl/task'
+import { ChecksumNotMatchError, ChecksumValidatorOptions, DownloadBaseOptions, JsonValidator, Validator, getDownloadBaseOptions } from '@xmcl/file-transfer'
+import { Task, task } from '@xmcl/task'
+import { link } from 'fs'
 import { readFile, stat, writeFile } from 'fs/promises'
 import { join, relative, sep } from 'path'
-import { Dispatcher, errors, request } from 'undici'
-import { DownloadTask } from './downloadTask'
+import { Dispatcher, fetch, request } from 'undici'
+import { promisify } from 'util'
+import { DownloadMultipleTask, DownloadTask } from './downloadTask'
 import { ParallelTaskOptions, ensureDir, errorToString, joinUrl, normalizeArray } from './utils'
 import { ZipValidator } from './zipValdiator'
 
@@ -121,21 +123,26 @@ export interface LibraryOptions extends DownloadBaseOptions, ParallelTaskOptions
  */
 export interface AssetsOptions extends DownloadBaseOptions, ParallelTaskOptions {
   /**
-     * The alternative assets host to download asset. It will try to use these host from the `[0]` to the `[assetsHost.length - 1]`
-     */
+   * The alternative assets host to download asset. It will try to use these host from the `[0]` to the `[assetsHost.length - 1]`
+   */
   assetsHost?: string | string[]
   /**
-     * Control how many assets download task should run at the same time.
-     * It will override the `maxConcurrencyOption` if this is presented.
-     *
-     * This will be ignored if you have your own downloader assigned.
-     */
+   * Control how many assets download task should run at the same time.
+   * It will override the `maxConcurrencyOption` if this is presented.
+   *
+   * This will be ignored if you have your own downloader assigned.
+   */
   assetsDownloadConcurrency?: number
-
+  /**
+   * Use hash as the assets index file name. Default is `false`
+   */
+  useHashForAssetsIndex?: boolean
   /**
    * The assets index download or url replacement
    */
   assetsIndexUrl?: string | string[] | ((version: ResolvedVersion) => string | string[])
+
+  fetch?: typeof fetch
 
   checksumValidatorResolver?: (checksum: ChecksumValidatorOptions) => Validator
   /**
@@ -344,10 +351,14 @@ export function installAssetsTask(version: ResolvedVersion, options: AssetsOptio
         ...getDownloadBaseOptions(options),
       }).setName('asset', { name: file.id, hash: file.sha1, size: file.size }))
     }
-    const jsonPath = folder.getPath('assets', 'indexes', version.assets + '.json')
+    const jsonPath = folder.getPath('assets', 'indexes', (version.assetIndex?.sha1 ?? version.assets) + '.json')
 
     if (version.assetIndex) {
       await this.yield(new InstallAssetIndexTask(version as any, options))
+      await promisify(link)(
+        folder.getPath('assets', 'indexes', version.assetIndex.sha1 + '.json'),
+        folder.getPath('assets', 'indexes', version.assets + '.json'),
+      ).catch(() => { })
     }
 
     await ensureDir(folder.getPath('assets', 'objects'))
@@ -364,8 +375,8 @@ export function installAssetsTask(version: ResolvedVersion, options: AssetsOptio
       const urls = resolveDownloadUrls(version.assetIndex!.url, version, options.assetsIndexUrl)
       for (const url of urls) {
         try {
-          const response = await request(url, { dispatcher: options?.dispatcher })
-          const json = await response.body.json() as any
+          const response = await (options.fetch || fetch)(url, { dispatcher: options?.dispatcher })
+          const json = await response.json() as any
           await writeFile(jsonPath, JSON.stringify(json))
           return json
         } catch {
@@ -379,9 +390,6 @@ export function installAssetsTask(version: ResolvedVersion, options: AssetsOptio
       const { objects } = JSON.parse(await readFile(jsonPath).then((b) => b.toString())) as AssetIndex
       objectArray = Object.keys(objects).map((k) => ({ name: k, ...objects[k] }))
     } catch (e) {
-      if ((e instanceof SyntaxError)) {
-        throw e
-      }
       const { objects } = await getAssetIndexFallback()
       objectArray = Object.keys(objects).map((k) => ({ name: k, ...objects[k] }))
     }
@@ -476,8 +484,8 @@ export class InstallJarTask extends DownloadTask {
 export class InstallAssetIndexTask extends DownloadTask {
   constructor(version: ResolvedVersion & { assetIndex: Version.AssetIndex }, options: AssetsOptions = {}) {
     const folder = MinecraftFolder.from(version.minecraftDirectory)
-    const jsonPath = folder.getPath('assets', 'indexes', version.assets + '.json')
     const expectSha1 = version.assetIndex.sha1
+    const jsonPath = folder.getPath('assets', 'indexes', (options.useHashForAssetsIndex ? expectSha1 : version.assets) + '.json')
 
     super({
       url: resolveDownloadUrls(version.assetIndex.url, version, options.assetsIndexUrl),
@@ -513,55 +521,24 @@ export class InstallLibraryTask extends DownloadTask {
   }
 }
 
-export class InstallAssetTask extends AbortableTask<void> {
-  constructor(private assets: AssetInfo[], private folder: MinecraftFolder, private options: AssetsOptions) {
-    super()
-
-    this._total = assets.reduce((a, b) => a + b.size, 0)
-    this.name = 'asset'
-    this.param = { count: assets.length }
-  }
-
-  protected abort: (isCancelled: boolean) => void = () => { }
-
-  protected async process(): Promise<void> {
-    const assetsHosts = normalizeArray(this.options.assetsHost || [])
+export class InstallAssetTask extends DownloadMultipleTask {
+  constructor(assets: AssetInfo[], folder: MinecraftFolder, options: AssetsOptions) {
+    const assetsHosts = normalizeArray(options.assetsHost || [])
 
     if (assetsHosts.indexOf(DEFAULT_RESOURCE_ROOT_URL) === -1) {
       assetsHosts.push(DEFAULT_RESOURCE_ROOT_URL)
     }
 
-    const listeners: Array<() => void> = []
-    const aborted = () => this.isCancelled || this.isPaused
-    const signal: AbortSignal = {
-      get aborted() { return aborted() },
-      addEventListener(event, listener) {
-        if (event !== 'abort') {
-          return this
-        }
-        listeners.push(listener)
-        return this
-      },
-      removeEventListener(event, listener) {
-        // noop as this will be auto gc
-        return this
-      },
-    }
-    this.abort = () => {
-      listeners.forEach((l) => l())
-    }
-
-    const progresses = new Array(this.assets.length).fill(0)
-    await Promise.allSettled(this.assets.map(async (asset, i) => {
+    super(assets.map((asset) => {
       const { hash, size, name } = asset
       const head = hash.substring(0, 2)
-      const dir = this.folder.getPath('assets', 'objects', head)
+      const dir = folder.getPath('assets', 'objects', head)
       const file = join(dir, hash)
       const urls = assetsHosts.map((h) => `${h}/${head}/${hash}`)
-      await download({
+      return {
         url: urls,
         destination: file,
-        validator: this.options.prevalidSizeOnly
+        validator: options.prevalidSizeOnly
           ? {
             async validate(destination, url) {
               const fstat = await stat(destination).catch(() => ({ size: -1 }))
@@ -570,31 +547,15 @@ export class InstallAssetTask extends AbortableTask<void> {
               }
             },
           }
-          : this.options.checksumValidatorResolver?.({ algorithm: 'sha1', hash }) || { algorithm: 'sha1', hash },
-        ...getDownloadBaseOptions(this.options),
+          : options.checksumValidatorResolver?.({ algorithm: 'sha1', hash }) || { algorithm: 'sha1', hash },
+        ...getDownloadBaseOptions(options),
         skipHead: asset.size < 2 * 1024 * 1024,
-        progressController: {
-          progress: 0,
-          onProgress: (url, chunkSize, written, total) => {
-            progresses[i] = written
-            this._progress = progresses.reduce((a, b) => a + b, 0)
-            this.update(chunkSize)
-            this._from = url.toString()
-          },
-        },
-        abortSignal: signal,
-      })
-      progresses[i] = size
-      this._progress = progresses.reduce((a, b) => a + b, 0)
-      this.update(0)
+      }
     }))
-  }
 
-  protected isAbortedError(e: any): boolean {
-    if (e instanceof errors.RequestAbortedError || e.code === 'UND_ERR_ABORTED') {
-      return true
-    }
-    return false
+    this._total = assets.reduce((a, b) => a + b.size, 0)
+    this.name = 'asset'
+    this.param = { count: assets.length }
   }
 }
 

@@ -1,4 +1,5 @@
 import { Exception, InstanceNotFoundException } from '../entities/exception'
+import { InstallMarketOptionWithInstance } from '../entities/market'
 import { InstanceSave, InstanceSaveHeader, Saves } from '../entities/save'
 import { MutableState } from '../util/MutableState'
 import { ServiceKey } from './Service'
@@ -35,10 +36,6 @@ export interface ImportSaveOptions {
   * This will be the active instance by default.
   */
   instancePath: string
-  /**
-   * The root of the save in zip
-   */
-  saveRoot?: string
   /**
    * Linked curseforge
    */
@@ -167,9 +164,13 @@ export interface InstanceSavesService {
   /**
    * Get the linked save world path.
    * @param instancePath
-   * @return The linked save world path. Should if it's a origial world folder them it's unlinked folder existed. `undefined` if no folder existed.
+   * @return The linked save world path. Empty string if it's a raw world folder, else it's linked folder existed. `undefined` if no folder existed.
    */
   getLinkedSaveWorld(instancePath: string): Promise<string | undefined>
+  /**
+   * Install a save from market.
+   */
+  installFromMarket(options: InstallMarketOptionWithInstance): Promise<string>
 }
 
 export const InstanceSavesServiceKey: ServiceKey<InstanceSavesService> = 'InstanceSavesService'

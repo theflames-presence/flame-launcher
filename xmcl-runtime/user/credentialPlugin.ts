@@ -11,7 +11,7 @@ import { AnyError } from '~/util/error'
 const CredentialSerializeError = AnyError.make('CredentialSerializeError')
 
 export function createPlugin(serviceName: string, accountName: string, logger: Logger, storage: SecretStorage): ICachePlugin {
-  accountName = accountName || 'FMCL_MICROSOFT_ACCOUNT'
+  accountName = accountName || 'XMCL_MICROSOFT_ACCOUNT'
   let cachedInMemory: boolean
   const plugin: ICachePlugin = {
     async beforeCacheAccess(cacheContext: TokenCacheContext): Promise<void> {

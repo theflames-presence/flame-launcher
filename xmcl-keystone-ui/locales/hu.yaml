@@ -386,6 +386,8 @@ instance:
   changeIcon: Ikon módosítása
   current: Jelenlegi példány
   delete: Játék törlése
+  deleteFailed: Nem sikerült törölni a példányt
+  deleteFailedPermission: Más program foglalta el a fájlt
   deleteHint: >-
     A példányadatok örökre lekerülnek a lemezről. Biztos vagy benne, hogy ezt
     akarod csinálni?
@@ -403,6 +405,10 @@ instance:
   lastPlayed: Utoljára játszott
   launchArguments: Indítási argumentumok Előnézet
   launchServer: Indítsa el a localhost szervert
+  linkFileDesc: |-
+    Ez felülírja a helyi {file} példányt a globális {file} értékkel. 
+    Biztosan linkeled?
+  linkFileTitle: Biztosan linkeli a(z) {file} fájlt?
   mcOptions: Minecraft beállítások
   mcOptionsHint: Kiegészítő Minecraft indítási beállítások
   name: Profil név
@@ -415,6 +421,14 @@ instance:
   prependCommandHint: Ez a parancs az összes indítási parancs elé kerül
   requireName: A név megadása kötelező
   showInstance: Játék mappa megjelenítése
+  useSharedOptions: Használja a megosztott játékbeállításokat
+  useSharedOptionsDesc: >-
+    Ezzel összekapcsolja az options.txt fájlt egy több példányban megosztott
+    fájllal
+  useSharedServersList: Használja a megosztott szerverek listáját
+  useSharedServersListDesc: >-
+    Ez összekapcsolja a servers.da fájlt egy megosztott fájllal a példányok
+    között
   versionHint: A játék Minecraft verziója
   vmOptions: JVM Beállítások
   vmOptionsHint: Extra argumentumok átadása a JVM-nek
@@ -422,6 +436,9 @@ instanceAge:
   older: Régebbi
   threeDay: Három napon belül
   today: Ma
+instanceDiscover:
+  gameFolder: Fedezzen fel {count} játékmappát
+  instanceFolder: '{count} példányt találtunk'
 instanceFileOperation:
   add: Új
   backup-add: Felülírás (Mentés)
@@ -466,23 +483,27 @@ instanceUpdate:
   update: Frissítés indítása
 instances:
   add: Játék létrehozása
+  addCurseForgeDescription: |-
+    Importálás a cursefor adatmappából. 
+    Ki kell választania a curseforge gyökéradat-mappáját
   addDescription: Új példány létrehozása az alapoktól
-  addMMCDescription: >-
-    Létező MultiMC-példány importálása. Ki kell választanod a példány mappáját a
-    MultiMC-ből.
+  addMMCDescription: |-
+    Importálja a meglévő MultiMC példányt. 
+    Ki kell választania az adatmappát a MultiMC-ből.
   addManually: Manuális létrehozás
-  addModrinthDescription: >-
-    Létező Modrinth példány importálása. Ki kell választanod a Modrinth példány
-    mappáját.
+  addModrinthDescription: |-
+    Importálja a meglévő Modrinth példányt. 
+    Ki kell választania a Modrinth gyökér adatmappát.
   addServer: Létrehozás szerverről
   addServerDescription: Ez létrehoz egy játékot közvetlenül a szerverre.
-  addTemplate: Létrehozás sablonról
+  addTemplate: Hozzon létre a letöltött modpackből
   addTemplateDescription: Importálás letöltött Modcsomagból
   addVanilla: Létrehozás vanilla-szerű Minecraftból
   addVanillaDescription: >-
     Importálás a közös .minecraft mappából. Ez duplikálja az eredeti
-    játékprofilt az FMCL-be.
+    játékprofilt az XMCL-be.
   choose: Játék kiválasztása
+  fix: Javítás
   folderSetting: Mappa beállításai
   importFolder: Importálás mappából
   importFolderDescription: Minecraft importálása a Launcherbe
@@ -516,6 +537,7 @@ launch:
   kill: Leállítás
   killServer: Öld meg a Localhost szervert
   launch: Indítás
+  launchAnyway: Indítsa el egyébként
 launchBlocked:
   ignore: Indítás erőltetve
   launchBadVersion:
@@ -676,14 +698,27 @@ mod:
   deletionRestHint: És további {rest} mod...
   denseView: Sűrű kilátás
   dropHint: A mod .jar/.litemod fájlt húzd ide az importáláshoz.
+  duplicatedDetected: '{count} duplikált mod'
+  duplicatedDetectedDescription: |-
+    Modokat találtam azonos mod azonosítóval, de különböző fájlokkal. 
+    Ez a Minecraft összeomlását okozhatja. 
+    Kérjük, válassza ki a megtartani kívánt fájlt.
   enabled: '{count} Modok engedélyezve'
   filter: Modok szűrése
   groupInstalled: Csoportosan telepített modok
   hasUpdate: A modnak új verziója van!
   hideIncompatible: Inkompatibilis modok elrejtése
   incompatible: Inkompatibilis mod.
+  incompatibleHint: Nézze meg a mod kompatibilitási jelentést
+  incompatibleHintDescription: |-
+    Előfordulhat, hogy néhány mod-függőség hiányzik. 
+    Vagy egyes függőségi verziók nem egyeznek.
   manage: Modok kezelése
   maybeCompatible: Talán kompatibilis.
+  modloaderSelectHint: |-
+    A mod támogatja a mod betöltőket. 
+    Kérjük, válasszon egyet a telepítéshez.
+  modloaderSelectNotSupported: Nem található {modloader} a Minecraft {minecraft} számára
   mods: '{count} Mod'
   name: Mod | Modok
   noModLoaderHint: Ne felejtsd el engedélyezni a modloadert a modok használatához!
@@ -719,6 +754,7 @@ modInstall:
     oldalon!
   search: Keresési találat
   searchHint: Keresés és projekt kiválasztása
+  skipVersion: Hagyd ki a modokat a különböző Minecraft verziókkal
   source: Mod forrása
   switch: Verzió váltás
   upgrade: Modok frissítése
@@ -727,6 +763,11 @@ modSearchType:
   explore: Piac felfedezése
   installed: Telepítve
   local: Lemez gyorsítótár
+modUpgradePolicy:
+  curseforge: Curseforge először
+  curseforgeOnly: Csak Curseforge
+  modrinth: Modrinth először
+  modrinthOnly: Csak Modrinth
 modified:
   reset: Visszaállítás
   save: Mentés
@@ -951,6 +992,8 @@ multiplayer:
   enterRemoteTokenHint: >-
     Miután a társad beírta a jelszavadat, neked is be kell írnod a jelszavát az
     alábbi szöveges területre. Kattints a megerősítésre a csatlakozáshoz.
+  exposedPortDescription: A port, amelyet a többi társnak tettél közzé
+  exposedPorts: Továbbított portok
   gatheringIce: >
     "Kérjük, várjon, amíg az ICE-kiszolgáló elegendő információt gyűjt az Ön a
     hálózatáról. Ha türelmetlen, és van elég információ, akkor adjon az aktuális
@@ -987,6 +1030,7 @@ multiplayer:
   name: Többjátékos LAN-on
   networkInfo: Hálózati információk
   next: Következő
+  otherExposedPortDescription: 'A port előszava: {user}'
   placeholder: Csatlakozz más felhasználókhoz, hogy Minecraftot játszhass LAN-on!
   previous: Előző
   receiveHint: >-
@@ -1141,6 +1185,7 @@ save:
   shared: Példány megosztott mentési mappa használata
   showDirectory: Mentés könyvtár megjelenítése
   unselected: megosztott archívum
+  useCurrent: Használja a jelenlegi világot
 saves: {}
 screenshots:
   empty: Nincsenek képernyőképeid
@@ -1243,7 +1288,7 @@ setting:
   developerModeDescription: Fejlesztői mód a saját írt mod tesztelésére irányul
   disableTelemetry: Telemetria kikapcsolása
   disableTelemetryDescription: >-
-    Az FMCL összegyűjti a játékindítási és a felhasználói bejelentkezési
+    Az XMCL összegyűjti a játékindítási és a felhasználói bejelentkezési
     eseményeket.
   enableDiscord: Discord státusz engedélyezése
   enableDiscordDescription: Ez folyamatosan frissíti az launcher állapotát a discordra.
@@ -1273,6 +1318,7 @@ setting:
     Korlátozza a maximálisan engedélyezhető foglalatok számát állomásonként vagy
     az összes állomáson összesen. A 0 azt jelenti, hogy nincs korlátozás.
   maxSocketsTitle: Max HTTP foglalatok
+  migrateFromOther: Importálás másik indítóból
   name: Globális beállítás | Globális beállítások
   network: Hálózati beállítások
   officialWebsite: Hivatalos weboldal
@@ -1321,7 +1367,7 @@ setup:
     name: '@:setting.appearance'
   dataRoot:
     description: >-
-      Az adatgyökér nem egy közös .minecraft könyvtár. Mivel az FMCL adatok
+      Az adatgyökér nem egy közös .minecraft könyvtár. Mivel az XMCL adatok
       könyvtárszerkezet különbözik a vanilla könyvtárszerkezettől, nem
       javasoljuk, hogy a a közös .minecraft könyvtárat adatgyökérként használni.
     drives: Ajánlott helyek
@@ -1372,12 +1418,17 @@ shaderPack:
   enabled: Engedélyezett Shader Pack
   manage: Shader packek kezelése
   name: Shader Pack
+  noShaderMod: Nincs telepítve Shader Mod
+  noShaderModHint: A shader nem használható shader mod nélkül
+  noShaderModInstallHint: A shader csomag betöltéséhez telepítenie kell a következő modok egyikét.
   searchHint: Shader Pack keresése
   selectSearchHint: Keresés és Shader Pack kiválasztása
   showDirectory: Shader pack könyvtár megjelenítése
   showFile: Shader pack megjelenítése a mappában
 shared:
   accept: Elfogad
+  keepSelected: Tartsa kiválasztva
+  skipForNow: Most hagyd ki
 store:
   explore: Felfedezés
   latestMinecraft: Legfrissebb Minecraft verzió
