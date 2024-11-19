@@ -135,6 +135,3 @@ jobs:
         asset_path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
         asset_name: Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
         asset_content_type: application/exe
-
-    - name: Publish to WinGet
-      run: wingetcreate.exe update --submit --token ${{ secrets.GITHUB_TOKEN }} --urls https://github.com/aislxflames/flame-launcher/releases/download/v1.0.8/Flame-Launcher.-v1.0.8.-setup-x64.exe --version 1.0.8 aislx.FlameLauncher
