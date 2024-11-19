@@ -133,7 +133,7 @@ curseforge:
 curseforgeCard: {}
 curseforgeCategory:
   API and Library: API и бібліотеки
-  Addons: Addons
+  Addons: Аддони
   Adventure and RPG: Пригоди та RPG
   Animated: Анімація
   Cosmetic: Зовнішній вид/декор
@@ -405,6 +405,8 @@ instance:
   changeIcon: Змінити значок
   current: Поточний екземпляр
   delete: Видалити гру
+  deleteFailed: Не вдалося видалити примірник
+  deleteFailedPermission: Інша програма зайняла файл
   deleteHint: Дані екземпляра будуть переміщені з диска назавжди. Як зробити Цей?
   duplicate: Дублювати екземпляр
   duplicatedName: Ім'я, що повторюється
@@ -420,6 +422,10 @@ instance:
   lastPlayed: Востаннє грали
   launchArguments: Попередній перегляд аргументів запуску
   launchServer: Запустіть локальний сервер
+  linkFileDesc: |-
+    Це замінить локальний екземпляр {file} глобальним {file}. 
+    Ви впевнені, що пов’язуєте це?
+  linkFileTitle: Ви впевнені, що посилаєте {file}?
   mcOptions: Параметри Minecraft
   mcOptionsHint: Додаткові інструкції із запуску Minecraft
   name: Ім'я профілю
@@ -431,6 +437,10 @@ instance:
   prependCommandHint: Це додасть цю команду перед усіма командами запуску
   requireName: Ім'я обов'язкове
   showInstance: Показати папку гри
+  useSharedOptions: Використовуйте спільні налаштування гри
+  useSharedOptionsDesc: Це зв’яже файл options.txt зі спільним файлом у екземплярі
+  useSharedServersList: Використовуйте список спільних серверів
+  useSharedServersListDesc: Це зв’яже файл servers.dat зі спільним файлом у примірнику
   versionHint: Версія Minecraft для цієї гри
   vmOptions: Параметри JVM
   vmOptionsHint: Додаткові аргументи, що передаються JVM
@@ -438,6 +448,9 @@ instanceAge:
   older: Старі
   threeDay: В протягом трьох днів
   today: Сьогодні
+instanceDiscover:
+  gameFolder: Відкрийте {count} папок ігор
+  instanceFolder: Знайдено {count} екземплярів
 instanceFileOperation:
   add: Додати
   backup-add: Замінити (Резерв)
@@ -478,23 +491,27 @@ instanceUpdate:
   update: Почати оновлення
 instances:
   add: Створити гру
+  addCurseForgeDescription: |-
+    Імпортувати з папки даних curseforge. 
+    Вам потрібно вибрати кореневу папку даних curseforge
   addDescription: Створіть новий екземпляр з нуля
   addMMCDescription: |-
-    Імпорт існуючого екземпляра MultiMC. 
-    Вам потрібно вибрати папку екземпляра з MultiMC.
+    Імпорт наявного екземпляра MultiMC. 
+    Вам потрібно вибрати папку даних із MultiMC.
   addManually: Створити вручну
   addModrinthDescription: |-
-    Імпорт існуючого екземпляра Modrinth. 
-    Вам потрібно вибрати папку екземпляра Modrinth.
+    Імпорт наявного екземпляра Modrinth. 
+    Вам потрібно вибрати кореневу папку даних Modrinth.
   addServer: Створити з сервера
   addServerDescription: Це призведе до запуску гри безпосередньо на сервері.
-  addTemplate: Створити з шаблону
+  addTemplate: Створіть із завантаженого пакета модів
   addTemplateDescription: Імпорт із завантаженого Modpack
   addVanilla: Створюйте з ванільного Minecraft
   addVanillaDescription: |-
     Імпорт із загальної папки .minecraft. 
-    Це призведе до копіювання оригінального профілю гри в FMCL.
+    Це призведе до копіювання оригінального профілю гри в XMCL.
   choose: Виберіть Гра
+  fix: Виправити
   folderSetting: Параметри папки
   importFolder: Імпорт із папки
   importFolderDescription: Імпорт Minecraft до лаунчера
@@ -528,6 +545,7 @@ launch:
   kill: Зупинити
   killServer: Закрийте локальний сервер
   launch: Почати
+  launchAnyway: Все одно запустити
 launchBlocked:
   ignore: Примусовий запуск
   launchGeneralException:
@@ -678,13 +696,26 @@ mod:
   deletionRestHint: И ще {rest} модів...
   denseView: Щільний вид
   dropHint: Перетягніть мод .jar/.litemod сюди для імпорту.
+  duplicatedDetected: '{count} дубльованих модів'
+  duplicatedDetectedDescription: |-
+    Знайдено моди з однаковим ідентифікатором мода, але різними файлами. 
+    Це може призвести до збою Minecraft. 
+    Виберіть файл, який хочете зберегти.
   enabled: 'Модів включенно: {count}'
   filter: Фільтр модов
   groupInstalled: Групові встановлені моди
   hideIncompatible: Приховати несумісні модифікації
   incompatible: Несумістні мод.
+  incompatibleHint: Перегляньте свій звіт про сумісність модів
+  incompatibleHintDescription: |-
+    Деякі залежності модів можуть бути відсутні. 
+    Або деякі версії залежностей не збігаються.
   manage: Управління модами
   maybeCompatible: Можливо сумісний.
+  modloaderSelectHint: |-
+    Мод підтримує такі завантажувачі модів. 
+    Будь ласка, виберіть один для встановлення.
+  modloaderSelectNotSupported: Не знайдено {modloader} для Minecraft {minecraft}
   mods: '{count} модів'
   name: Мод | Моди
   noModLoaderHint: Не забудьте увімкнути модлоадер для використання модів!
@@ -718,6 +749,7 @@ modInstall:
   recommendation: Дослідіть {first} або {second} моди в {modrinth} і {curseforge}!
   search: Результат пошуку
   searchHint: Пошук та вибір проекту
+  skipVersion: Пропустіть моди з іншою версією Minecraft
   source: Джерело мода
   switch: Змінити версію
   upgrade: Оновлення модифікацій
@@ -725,6 +757,11 @@ modSearchType:
   all: Всі
   installed: Встановленно
   local: Кеш на диску
+modUpgradePolicy:
+  curseforge: Curseforge First
+  curseforgeOnly: Тільки Curseforge
+  modrinth: Modrinth Перший
+  modrinthOnly: Тільки Модрінт
 modified:
   reset: Скидання
   save: Зберегти
@@ -945,6 +982,8 @@ multiplayer:
   enterRemoteTokenHint: |-
     Як тільки товариш введе ваш токен, вам потрібно ввести його токен у текстове
      поле нижче. Натисніть кнопку «Підтвердити», щоб підключитися.
+  exposedPortDescription: Порт, який ви надали іншим аналогам
+  exposedPorts: Переадресовані порти
   gatheringIce: >
     "Зачекайте, поки сервер ICE збере достатньо інформації про вашу
      мережі. Якщо ви нетерплячі і ви маєте достатньо інформації, ви можете заздалегідь
@@ -979,6 +1018,7 @@ multiplayer:
   name: Мультиплеєр по локальній мережі
   networkInfo: Інформація про мережу
   next: Далі
+  otherExposedPortDescription: Порт передмова від {user}
   placeholder: >-
     Приєднуйтесь до інших користувачів, щоб грати в Minecraft по локальній
     мережі!
@@ -1110,6 +1150,7 @@ save:
   shared: Екземпляр використовує спільну папку збереження
   showDirectory: Показати каталог збереження
   unselected: спільний архів
+  useCurrent: Використовуйте поточний світ
 saves: {}
 screenshots:
   empty: У вас немає скріншотів
@@ -1209,7 +1250,7 @@ setting:
   developerMode: Режим розробника
   developerModeDescription: Режим розробника призначений для тестування написаного вами мода
   disableTelemetry: Вимкнути телеметрію
-  disableTelemetryDescription: FMCL збиратиме події запуску гри та входу користувача у гру.
+  disableTelemetryDescription: XMCL збиратиме події запуску гри та входу користувача у гру.
   enableDedicatedGPUOptimization: Призначити виділений графічний процесор
   enableDedicatedGPUOptimizationDescription: Ця опція призначить виділений графічний процесор для процесу Minecraft.
   enableDiscord: Увімкнути Discord Presence(Статус гри в Discord)
@@ -1241,6 +1282,7 @@ setting:
     всіх хостів
      загалом. 0 означає відсутність обмежень.
   maxSocketsTitle: Максимальна кількість HTTP-сокетів
+  migrateFromOther: Імпорт з іншого запуску
   name: Глобальне налаштування | Глобальні налаштування
   network: Мережеві налаштування
   officialWebsite: Офіційний сайт
@@ -1292,7 +1334,7 @@ setup:
     name: '@:setting.appearance'
   dataRoot:
     description: |-
-      Корінь даних – це не звичайний каталог .minecraft. Оскільки дані FMCL
+      Корінь даних – це не звичайний каталог .minecraft. Оскільки дані XMCL
        структура каталогів відрізняється від ванільної, ми не рекомендуємо використовувати
        загальний каталог .minecraft як корінь даних.
     drives: Рекомендовані місця
@@ -1349,6 +1391,11 @@ shaderPack:
   enabled: Увімкнений пакет шейдерів
   manage: Управління шейдерами
   name: Шейдер
+  noShaderMod: Шейдерний мод не встановлено
+  noShaderModHint: Ви не можете використовувати шейдер без шейдерного мода
+  noShaderModInstallHint: >-
+    Вам потрібно встановити один із наведених нижче модів, щоб завантажити пакет
+    шейдерів.
   showFile: Відкрити цей шейдер у папці
 shared: Екземпляр використовує спільну папку пакета ресурсів
 summery: Літній

@@ -110,7 +110,6 @@ browseApps: Просмотр пользовательского интерфей
 cancel: Отмена
 checkUpdate:
   name: Проверить обновление
-color: Цвет
 confirm: Подтвердить
 copyClipboard:
   success: Скопировано в буфер обмена
@@ -137,8 +136,8 @@ curseforge:
   totalDownloads: Всего скачиваний
 curseforgeCategory:
   API and Library: API и библиотеки
-  Addons: Addons
-  Adventure: Авентура
+  Addons: Дополнения
+  Adventure: Приключение
   Adventure and RPG: Приключения и RPG
   Animated: Анимация
   Armor, Tools, and Weapons: Доспехи, инструменты и оружие
@@ -455,6 +454,8 @@ instance:
   changeIcon: Изменить значок
   current: Текущий экземпляр
   delete: Удалить экземпляр
+  deleteFailed: Не удалось удалить экземпляр
+  deleteFailedPermission: Другая программа заняла файл
   deleteHint: >-
     Данные экземпляра будут удалены с диска навсегда. Вы уверены, что хотите это
     сделать?
@@ -470,6 +471,10 @@ instance:
   lastPlayed: Последняя игра
   launchArguments: Предпросмотр аргументов запуска
   launchServer: Запустить локальный сервер
+  linkFileDesc: |-
+    Это перезапишет локальный {file} экземпляра глобальным {file}. 
+    Вы уверены, что соедините это?
+  linkFileTitle: Вы уверены, что хотите связать {file}?
   mcOptions: Опции Minecraft
   mcOptionsHint: Дополнительные аргументы запуска Minecraft
   name: Имя экземпляра
@@ -482,6 +487,10 @@ instance:
   prependCommandHint: Это добавит эту команду перед всеми командами запуска.
   requireName: Требуется имя
   showInstance: Открыть папку экземпляра
+  useSharedOptions: Использовать общие настройки игры
+  useSharedOptionsDesc: Это свяжет файл options.txt с общим файлом в экземпляре.
+  useSharedServersList: Использовать список общих серверов
+  useSharedServersListDesc: Это свяжет файл server.dat с общим файлом в экземпляре.
   versionHint: Minecraft-версия этой игры
   vmOptions: Опции JVM
   vmOptionsHint: Дополнительные аргументы, передаваемые JVM
@@ -489,6 +498,9 @@ instanceAge:
   older: Старые
   threeDay: В течение трёх дней
   today: Сегодня
+instanceDiscover:
+  gameFolder: Откройте {count} папок с играми
+  instanceFolder: 'Найдено экземпляров: {count}'
 instanceFileOperation:
   add: Добавить
   backup-add: Заменить (создать резервную копию)
@@ -529,23 +541,27 @@ instanceUpdate:
   update: Начать обновление
 instances:
   add: Создать экземпляр
+  addCurseForgeDescription: |-
+    Импортируйте из папки данных Curseforge. 
+    Вам нужно выбрать корневую папку данных Curseforge.
   addDescription: Создать новый экземпляр с нуля
-  addMMCDescription: >-
-    Импортировать существующий экземпляр MultiMC. Вам нужно выбрать папку
-    экземпляра из MultiMC.
+  addMMCDescription: |-
+    Импортируйте существующий экземпляр MultiMC. 
+    Вам нужно выбрать папку с данными из MultiMC.
   addManually: Создать вручную
-  addModrinthDescription: >-
-    Импортировать существующий экземпляр Modrinth. Вам нужно выбрать папку
-    экземпляра Modrinth.
+  addModrinthDescription: |-
+    Импортируйте существующий экземпляр Modrinth. 
+    Вам необходимо выбрать корневую папку данных Modrinth.
   addServer: Создать из сервера
   addServerDescription: Это создаст экземпляр, который запустится непосредственно на сервере.
-  addTemplate: Создать из шаблона
+  addTemplate: Создать из скачанного модпака
   addTemplateDescription: Импортировать из загруженной сборки модов
   addVanilla: Создать из стандартного Minecraft
   addVanillaDescription: >-
     Импортировать из обычной папки (.minecraft). Это дублирует оригинальный
-    профиль экземпляра в FMCL.
+    профиль экземпляра в XMCL.
   choose: Выбрать экземпляр
+  fix: Исправить
   folderSetting: Настройки папки
   importFolder: Импортировать из папки
   importFolderDescription: Импортировать Minecraft в лаунчер
@@ -579,6 +595,7 @@ launch:
   kill: Остановить
   killServer: Остановить локальный сервер
   launch: Запустить
+  launchAnyway: Запустить в любом случае
 launchBlocked:
   ignore: Насильный запуск
   launchBadVersion:
@@ -740,14 +757,27 @@ mod:
   deletionRestHint: И ещё {rest} модов...
   denseView: Компактное отображение модов
   dropHint: Перетащите сюда файл мода (.jar/.litemod), чтобы импортировать его.
+  duplicatedDetected: '{count} дублированных модов'
+  duplicatedDetectedDescription: |-
+    Найдены моды с одинаковым идентификатором, но с разными файлами. 
+    Это может привести к сбою Minecraft. 
+    Пожалуйста, выберите файл, который вы хотите сохранить.
   enabled: 'Всего модов включено: {count}'
   filter: Фильтр модов
   groupInstalled: Группировать установленные моды
   hasUpdate: У мода есть новая версия!
   hideIncompatible: Скрыть несовместимые моды
   incompatible: Несовместимый мод.
+  incompatibleHint: Посмотрите отчет о совместимости вашего мода
+  incompatibleHintDescription: |-
+    Некоторые зависимости модов могут отсутствовать. 
+    Или некоторые версии зависимостей не совпадают.
   manage: Моды
   maybeCompatible: Возможно, совместим.
+  modloaderSelectHint: |-
+    Мод поддерживает следующие загрузчики модов. 
+    Пожалуйста, выберите один для установки.
+  modloaderSelectNotSupported: Не найден {modloader} для Minecraft {minecraft}
   mods: '{count} модов'
   name: Мод | Моды
   noModLoaderHint: Не забудьте включить модлоадер для использования модов!
@@ -782,6 +812,7 @@ modInstall:
   recommendation: Исследуйте {first} или {second} в {modrinth} и {curseforge}!
   search: Результаты поиска
   searchHint: Поиск и выбор проекта
+  skipVersion: Пропустите моды с другой версией Minecraft
   source: Источник контента мода
   switch: Переключить версию
   upgrade: Обновить моды
@@ -790,6 +821,11 @@ modSearchType:
   explore: Исследуйте рынок
   installed: Установлено
   local: Дисковый кэш
+modUpgradePolicy:
+  curseforge: Curseforge First
+  curseforgeOnly: Только в Кёрсфордже
+  modrinth: Modrinth Первый
+  modrinthOnly: Только Модринт
 modified:
   reset: Сбросить
   save: Сохранить
@@ -984,7 +1020,8 @@ multiplayer:
   allowTurn: Разрешить сервер-ретранслятор
   allowTurnHint: >-
     Включите ретранслятор, если связь напрямую не работает.  Он может замедлить
-    соединение, используйте осторожно.
+    соединение, используйте осторожно. Включите ретранслятор, если связь
+    напрямую не работает.  Он может замедлить соединение, используйте осторожно.
   complete: Завершено
   confirm: Подтвердить
   connections: Соединения
@@ -1013,6 +1050,8 @@ multiplayer:
     После того, как пользователь введёт ваш токен, необходимо ввести его токен в
     приведённое ниже текстовое поле. Нажмите "Подтвердить", чтобы установить
     соединение.
+  exposedPortDescription: Порт, который вы предоставили другим узлам
+  exposedPorts: Перенаправленные порты
   gatheringIce: >-
     Пожалуйста, подождите, пока сервер ICE соберёт необходимую информацию о
     вашей сети. Если вы нетерпеливы и информации достаточно, вы можете отправить
@@ -1039,13 +1078,16 @@ multiplayer:
   kernel: Ядро P2P
   kernelDescription: >-
     Используйте WebRTC или node-datachannel.  Переключайтесь между ними только
-    если p2p-соединение иногда вызывает ошибку окна запуска.
+    если p2p-соединение иногда вызывает ошибку окна запуска. Используйте WebRTC
+    или node-datachannel.  Переключайтесь между ними только если p2p-соединение
+    иногда вызывает ошибку окна запуска.
   leaveGroup: Покинуть группу
   localToken: Локальный токен
   manualConnect: Ручное соединение
   name: Игра по локальной сети
   networkInfo: Информация о сети
   next: Далее
+  otherExposedPortDescription: Предисловие к порту от {user}
   placeholder: >-
     Соединитесь с другим пользователем, чтобы играть в Minecraft в локальной
     сети!
@@ -1199,6 +1241,7 @@ save:
   shared: Экземпляр использует общую папку сохранений
   showDirectory: Открыть папку с мирами
   unselected: общий архив
+  useCurrent: Использовать текущий мир
 screenshots:
   empty: У вас нет снимков экрана
   goto: Открыть папку со снимками экрана
@@ -1213,7 +1256,7 @@ server:
   host: Хост
   hostHint: Хост (с портом) сервера
   ipAddress: IP-адрес
-  maxPlayers: Максимум игроков
+  maxPlayers: Максимум игроковr
   motd: Сервер MOTD
   name: Сервер | Серверы
   nogui: Нет графического интерфейса сервера
@@ -1300,7 +1343,7 @@ setting:
   developerModeDescription: Эта опция предназначена для тестирования ваших собственных модов.
   disableTelemetry: Отключить телеметрию
   disableTelemetryDescription: >-
-    Если включено, FMCL будет собирать информацию о запуске экземпляра и входа
+    Если включено, XMCL будет собирать информацию о запуске экземпляра и входа
     пользователя.
   enableDedicatedGPUOptimization: Назначить выделенный графический процессор
   enableDedicatedGPUOptimizationDescription: Эта опция назначит выделенный графический процессор процессу Minecraft.
@@ -1332,6 +1375,7 @@ setting:
   maxSockets: Максимум сокетов
   maxSocketsDescription: Ограничьте количество сокетов на хост или для всех. 0 - без ограничений.
   maxSocketsTitle: Максимальное количество HTTP-сокетов
+  migrateFromOther: Импорт из другого лаунчера
   name: Глобальные настройки | Глобальные настройки
   network: Настройки сети
   officialWebsite: Официальный сайт
@@ -1391,7 +1435,7 @@ setup:
   dataRoot:
     description: >-
       Корневая папка не является обычной папкой (.minecraft). Поскольку
-      структура каталогов данных FMCL отличается от оригинальной, мы не
+      структура каталогов данных XMCL отличается от оригинальной, мы не
       рекомендуем использовать общую папку (.minecraft) в качестве корневой
       папки данных.
     drives: Рекомендуемые расположения
@@ -1444,12 +1488,19 @@ shaderPack:
   enabled: Выбранные наборы шейдеров
   manage: Шейдера
   name: Набор шейдеров | Наборы шейдеров
+  noShaderMod: Мод шейдеров не установлен
+  noShaderModHint: Вы не можете использовать шейдер без мода шейдера.
+  noShaderModInstallHint: >-
+    Для загрузки пакета шейдеров вам необходимо установить один из следующих
+    модов.
   searchHint: Поиск набора шейдеров
   selectSearchHint: Найдите и выберите Shader Pack
   showDirectory: Открыть папку с наборами шейдеров
   showFile: Показать путь к набору шейдеров {file}
 shared:
   accept: Принять
+  keepSelected: Сохранить выбранное
+  skipForNow: Пропустить сейчас
 store:
   explore: Исследовать
   latestMinecraft: Последняя версия Minecraft

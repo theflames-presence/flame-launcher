@@ -1,9 +1,9 @@
 {
-    "name": "xmcl",
+    "name": "fmcl",
     "private": true,
     "main": "./index.js",
-    "version": "1.0.9",
-    "author": "aislxflames <proarghaop@gmail.com>",
+    "version": "1.1.0",
+    "author": "aislx <proarghaop@gmail.com>",
     "description": "A great minecraft launcher in the future",
     "license": "MIT",
     "engines": {
@@ -15,10 +15,11 @@
     },
     "msstoreCliAppId": "9MXJWHXTP4B9",
     "scripts": {
-        "build": "cross-env NODE_ENV=development tsx build.ts",
-        "build:all": "cross-env NODE_ENV=production cross-env BUILD_TARGET=production tsx build.ts",
-        "build:dir": "cross-env NODE_ENV=development cross-env BUILD_TARGET=dir tsx build.ts",
+        "compile": "cross-env BUILD_TARGET=none tsx build.ts",
+        "build": "cross-env NODE_ENV=production tsx build.ts",
+        "build:all": "cross-env NODE_ENV=production cross-env BUILD_TARGET=all tsx build.ts",
         "postinstall": "tsx postinstall.ts",
+        "postsign": "tsx postsign.ts",
         "check": "tsc --noEmit --project tsconfig.json && tsc --noEmit --project preload/tsconfig.json",
         "dev": "cross-env NODE_ENV=development tsx dev.ts",
         "lint": "eslint --ext .ts .",
@@ -70,7 +71,7 @@
         "node-abi": "3.60.0",
         "tslib": "^2.5.0",
         "tsx": "^3.13.0",
-        "typescript": "^5.2.2",
+        "typescript": "5.4.5",
         "undici": "6.19.4"
     }
 }

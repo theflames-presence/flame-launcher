@@ -1,6 +1,6 @@
 import { Client } from 'undici'
 import { LauncherAppPlugin } from '~/app'
-import { GFW } from './gfw'
+import { GFW, kGFW } from './gfw'
 
 export const pluginGFW: LauncherAppPlugin = (app) => {
   const logger = app.getLogger('GFW')
@@ -28,10 +28,10 @@ export const pluginGFW: LauncherAppPlugin = (app) => {
         headersTimeout: 5000,
       }).then(() => 'yandex' as const, () => 'global' as const),
     ])
-    logger.log(networkEnv ? 'Detected current in India Mainland.' : 'Detected current NOT in Chinese Mainland.')
+    logger.log(networkEnv ? 'Detected current in Chinese Mainland.' : 'Detected current NOT in Chinese Mainland.')
     taobao.close()
     google.close()
     return networkEnv
   }
-  app.registry.register(GFW, new GFW(updateGFW()))
+  app.registry.register(kGFW, new GFW(updateGFW()))
 }

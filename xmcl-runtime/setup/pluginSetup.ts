@@ -20,13 +20,13 @@ export const pluginSetup: LauncherAppPlugin = async (app) => {
   }
 
   app.controller.handle('preset', async () => {
-    const defaultPath = join(app.host.getPath('home'), '.fmcl')
+    const defaultPath = join(app.host.getPath('home'), '.xmcl')
     const getPath = (driveSymbol: string) => {
       const parsedHome = parse(defaultPath)
       if (parsedHome.root.toLocaleLowerCase().startsWith(driveSymbol.toLocaleLowerCase())) {
         return defaultPath
       }
-      return join(driveSymbol, '.fmcl')
+      return join(driveSymbol, '.xmcl')
     }
     const getAllDrived = async () => {
       try {

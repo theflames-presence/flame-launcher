@@ -5,17 +5,18 @@ AppAddInstanceDialog:
   downloadedNotification: Il modpack {name} è stato scaricato. Vuoi creare un'istanza per esso?
   serverTitle: Inserisci l'indirizzo del server
 AppShareInstanceDialog:
-  alterDownloadDescription: |-
-    "Se non vuoi rovinare l'istanza corrente. Puoi anche creare una nuova istanza dalla configurazione del tuo peer. Fai clic sul pulsante qui sotto per creare un'istanza."
+  alterDownloadDescription: >-
+    "Se non vuoi rovinare l'istanza corrente. Puoi anche creare una nuova
+    istanza dalla configurazione del tuo peer. Fai clic sul pulsante qui sotto
+    per creare un'istanza."
   baseInfo: Impostazioni di base
   cancelShare: Annulla condivisione
   description: >-
     Dopo aver condiviso il profilo, altri luoghi possono scaricare questi file
     tramite il tuo PC.
   downloadDescription: >-
-    Verifica i file che ti sono stati forniti dal tuo peer. 
-    Seleziona il file che desideri scaricare. 
-    Verrà inserito nell'istanza corrente {nome}.
+    Verifica i file che ti sono stati forniti dal tuo peer.  Seleziona il file
+    che desideri scaricare.  Verrà inserito nell'istanza corrente {nome}.
   downloadNotifyTitle: Scarica l'istanza da {user}
   downloadTitle: Scarica i file da altri peer
   downloadToLocal: Scarica nell'istanza corrente
@@ -264,8 +265,8 @@ errors:
   SocketError: Errore del socket del server
 eula:
   body: >-
-    Selezionando il pulsante della casella di controllo, indichi il tuo accordo
-    con {eula} di Minecraft.
+    cliccando la casella di controllo, indichi la tua accettazione  con l'{eula}
+    di Minecraft.
 exception:
   http: >-
     La richiesta HTTP a {url} non è riuscita. Codice di stato {statusCode}.
@@ -394,6 +395,8 @@ instance:
   changeIcon: Cambia icona
   current: Istanza corrente
   delete: Elimina gioco
+  deleteFailed: Impossibile eliminare l'istanza
+  deleteFailedPermission: Un altro programma occupava il file
   deleteHint: >-
     I dati dell'istanza verranno rimossi definitivamente dal disco. Sei sicuro
     di voler fare questo?
@@ -411,6 +414,10 @@ instance:
   lastPlayed: Giocato l'ultima volta
   launchArguments: Anteprima argomenti di avvio
   launchServer: Avvia il server localhost
+  linkFileDesc: |-
+    Ciò sovrascriverà l'istanza locale del {file} con il globale {file}. 
+    Sei sicuro di collegarlo?
+  linkFileTitle: Sei sicuro di collegare {file}?
   mcOptions: Opzioni Minecraft
   mcOptionsHint: Argomenti di avvio aggiuntivi di Minecraft
   name: Nome profilo
@@ -423,6 +430,10 @@ instance:
   prependCommandHint: Questo anteporrà questo comando prima di tutti i comandi di avvio
   requireName: Il nome è obbligatorio
   showInstance: Mostra la cartella del gioco
+  useSharedOptions: Utilizza le impostazioni di gioco condivise
+  useSharedOptionsDesc: Ciò collegherà options.txt a un file condiviso tra le istanze
+  useSharedServersList: Utilizza l'elenco dei server condivisi
+  useSharedServersListDesc: Ciò collegherà server.dat a un file condiviso tra le istanze
   versionHint: La versione di Minecraft di questo gioco
   vmOptions: Opzioni JVM
   vmOptionsHint: Argomenti aggiuntivi passati a JVM
@@ -430,6 +441,9 @@ instanceAge:
   older: Più vecchio
   threeDay: In tre giorni
   today: Oggi
+instanceDiscover:
+  gameFolder: Scopri {count} cartelle di giochi
+  instanceFolder: Trovate {count} istanze
 instanceFileOperation:
   add: Aggiungi
   backup-add: Sostituisci (Backup)
@@ -472,23 +486,27 @@ instanceUpdate:
   update: Avvia aggiornamento
 instances:
   add: Crea gioco
+  addCurseForgeDescription: |-
+    Importa dalla cartella dei dati di curseforge. 
+    Devi selezionare la cartella dei dati root di curseforge
   addDescription: Crea una nuova istanza da zero
-  addMMCDescription: >-
-    Importa istanza MultiMC esistente. È necessario selezionare la cartella
-    dell'istanza da MultiMC.
+  addMMCDescription: |-
+    Importa l'istanza MultiMC esistente. 
+    È necessario selezionare la cartella dati da MultiMC.
   addManually: Crea manualmente
-  addModrinthDescription: >-
-    Importa istanza Modrinth esistente. È necessario selezionare la cartella
-    dell'istanza Modrinth.
+  addModrinthDescription: |-
+    Importa l'istanza Modrinth esistente. 
+    È necessario selezionare la cartella dei dati root di Modrinth.
   addServer: Crea da server
   addServerDescription: Questo creerà un gioco che si avvia direttamente nel server.
-  addTemplate: Crea da modello
+  addTemplate: Crea dal modpack scaricato
   addTemplateDescription: Importa da Modpack scaricato
   addVanilla: Crea da Minecraft vanilla
   addVanillaDescription: >-
     Importa dalla cartella .minecraft comune. Questo duplicherà il profilo di
-    gioco originale in FMCL.
+    gioco originale in XMCL.
   choose: Seleziona gioco
+  fix: Sistemati
   folderSetting: Impostazioni della cartella
   importFolder: Importa da cartella
   importFolderDescription: Importa Minecraft nel launcher
@@ -522,6 +540,7 @@ launch:
   kill: Arresta
   killServer: Uccidi il server Localhost
   launch: Avvia
+  launchAnyway: Avvia comunque
 launchBlocked:
   ignore: Forza avvio
   launchBadVersion:
@@ -675,20 +694,33 @@ mod:
   currentVersion: Versione corrente {current}
   deletion: Elimina mod
   deletionHint: >-
-    Perderai questa mod e i relativi metadati per sempre. Sei sicuro di
-    volerla eliminare? | Perderai queste mod e questi metadati per sempre.
-    Sei sicuro di volerlo fare?
+    Perderai questa mod e i relativi metadati per sempre. Sei sicuro di volerla
+    eliminare? | Perderai queste mod e questi metadati per sempre. Sei sicuro di
+    volerlo fare?
   deletionRestHint: E {rest} altre Mods...
   denseView: Vista densa
   dropHint: Rilasca il file .jar/.litemod della mod qui per importarlo.
+  duplicatedDetected: '{count} mod duplicate'
+  duplicatedDetectedDescription: |-
+    Mod trovate con lo stesso ID mod ma file diversi. 
+    Ciò potrebbe causare l'arresto anomalo di Minecraft. 
+    Seleziona il file che desideri conservare.
   enabled: '{count} Mod abilitate'
   filter: Filtra Mod
   groupInstalled: Raggruppa le mod installate
   hasUpdate: la Mod ha una nuova versione!
   hideIncompatible: Nascondi Mod Incompatibili
   incompatible: Mod Incompatibile.
+  incompatibleHint: Controlla il rapporto sulla compatibilità della tua mod
+  incompatibleHintDescription: |-
+    Potrebbero mancare alcune dipendenze delle mod. 
+    Oppure alcune versioni delle dipendenze non corrispondono.
   manage: Gestisci Mod
   maybeCompatible: Forse Compatibile.
+  modloaderSelectHint: |-
+    Il mod supporta i seguenti caricatori di mod. 
+    Selezionane uno da installare.
+  modloaderSelectNotSupported: Non trovato {modloader} per Minecraft {minecraft}
   mods: '{count} Mods'
   name: Mod | Mods
   noModLoaderHint: Non dimenticare di abilitare un modloader per utilizzare le mod!
@@ -700,7 +732,7 @@ mod:
   showFile: Mostra il percorso della mod {file}
   showInCurseforge: Mostra la mod in curseforge
   showInModrinth: Mostra {name} in Modrinth
-  switchDefaultSource: Sorgente della Mod Predefinita
+  switchDefaultSource: Sorgente delle Mod Predefinita
   toUpdate: '{count} da aggiornare'
 modInstall:
   archived: >-
@@ -722,6 +754,7 @@ modInstall:
   recommendation: Esplora {first} o {second} mod in {modrinth} e {curseforge}!
   search: Risultato della ricerca
   searchHint: Cerca e seleziona il progetto
+  skipVersion: Salta le Mod con diverse versioni di Minecraft
   source: Sorgente Mod
   switch: Cambia versione
   upgrade: Aggiorna le Mod
@@ -730,6 +763,11 @@ modSearchType:
   explore: Esplora il mercato
   installed: Installato
   local: Cache del disco
+modUpgradePolicy:
+  curseforge: Curseforge  Maledizione
+  curseforgeOnly: Solo Forgiamaledizione
+  modrinth: Modrinth Primo
+  modrinthOnly: Solo Modrinth
 modified:
   reset: Reimposta
   save: Salva
@@ -923,7 +961,7 @@ modrinthCard:
 multiplayer:
   allowTurn: Abilita il server di relay
   allowTurnHint: >-
-    Abilita il server di relay se non riesci a connetterti con il tuo amico.
+    Abilita il server relay se non riesci a connetterti con il tuo amico.
     Tuttavia, l'utilizzo di un server di relay potrebbe rallentare la tua
     connessione. Usalo con cautela.
   complete: Completo
@@ -952,6 +990,8 @@ multiplayer:
   enterRemoteTokenHint: >-
     Una volta che il tuo peer ha inserito il tuo token, devi inserire il suo
     token nell'area di testo qui sotto. Fai clic su Conferma per connetterti.
+  exposedPortDescription: La porta che hai esposto ad altri peer
+  exposedPorts: Porte inoltrate
   gatheringIce: >
     "Attendere che il server ICE raccolga informazioni sufficienti sulla rete.
     Se si è impazienti e ci sono informazioni sufficienti, è possibile fornire
@@ -986,6 +1026,7 @@ multiplayer:
   name: Multiplayer in LAN
   networkInfo: Informazioni sulla rete
   next: Avanti
+  otherExposedPortDescription: Il port forwarding di {user}
   placeholder: Connettiti con altri utenti per giocare a Minecraft su LAN!
   previous: Precedente
   receiveHint: >-
@@ -1137,6 +1178,7 @@ save:
   shared: L'istanza utilizza la cartella di salvataggio condivisa
   showDirectory: Mostra la directory di salvataggio
   unselected: archivio condiviso
+  useCurrent: Usa il mondo attuale
 saves: {}
 screenshots:
   empty: Non hai screenshot
@@ -1155,7 +1197,7 @@ server:
   hostHint: L'host (con porta) del server
   ipAddress: Indirizzo IP
   maxPlayers: Giocatori massimi
-  motd: MOTD server
+  motd: MOTD del server
   name: Server | Server
   nogui: Nessuna GUI del server
   onlineMode: Modalità online
@@ -1168,7 +1210,7 @@ server:
   unknown: Server sconosciuto
   unknownDescription: Server sconosciuto. Aggiorna
   version: Versione richiesta dal server
-  versionHint: La versione di Minecraft da pingare
+  versionHint: La versione di Minecraft di cui eseguire il ping
 serverStatus:
   nohost: §4Impossibile trovare l'host!
   ping: Ping...
@@ -1238,7 +1280,7 @@ setting:
   developerMode: Modalità sviluppatore
   developerModeDescription: La modalità sviluppatore è destinata a testare i mod scritti personalmente
   disableTelemetry: Disabilita telemetria
-  disableTelemetryDescription: "FMCL racoglie gli eventi di avvio del gioco e di accesso dell'utente."
+  disableTelemetryDescription: XMCL racoglie gli eventi di avvio del gioco e di accesso dell'utente.
   enableDedicatedGPUOptimization: Assegna GPU dedicata
   enableDedicatedGPUOptimizationDescription: Questa opzione assegnerà una GPU dedicata al processo di Minecraft.
   enableDiscord: Abilita la presenza di Discord
@@ -1246,7 +1288,7 @@ setting:
   general: Generale
   githubRelease: Rilascio Github
   globalSetting: Impostazioni globali
-  globalSettingHint: "L'istanza utilizzerà queste impostazioni per impostazione predefinita."
+  globalSettingHint: L'istanza utilizzerà queste impostazioni per impostazione predefinita.
   hideNewsHeader: Nascondi showcase delle notizie
   language: Lingua
   languageDescription: La lingua visualizzata
@@ -1267,6 +1309,7 @@ setting:
     Limita il numero massimo di socket consentiti per host o per tutti gli host
     in totale. 0 significa senza limiti.
   maxSocketsTitle: Max socket HTTP
+  migrateFromOther: Importa da un altro launcher
   name: Impostazioni globali | Impostazioni globali
   network: Impostazioni di rete
   officialWebsite: Sito ufficiale
@@ -1278,7 +1321,7 @@ setting:
     repulse: Ripulsa
   particleModeDescription: Seleziona il comportamento del clic della particella
   replaceNative: Sostituisci librerie native
-  replaceNativeDescription: "Sostituisci le librerie native in base all'architettura del tuo computer."
+  replaceNativeDescription: Sostituisci le librerie native in base all'architettura del tuo computer.
   replaceNatives:
     all: Tutti
     legacy: Solo versione legacy
@@ -1287,7 +1330,8 @@ setting:
   showRoot: Mostra
   streamerMode: Modalità streaming
   streamerModeDescription: >-
-    "Questa opzione nasconde le tue informazioni private, come l'email, nel launcher."
+    "Questa opzione nasconde le tue informazioni private, come l'email, nel
+    launcher."
   theme:
     dark: Tema scuro
     light: Tema chiaro
@@ -1325,7 +1369,7 @@ setup:
   dataRoot:
     description: >-
       La directory dei dati non è una directory ".minecraft" standard. perché la
-      struttura dei dati di FMCL è diversa da quella standard, non consigliamo
+      struttura dei dati di XMCL è diversa da quella standard, non consigliamo
       di utilizzare la directory ".minecraft" standard come directory dei dati.
     drives: Posizioni consigliate
     name: Imposta directory dati
@@ -1377,12 +1421,17 @@ shaderPack:
   enabled: Shader Pack abilitato
   manage: Gestisci Shader Pack
   name: Shader Pack
+  noShaderMod: Nessuna mod Shader installata
+  noShaderModHint: Non puoi usare lo shader senza un mod shader
+  noShaderModInstallHint: È necessario installare una delle seguenti mod per caricare lo shader pack.
   searchHint: Cerca Shader Pack
   selectSearchHint: Cerca e seleziona Shader Pack
   showDirectory: Mostra la directory degli shader pack
   showFile: Mostra questo shader pack nella cartella
 shared:
   accept: Accetta
+  keepSelected: Mantieni selezionato
+  skipForNow: Salta per ora
 store:
   explore: Esplora
   latestMinecraft: Ultima versione di Minecraft
@@ -1423,6 +1472,9 @@ transportType:
   srflx: Server Reflexive Scelto
 turnRegion:
   fr: Francia
+  guangzhou: Guangzhou, Cina
+  hk: Hong Kong
+  liaoning: Liaoning, Cina
   po: Polonia
 tutorial:
   feedbackDescription: >-

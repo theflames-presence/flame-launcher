@@ -1,12 +1,10 @@
-import { fdatasync, close as sclose, open as sopen, rename as srename, stat as sstat, unlink as sunlink, write } from 'fs'
-import { mkdir } from 'fs/promises'
+import { fdatasync, close as sclose, open as sopen, rename as srename, stat as sstat, unlink as sunlink, write, mkdir as smkdir } from 'fs'
 import { dirname } from 'path'
 import { PassThrough, Writable, finished as sfinished } from 'stream'
 import { Agent, Dispatcher, errors, stream } from 'undici'
 import { promisify } from 'util'
 // @ts-ignore
 import { parseRangeHeader } from 'undici/lib/core/util'
-import { AbortSignal } from './abort'
 import { getDefaultAgentOptions } from './agent'
 import { CheckpointHandler } from './checkpoint'
 import { ProgressController, resolveProgressController } from './progress'
@@ -20,6 +18,7 @@ const open = promisify(sopen)
 const close = promisify(sclose)
 const finished = promisify(sfinished)
 const datasync = promisify(fdatasync)
+const mkdir = promisify(smkdir)
 
 export function getDownloadBaseOptions<T extends DownloadBaseOptions>(options?: T): DownloadBaseOptions {
   if (!options) return {}
@@ -318,7 +317,7 @@ export async function download(options: DownloadOptions) {
           totals[index] = partLength
           const writtenTotal = writtens.reduce((a, b) => a + b, 0)
           const totalTotal = metadata?.total || totalLength || totals.reduce((a, b) => a + b, 0)
-          progressController.onProgress(url, chunk, writtenTotal, totalTotal)
+          progressController(url, chunk, writtenTotal, totalTotal)
         }, abortSignal)),
       )
 
@@ -332,7 +331,7 @@ export async function download(options: DownloadOptions) {
             totals[0] = partLength
             const writtenTotal = writtens.reduce((a, b) => a + b, 0)
             const totalTotal = metadata?.total || totalLength || totals.reduce((a, b) => a + b, 0)
-            progressController.onProgress(url, chunk, writtenTotal, totalTotal)
+            progressController(url, chunk, writtenTotal, totalTotal)
           }, abortSignal),
         ]
       }

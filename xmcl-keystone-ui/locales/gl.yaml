@@ -248,23 +248,47 @@ eula:
   body: >-
     Marcando o botón da caixa de verificación, estás a indicar o teu acordo co
     {eula} de Minecraft.
+fabricVersion:
+  showSnapshot: Mostrar instantáneas
 importModpack:
   name: Importar Modpack
 instance:
   changeIcon: Cambiar icona
+  deleteFailed: Produciuse un erro ao eliminar a instancia
+  deleteFailedPermission: Outro programa ocupou o ficheiro
   iconHint: A icona pode ser un ficheiro ou unha ligazón URL de Internet.
   launchServer: Inicia o servidor localhost
+  linkFileDesc: |-
+    Isto sobrescribirá a instancia local {file} co global {file}. 
+    Seguro que o vinculas?
+  linkFileTitle: Estás seguro de ligar {file}?
   prependCommand: Comando anteposto
   prependCommandHint: Isto antepoñerá este comando antes de todos os comandos de inicio
+  useSharedOptions: Usa a configuración compartida do xogo
+  useSharedOptionsDesc: Isto enlazará o options.txt a un ficheiro compartido na instancia
+  useSharedServersList: Usa a lista de servidores compartidos
+  useSharedServersListDesc: Isto enlazará o servers.dat a un ficheiro compartido na instancia
+instanceDiscover:
+  gameFolder: Descubre {count} cartafoles de xogos
+  instanceFolder: Atopáronse {count} instancias
 instanceUpdate:
   loaderChanged: |-
     Cambiouse o modloader desta instancia. 
     O modloader antigo é {modloader} e o novo modloader é {newModloader}.
 instances:
+  addCurseForgeDescription: |-
+    Importar desde o cartafol de datos de curseforge. 
+    Debe seleccionar o cartafol de datos raíz de curseforge
+  addMMCDescription: |-
+    Importar a instancia de MultiMC existente. 
+    Debe seleccionar o cartafol de datos de MultiMC.
   addServerDescription: Isto creará un xogo que se lanzará directamente ao servidor.
+  addTemplate: Crear desde o modpack descargado
+  fix: Reparación
   folderSetting: Configuración do cartafol
 launch:
   killServer: Eliminar o servidor Localhost
+  launchAnyway: Lanzamento de todos os xeitos
 launchBlocked:
   launchSpawnProcessFailed:
     description: |-
@@ -277,6 +301,19 @@ me:
   versions: Versións instaladas
 mod:
   denseView: Vista Densa
+  duplicatedDetected: '{count} modificacións duplicadas'
+  duplicatedDetectedDescription: |-
+    Atopáronse modificacións co mesmo ID de mod pero con ficheiros diferentes. 
+    Isto pode causar un fallo de Minecraft. 
+    Selecciona o ficheiro que queres conservar.
+  incompatibleHint: Consulta o teu informe de compatibilidade de mod
+  incompatibleHintDescription: |-
+    É posible que falten algunhas dependencias de modificacións. 
+    Ou algunhas versións de dependencias non coinciden.
+  modloaderSelectHint: |-
+    O mod admite os seguintes cargadores de mod. 
+    Selecciona un para instalar.
+  modloaderSelectNotSupported: Non se atopou {modloader} para Minecraft {minecraft}
   mods: '{count} Mods'
   searchOnCurseforge: Busca {name} en curseforge
 modInstall:
@@ -290,6 +327,12 @@ modInstall:
   installDependencies: Instalar dependencias que faltan
   noVersionSupported: Só os mods son compatibles con Minecraft {supported}.
   recommendation: Explora as modificacións {first} ou {second} en {modrinth} e {curseforge}!
+  skipVersion: Salta os Mods con diferentes versións de Minecraft
+modUpgradePolicy:
+  curseforge: Curseforge Primeiro
+  curseforgeOnly: Só Curseforge
+  modrinth: Modrinth Primeiro
+  modrinthOnly: Só Modrinth
 modrinth:
   categories:
     128x: 128x
@@ -320,12 +363,15 @@ modrinth:
     mod: Mod
     shader: Shader
 multiplayer:
+  exposedPortDescription: O porto que expuxo a outros compañeiros
+  exposedPorts: Portos remitidos
   kernel: Núcleo P2P
   kernelDescription: >-
     Use WebRTC nativo ou canle de datos de nodos. 
 
     Cambia isto só cando a túa conexión p2p nalgún momento falla a xanela do
     lanzador.
+  otherExposedPortDescription: O prefacio do porto de {usuario}
   sharingNotificationBody: >-
     Podes descargar ou crear unha instancia desde a configuración compartida de
     {name}.
@@ -348,6 +394,7 @@ save:
   shared: A instancia utiliza o cartafol de gardados compartidos
   showDirectory: Mostrar o directorio de gardar
   unselected: arquivo compartido
+  useCurrent: Usa o mundo actual
 saves: {}
 server:
   maxPlayers: Máximo xogadores
@@ -363,6 +410,7 @@ setting:
   maunalUpdateHint: |-
     A versión non se pode actualizar automaticamente. 
     Volve descargar o iniciador do sitio web!
+  migrateFromOther: Importar desde outro lanzador
   replaceNative: Substituír as bibliotecas nativas
   replaceNativeDescription: Substitúe as bibliotecas nativas segundo o arco do teu ordenador.
   replaceNatives:
@@ -383,8 +431,14 @@ setting:
 setup:
   appearance:
     name: '@:setting.appearance'
+shaderPack:
+  noShaderMod: Non hai ningún Shader Mod instalado
+  noShaderModHint: Non pode usar shader sen un mod shader
+  noShaderModInstallHint: Debes instalar un dos seguintes mods para cargar o paquete de sombreadores.
 shared:
   accept: Aceptar
+  keepSelected: Manter seleccionado
+  skipForNow: Saltar por agora
 task:
   connection:
     connected: Conectado

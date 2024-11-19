@@ -352,6 +352,8 @@ instance:
   changeIcon: Cambiar el ícono
   current: Instancia Actual
   delete: Eliminar juego
+  deleteFailed: No se pudo eliminar la instancia
+  deleteFailedPermission: Otro programa ocupó el archivo.
   deleteHint: >-
     Los datos de la instancia se eliminarán permanentemente del disco. ¿Estás
     seguro de hacer esto?
@@ -369,6 +371,10 @@ instance:
   lastPlayed: Última vez jugado
   launchArguments: Argumentos de Lanzamiento Previo
   launchServer: Iniciar el servidor localhost
+  linkFileDesc: |-
+    Esto sobrescribirá el {file} local de la instancia con el {file} global. 
+    ¿Estás seguro de vincularlo?
+  linkFileTitle: ¿Estás seguro de vincular {file}?
   mcOptions: Opciones de Minecraft
   mcOptionsHint: Argumentos adicionales de lanzamiento de Minecraft
   name: Nombre del Perfil
@@ -381,6 +387,12 @@ instance:
   prependCommandHint: Esto antepondrá este comando antes de todos los comandos de inicio.
   requireName: El nombre es obligatorio
   showInstance: Mostrar carpeta del juego
+  useSharedOptions: Usar configuración de juego compartida
+  useSharedOptionsDesc: >-
+    Esto vinculará el archivo options.txt a un archivo compartido entre
+    instancias.
+  useSharedServersList: Usar lista de servidores compartidos
+  useSharedServersListDesc: Esto vinculará servers.dat a un archivo compartido entre instancias.
   versionHint: La versión de Minecraft de este juego
   vmOptions: Opciones de JVM
   vmOptionsHint: Argumentos adicionales para pasar a la JVM
@@ -388,6 +400,9 @@ instanceAge:
   older: Más Antiguo
   threeDay: En Tres Días
   today: Hoy
+instanceDiscover:
+  gameFolder: Descubre {count} carpetas de juegos
+  instanceFolder: Se encontraron {count} instancias
 instanceFileOperation:
   add: Agregar
   backup-add: Reemplazar (Copia de Seguridad)
@@ -422,10 +437,17 @@ instanceUpdate:
   update: Iniciar Actualización
 instances:
   add: Crear juego
+  addCurseForgeDescription: |-
+    Importar desde la carpeta de datos de curseforge. 
+    Debes seleccionar la carpeta de datos raíz de curseforge.
+  addMMCDescription: |-
+    Importe la instancia MultiMC existente. 
+    Debe seleccionar la carpeta de datos de MultiMC.
   addServer: Crear desde el servidor
   addServerDescription: Esto creará un juego que se iniciará directamente en el servidor.
-  addTemplate: Crear desde plantilla
+  addTemplate: Crear desde modpack descargado
   choose: Selecciona un juego
+  fix: Reparar
   folderSetting: Configuración de carpeta
   importFolder: Importar desde Carpeta
   importFolderDescription: Importar Minecraft al Lanzador
@@ -439,6 +461,7 @@ java:
   allocatedShort: Asignación Automática
 launch:
   killServer: Matar el servidor localhost
+  launchAnyway: Lanzar de todos modos
 launchBlocked:
   launchSpawnProcessFailed:
     description: >-
@@ -481,13 +504,29 @@ mod:
   deletionRestHint: Y otros {rest} mods...
   denseView: Vista densa
   dropHint: Arrastra el archivo .jar/.litemod del mod aquí para importarlo.
+  duplicatedDetected: '{count} modificaciones duplicadas'
+  duplicatedDetectedDescription: >-
+    Mods encontrados con la misma identificación de mod pero archivos
+    diferentes. 
+
+    Esto podría causar que Minecraft falle. 
+
+    Seleccione el archivo que desea conservar.
   enabled: '{count} Mods habilitados'
   filter: Filtrar Mods
   hasUpdate: ¡El Mod tiene una nueva versión!
   hideIncompatible: Ocultar Mods Incompatibles
   incompatible: Mod Incompatible.
+  incompatibleHint: Consulte su informe de compatibilidad de mods
+  incompatibleHintDescription: |-
+    Es posible que falten algunas dependencias de modificaciones. 
+    O algunas versiones de dependencias no coinciden.
   manage: Administrar Mods
   maybeCompatible: Posiblemente Compatible.
+  modloaderSelectHint: |-
+    El mod admite los siguientes cargadores de mod. 
+    Seleccione uno para instalar.
+  modloaderSelectNotSupported: No encontrado {modloader} para Minecraft {minecraft}
   mods: '{count} modificaciones'
   name: Mod | Mods
   noModLoaderHint: ¡No olvides habilitar un modloader para usar mods!
@@ -521,12 +560,18 @@ modInstall:
   recommendation: ¡Explora las modificaciones {first} o {second} en {modrinth} y {curseforge}!
   search: Resultado de la Búsqueda
   searchHint: Buscar y seleccionar proyecto
+  skipVersion: Salta los Mods con diferentes versiones de Minecraft
   source: Fuente de Mods
   switch: Cambiar Versión
   upgrade: Actualizar Mods
 modSearchType:
   all: Todos
   local: Caché en Disco
+modUpgradePolicy:
+  curseforge: Forja maldita primero
+  curseforgeOnly: Sólo forja maldita
+  modrinth: Modrinth primero
+  modrinthOnly: Sólo Modrinth
 modified:
   reset: Restablecer
   save: Guardar
@@ -712,12 +757,15 @@ modrinth:
   versions: Versiones
   wikiUrl: Wiki
 multiplayer:
+  exposedPortDescription: El puerto que expuso a otros pares
+  exposedPorts: Puertos reenviados
   kernel: Núcleo P2P
   kernelDescription: >-
     Utilice WebRTC nativo o canal de datos de nodo. 
 
     Cambie esto solo cuando su conexión p2p en algún momento bloquee la ventana
     del iniciador.
+  otherExposedPortDescription: El prólogo del puerto de {usuario}
   sharingNotificationBody: >-
     Puede descargar o crear una instancia desde la configuración compartida de
     {nombre}.
@@ -839,6 +887,7 @@ save:
   shared: La instancia utiliza la carpeta guardada compartida
   showDirectory: Mostrar directorio de guardado
   unselected: archivo compartido
+  useCurrent: Usar el mundo actual
 saves: {}
 screenshots:
   empty: No tienes capturas de pantalla
@@ -940,7 +989,7 @@ setting:
   developerModeDescription: El Modo de Desarrollador está diseñado para probar tus propios mods
   disableTelemetry: Desactivar Telemetría
   disableTelemetryDescription: >-
-    FMCL recopilará eventos de inicio del juego y de inicio de sesión del
+    XMCL recopilará eventos de inicio del juego y de inicio de sesión del
     usuario.
   enableDedicatedGPUOptimization: Asignar GPU dedicada
   enableDedicatedGPUOptimizationDescription: Esta opción asignará GPU dedicada al proceso de Minecraft.
@@ -972,6 +1021,7 @@ setting:
     Limita el número máximo de conexiones por anfitrión o en total para todos
     los anfitriones. 0 significa sin límite.
   maxSocketsTitle: Máximo de Conexiones HTTP
+  migrateFromOther: Importar desde otro lanzador
   name: Configuración Global | Configuraciones Globales
   network: Configuración de la red
   officialWebsite: Sitio Web Oficial
@@ -1022,7 +1072,7 @@ setup:
   dataRoot:
     description: >-
       El directorio de datos no es un directorio .minecraft común. Dado que la
-      estructura de directorios de datos de FMCL es diferente de la versión
+      estructura de directorios de datos de XMCL es diferente de la versión
       original, no recomendamos usar el directorio .minecraft común como
       directorio de datos.
     name: Establecer Directorio de Datos
@@ -1049,10 +1099,17 @@ shaderPack:
   enable: Usando el pack de shaders {name}
   manage: Gestionar Packs de Shaders
   name: Pack de Shaders
+  noShaderMod: No hay ningún mod de sombreado instalado
+  noShaderModHint: No puedes usar sombreador sin un mod de sombreado
+  noShaderModInstallHint: >-
+    Debe instalar uno de los siguientes mods para cargar el paquete de
+    sombreadores.
   showDirectory: Mostrar directorio de packs de shaders
   showFile: Mostrar este pack de shaders en la carpeta
 shared:
   accept: Aceptar
+  keepSelected: Mantener seleccionado
+  skipForNow: Saltar por ahora
 summery: Resumen
 tag:
   create: Crear Etiqueta

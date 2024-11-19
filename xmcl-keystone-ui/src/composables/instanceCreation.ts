@@ -16,7 +16,12 @@ export function useInstanceCreation(gameProfile: Ref<GameProfile>, instances: Re
   const { getLatestMinecraftRelease } = useService(VersionMetadataServiceKey)
   const { installInstanceFiles } = useService(InstanceInstallServiceKey)
   let latest = ''
-  getLatestMinecraftRelease().then(v => { latest = v })
+  getLatestMinecraftRelease().then(v => {
+    latest = v
+    if (data.runtime.minecraft === '') {
+      data.runtime.minecraft = latest
+    }
+  })
   const getNewRuntime = () => ({
     minecraft: latest || '',
     forge: '',
@@ -32,12 +37,12 @@ export function useInstanceCreation(gameProfile: Ref<GameProfile>, instances: Re
     runtime: getNewRuntime(),
     version: '',
     java: '',
-    showLog: false,
-    hideLauncher: true,
+    showLog: undefined,
+    hideLauncher: undefined,
     vmOptions: [] as string[],
     mcOptions: [] as string[],
-    maxMemory: 0,
-    minMemory: 0,
+    maxMemory: undefined,
+    minMemory: undefined,
     author: gameProfile.value.name,
     fileApi: '',
     modpackVersion: '',
@@ -47,8 +52,8 @@ export function useInstanceCreation(gameProfile: Ref<GameProfile>, instances: Re
     icon: '',
     server: null,
     tags: [],
-    assignMemory: false,
-    fastLaunch: false,
+    assignMemory: undefined,
+    fastLaunch: undefined,
   })
   const files: Ref<InstanceFile[]> = ref([])
   const loading = ref(false)
@@ -60,8 +65,8 @@ export function useInstanceCreation(gameProfile: Ref<GameProfile>, instances: Re
       data.runtime = { ...template.runtime }
     }
     data.java = template.java ?? ''
-    data.showLog = template.showLog ?? false
-    data.hideLauncher = template.hideLauncher ?? true
+    data.showLog = template.showLog
+    data.hideLauncher = template.hideLauncher
     data.vmOptions = [...template.vmOptions ?? []]
     data.mcOptions = [...template.mcOptions ?? []]
     data.maxMemory = template.maxMemory ?? 0
@@ -103,6 +108,7 @@ export function useInstanceCreation(gameProfile: Ref<GameProfile>, instances: Re
     data.modpackVersion = ''
     data.description = ''
     error.value = null
+    files.value = []
     loading.value = false
   }
   return {
@@ -122,17 +128,23 @@ export function useInstanceCreation(gameProfile: Ref<GameProfile>, instances: Re
         if (!data.name) {
           data.name = generateDistinctName(generateBaseName(runtime), instances.value.map(i => i.name))
         }
-        const newPath = await create(data)
+        const pendingFiles = [...files.value]
+        const newPath = await create({
+          ...data,
+          resourcepacks: pendingFiles.some(f => f.path.startsWith('resourcepacks')),
+          shaderpacks: pendingFiles.some(f => f.path.startsWith('shaderpacks')),
+        })
         onCreated?.(newPath)
-        if (files.value.length > 0) {
+        reset()
+        if (pendingFiles.length > 0) {
           await installInstanceFiles({
             path: newPath,
-            files: files.value,
+            files: pendingFiles,
           }).catch((e) => {
             console.error(e)
           })
         }
-        reset()
+        return newPath
       } catch (e) {
         error.value = e
       } finally {

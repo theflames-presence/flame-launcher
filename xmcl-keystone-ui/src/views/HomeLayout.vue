@@ -23,7 +23,6 @@
     <HomeLogDialog />
     <HomeLaunchMultiInstanceDialog />
     <HomeLaunchStatusDialog />
-    <HomeJavaIssueDialog />
     <HomeInstanceInstallDialog />
   </div>
 </template>
@@ -38,7 +37,6 @@ import { useScroll } from '@vueuse/core'
 import { useInstanceServerStatus } from '../composables/serverStatus'
 import HomeHeader from './HomeHeader.vue'
 import HomeInstanceInstallDialog from './HomeInstanceInstallDialog.vue'
-import HomeJavaIssueDialog from './HomeJavaIssueDialog.vue'
 import HomeLaunchMultiInstanceDialog from './HomeLaunchMultiInstanceDialog.vue'
 import HomeLaunchStatusDialog from './HomeLaunchStatusDialog.vue'
 import HomeLogDialog from './HomeLogDialog.vue'
@@ -46,7 +44,7 @@ import HomeLogDialog from './HomeLogDialog.vue'
 const router = useRouter()
 
 router.afterEach((r) => {
-  document.title = `FMCL KeyStone - ${r.fullPath}`
+  document.title = `XMCL KeyStone - ${r.fullPath}`
   if (containerRef.value) {
     containerRef.value.scrollTop = 0
   }

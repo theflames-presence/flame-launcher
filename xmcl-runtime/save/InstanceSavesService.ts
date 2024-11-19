@@ -4,32 +4,35 @@ import {
   getInstanceSaveKey,
   InstanceSavesService as IInstanceSavesService,
   ImportSaveOptions,
+  InstallMarketOptionWithInstance,
   InstanceSaveException,
   InstanceSavesServiceKey,
-  isSaveResource,
   LaunchOptions,
   LinkSaveAsServerWorldOptions,
-  ResourceDomain, Saves,
+  LockKey,
+  MarketType,
+  Saves,
   ShareSaveOptions,
 } from '@xmcl/runtime-api'
 import { open, readAllEntries } from '@xmcl/unzip'
 import filenamify from 'filenamify'
 import { existsSync } from 'fs'
-import { ensureDir, ensureFile, readdir, readlink, rename, rm, unlink, writeFile } from 'fs-extra'
-import watch from 'node-watch'
+import { ensureDir, ensureFile, readdir, readlink, rename, rm, rmdir, stat, unlink, writeFile } from 'fs-extra'
+import debounce from 'lodash.debounce'
+import watch, { Watcher } from 'node-watch'
 import { basename, extname, isAbsolute, join, resolve } from 'path'
 import { Inject, kGameDataPath, LauncherAppKey, PathResolver } from '~/app'
 import { InstanceService } from '~/instance'
 import { LaunchService } from '~/launch'
-import { ResourceService } from '~/resource'
+import { kMarketProvider } from '~/market'
+import { ResourceManager } from '~/resource'
 import { AbstractService, ExposeServiceKey, ServiceStateManager } from '~/service'
 import { isSystemError } from '~/util/error'
 import { LauncherApp } from '../app/LauncherApp'
-import { copyPassively, createSymbolicLink, isDirectory, missing, readdirIfPresent } from '../util/fs'
+import { copyPassively, isDirectory, linkDirectory, missing, readdirIfPresent } from '../util/fs'
 import { isNonnull, requireObject, requireString } from '../util/object'
 import { ZipTask } from '../util/zip'
 import { getInstanceSaveHeader, readInstanceSaveMetadata } from './save'
-import debounce from 'lodash.debounce'
 
 /**
  * Provide the ability to preview saves data of an instance
@@ -37,18 +40,28 @@ import debounce from 'lodash.debounce'
 @ExposeServiceKey(InstanceSavesServiceKey)
 export class InstanceSavesService extends AbstractService implements IInstanceSavesService {
   constructor(@Inject(LauncherAppKey) app: LauncherApp,
-    @Inject(ResourceService) private resourceService: ResourceService,
     @Inject(InstanceService) private instanceService: InstanceService,
+    @Inject(ResourceManager) resourceManager: ResourceManager,
     @Inject(kGameDataPath) private getPath: PathResolver,
   ) {
-    super(app)
-    this.resourceService.registerInstaller(ResourceDomain.Saves, async (resource, instancePath) => {
-      if (isSaveResource(resource)) {
-        await this.importSave({
-          instancePath,
-          path: resource.path,
-          saveRoot: resource.metadata.save?.root,
-        })
+    super(app, async () => {
+      const snapshopts = await resourceManager.getSnapshotsUnderDomainedPath('saves')
+      const valid = await Promise.all(snapshopts.map(v => resourceManager.validateSnapshotFile(v)))
+      for (const file of valid) {
+        if (!file) continue
+        // unlink if the file last access time is 3 days ago
+        if (file.atime < Date.now() - 1000 * 60 * 60 * 24 * 3) {
+          await unlink(file.path)
+        }
+      }
+      await ensureDir(this.getPath('saves'))
+      if (existsSync(this.getPath('shared-saves'))) {
+        // move all shared saves to saves
+        const sharedSaves = await readdir(this.getPath('shared-saves'))
+        for (const save of sharedSaves) {
+          await rename(this.getPath('shared-saves', save), this.getPath('saves', save))
+        }
+        await rmdir(this.getPath('shared-saves'))
       }
     })
   }
@@ -111,7 +124,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     }
 
     this.log(`Link save ${saveName} as server world in instance ${instancePath}.`)
-    await createSymbolicLink(savePath, serverWorldPath, this)
+    await linkDirectory(savePath, serverWorldPath, this)
   }
 
   async showDirectory(instancePath: string): Promise<void> {
@@ -134,6 +147,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
    */
   async watch(path: string) {
     requireString(path)
+    const lock = this.semaphoreManager.getLock(LockKey.instance(path))
 
     const stateManager = await this.app.registry.get(ServiceStateManager)
     const launchService = await this.app.registry.get(LaunchService)
@@ -144,50 +158,32 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
       const savesDir = join(path, 'saves')
       const state = new Saves()
 
-      let parking = false
-      let count = 0
+      const onExit = (op: LaunchOptions) => {
+        if (op.gameDirectory !== path) return
+        for (const p of pending) {
+          updateSave(p)
+        }
+        pending.clear()
+      }
+      launchService.on('minecraft-exit', onExit)
 
-      const updateSave = debounce(defineAsyncOperation((filePath: string) =>
-        readInstanceSaveMetadata(filePath, baseName).then((save) => {
+      const updateSave = debounce(defineAsyncOperation(async (filePath: string) => {
+        const fileName = basename(filePath)
+        if (fileName.startsWith('.')) return
+        if (fileName.endsWith('.zip')) return
+        await lock.read(() => readInstanceSaveMetadata(filePath, baseName).then((save) => {
           state.instanceSaveUpdate(save)
         }).catch((e) => {
           this.warn(`Parse save in ${filePath} failed. Skip it.`)
           this.warn(e)
-        }),
-      ), 500)
-
-      const updateCount = (delta: number) => {
-        count += delta
-        parking = count > 0
-        if (!parking) {
-          for (const p of pending) {
-            updateSave(p)
-          }
-          pending.clear()
-        }
-      }
-
-      const onLaunch = (op: LaunchOptions) => {
-        if (op.gameDirectory !== path) return
-        updateCount(1)
-      }
-      const onExit = (op: LaunchOptions) => {
-        if (op.gameDirectory !== path) return
-        updateCount(-1)
-      }
-
-      launchService.on('minecraft-start', onLaunch)
-      launchService.on('minecraft-exit', onExit)
-
-      await ensureDir(savesDir)
-      const link = await readlink(savesDir).catch(() => '')
-      let isLinked = !!link
+        }))
+      }), 500)
 
       const onFileUpdate = (event: 'update' | 'remove', filename: string) => {
         if (filename.startsWith('.')) return
         const filePath = filename
         if (event === 'update') {
-          if (parking) {
+          if (launchService.isParked(path)) {
             pending.add(filePath)
           } else {
             updateSave(filePath)
@@ -196,13 +192,33 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
           state.instanceSaveRemove(filePath)
         }
       }
-      let watcher = watch(savesDir, onFileUpdate)
 
-      this.log(`Watch saves directory: ${savesDir}`)
+      const tryWatch = () => {
+        try {
+          watcher = watch(savesDir, onFileUpdate)
+          watcher.once('error', (e) => {
+            if (isSystemError(e) && e.code === 'ENOENT') {
+              this.log(`Skip watch saves directory ${savesDir} because it does not exist.`)
+            }
+            watcher?.close()
+            watcher = undefined
+          })
+        } catch (e) {
+          if (isSystemError(e) && e.code === 'ENOENT') {
+            this.log(`Skip watch saves directory ${savesDir} because it does not exist.`)
+          }
+          watcher = undefined
+        }
+      }
+
+      let isLinkedMemo = await this.isSaveLinked(path)
+      let watcher: Watcher | undefined
+
+      tryWatch()
 
       const readAll = async (savePaths: string[]) => {
         const saves = await Promise.all(savePaths
-          .filter((d) => !d.startsWith('.'))
+          .filter((d) => !d.startsWith('.') && !d.endsWith('.zip'))
           .map((d) => join(savesDir, d))
           .map((p) => readInstanceSaveMetadata(p, baseName).catch((e) => {
             this.warn(`Parse save in ${p} failed. Skip it.`)
@@ -212,19 +228,18 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
         return saves.filter(isNonnull)
       }
 
-      const saves = await readAll(await readdir(savesDir))
-      this.log(`Found ${saves.length} saves in instance ${path}`)
-      state.saves = saves
+      if (!isLinkedMemo) {
+        await ensureDir(savesDir)
+        const saves = await lock.read(async () => await readAll(await readdir(savesDir)))
+        this.log(`Found ${saves.length} saves in instance ${path}`)
+        state.saves = saves
+      }
 
-      return [state, () => {
-        watcher.close()
-        launchService.off('minecraft-start', onLaunch)
-        launchService.off('minecraft-exit', onExit)
-      }, async () => {
+      const revalidate = () => lock.read(async () => {
         const newIsLink = !!await readlink(savesDir).catch(() => '')
-        if (newIsLink !== isLinked) {
-          isLinked = !!newIsLink
-          watcher = watch(savesDir, onFileUpdate)
+        if (newIsLink !== isLinkedMemo) {
+          isLinkedMemo = !!newIsLink
+          tryWatch()
           const savePaths = await readdir(savesDir)
           const saves = await readAll(savePaths)
           state.instanceSaves(saves)
@@ -234,10 +249,22 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
             const toRemove = state.saves.filter((s) => !savePaths.includes(basename(s.path)))
             toRemove.forEach((s) => state.instanceSaveRemove(s.path))
             const toAdd = savePaths.filter((s) => !state.saves.some((ss) => ss.name === s))
-            await readAll(toAdd)
+            const saves = await readAll(toAdd)
+            state.instanceSaves(saves)
           }
         }
-      }]
+      })
+
+      const instanceService = await this.app.registry.get(InstanceService)
+      instanceService.registerRemoveHandler(path, () => {
+        launchService.off('minecraft-exit', onExit)
+        watcher?.close()
+      })
+
+      return [state, () => {
+        launchService.off('minecraft-exit', onExit)
+        watcher?.close()
+      }, revalidate]
     })
   }
 
@@ -292,7 +319,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
 
     requireString(saveName)
 
-    const savePath = instancePath ? join(instancePath, 'saves', saveName) : this.getPath('shared-saves', saveName)
+    const savePath = instancePath ? join(instancePath, 'saves', saveName) : this.getPath('saves', saveName)
 
     if (await missing(savePath)) {
       throw new InstanceSaveException({ type: 'instanceDeleteNoSave', name: saveName })
@@ -312,14 +339,14 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
       throw new InstanceSaveException({ type: 'instanceDeleteNoSave', name: saveName })
     }
 
-    await ensureDir(this.getPath('shared-saves'))
-    let destSharedSavePath = this.getPath('shared-saves', saveName)
+    await ensureDir(this.getPath('saves'))
+    let destSharedSavePath = this.getPath('saves', saveName)
 
     if (await missing(destSharedSavePath)) {
       await rename(savePath, destSharedSavePath)
     } else {
       // move the save to shared save with a new name
-      destSharedSavePath = this.getPath('shared-saves', `${saveName}-${Date.now()}`)
+      destSharedSavePath = this.getPath('saves', `${saveName}-${Date.now()}`)
       await rename(savePath, destSharedSavePath)
     }
   }
@@ -346,24 +373,38 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
         throw new InstanceSaveException({ type: 'instanceImportIllegalSave', path })
       }
 
-      const sharedSavesDir = this.getPath('shared-saves')
-      // if path is direct child of shared-saves, we need to link it else we copy it
+      const sharedSavesDir = this.getPath('saves')
+      // if path is direct child of saves, we need to link it else we copy it
       if (path.startsWith(sharedSavesDir)) {
-        await createSymbolicLink(path, dest, this)
+        await linkDirectory(path, dest, this)
       } else {
         await copyPassively(path, dest)
       }
     } else {
       // validate the source
-      const levelRoot = options.saveRoot
-      if (!levelRoot) {
-        throw new InstanceSaveException({ type: 'instanceImportIllegalSave', path })
-      }
-
       const zipFile = await open(path)
       const entries = await readAllEntries(zipFile)
-      const task = new UnzipTask(zipFile, entries.filter(e => !e.fileName.endsWith('/')), dest, (e) => {
-        return e.fileName.substring(levelRoot.length)
+
+      let saveRoot = undefined as string | undefined
+      for (const e of entries) {
+        if (e.fileName.endsWith('/level.dat')) {
+          saveRoot = e.fileName.substring(0, e.fileName.length - '/level.dat'.length)
+          break
+        }
+        if (e.fileName === 'level.dat') {
+          saveRoot = ''
+          break
+        }
+      }
+
+      if (saveRoot === undefined) {
+        throw new InstanceSaveException({ type: 'instanceCopySaveUnexpected', src: path, dest: [dest] })
+      }
+
+      const root = saveRoot
+
+      const task = new UnzipTask(zipFile, entries.filter(e => !e.fileName.endsWith('/') && e.fileName.startsWith(root)), dest, (e) => {
+        return e.fileName.substring(root.length)
       })
       await task.startAndWait()
     }
@@ -419,14 +460,14 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   }
 
   async isSaveLinked(instancePath: string) {
-    const sharedSave = this.getPath('shared-saves')
+    const sharedSave = this.getPath('saves')
     const instanceSave = join(instancePath, 'saves')
     const isLinked = await readlink(instanceSave).catch(() => '') === sharedSave
     return isLinked
   }
 
   async linkSharedSave(instancePath: string) {
-    const sharedSave = this.getPath('shared-saves')
+    const sharedSave = this.getPath('saves')
     const instanceSaves = join(instancePath, 'saves')
     await ensureDir(sharedSave)
 
@@ -435,7 +476,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     }
 
     if (await missing(instanceSaves)) {
-      await createSymbolicLink(sharedSave, instanceSaves, this)
+      await linkDirectory(sharedSave, instanceSaves, this)
       return
     }
 
@@ -463,11 +504,11 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     }
 
     await rm(instanceSaves, { recursive: true })
-    await createSymbolicLink(sharedSave, instanceSaves, this)
+    await linkDirectory(sharedSave, instanceSaves, this)
   }
 
   async unlinkSharedSave(instancePath: string) {
-    const sharedSave = this.getPath('shared-saves')
+    const sharedSave = this.getPath('saves')
     const instanceSave = join(instancePath, 'saves')
     if (await readlink(instanceSave).catch(() => '') !== sharedSave) {
       return
@@ -478,11 +519,36 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   }
 
   async getSharedSaves() {
-    const sharedSave = this.getPath('shared-saves')
+    const sharedSave = this.getPath('saves')
     const saves = await readdirIfPresent(sharedSave).then(a => a.filter(s => !s.startsWith('.')))
-    const metadatas = Promise.all(saves
+    const results = await Promise.allSettled(saves
       .map(s => resolve(sharedSave, s))
-      .map((p) => readInstanceSaveMetadata(p, '')))
-    return metadatas
+      .map(async (p) => {
+        const fstat = await stat(p)
+        if (fstat.isDirectory()) {
+          return await readInstanceSaveMetadata(p, '')
+        }
+      }))
+    return results.map(r => r.status === 'fulfilled' ? r.value : undefined).filter(isNonnull)
+  }
+
+  async installFromMarket(options: InstallMarketOptionWithInstance): Promise<string> {
+    if (options.market !== MarketType.CurseForge) {
+      throw new Error('Unsupported market type')
+    }
+    const provider = await this.app.registry.get(kMarketProvider)
+    const [result] = await provider.installFile({
+      ...options,
+      directory: this.getPath('saves'),
+    })
+    const savePath = await this.importSave({
+      path: result.path,
+      curseforge: {
+        projectId: result.metadata.curseforge!.projectId,
+        fileId: result.metadata.curseforge!.fileId,
+      },
+      instancePath: options.instancePath,
+    })
+    return savePath
   }
 }

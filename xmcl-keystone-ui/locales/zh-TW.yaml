@@ -36,7 +36,7 @@ FeedTheBeastProject:
   overview: 總覽
   versions: 版本
 HomeJavaIssueDialog:
-  incompatibleJava: 目前的 Java 版本可能不相容
+  incompatibleJava: Java 版本可能不相容
   incompatibleJavaHint: Java {javaVersion} 可能無法執行已選擇的 Minecraft 版本
   missingJava: 沒有找到 Java
   missingJavaHint: 啟動器在您的電腦上沒有找到任何Java。您可以嘗試：
@@ -239,7 +239,7 @@ diagnosis:
   missingAuthlibInjector: {}
   missingJava:
     message: 點選來解決這個問題
-    name: 目前電腦上沒有找到任何 Java
+    name: 沒有找到合适的 Java
   missingLibraries:
     message: 啟動器將自動下載並安裝 Libraries 檔案
     name: >-
@@ -408,6 +408,8 @@ instance:
   changeIcon: 更改圖示
   current: 目前例項
   delete: 刪除遊戲
+  deleteFailed: 刪除實例失敗
+  deleteFailedPermission: 其他程式佔用了該文件
   deleteHint: 遊戲資料將完全被移除。您確定繼續此操作嗎？
   duplicate: 建立備份
   duplicatedName: 名字衝突！
@@ -421,6 +423,10 @@ instance:
   lastPlayed: 上次遊玩
   launchArguments: 啟動命令預覽
   launchServer: 啟動本機主機伺服器
+  linkFileDesc: |-
+    這將使用全域 {file} 覆寫實例本機 {file}。
+    您確定要連結嗎？
+  linkFileTitle: 您確定要連結{file}嗎？
   mcOptions: Minecraft 啟動選項
   mcOptionsHint: 額外的 Minecraft 啟動引數
   name: 名稱
@@ -432,6 +438,10 @@ instance:
   prependCommandHint: 這將在所有啟動命令之前添加此命令
   requireName: 必須填寫名稱
   showInstance: 開啟資料夾
+  useSharedOptions: 共享 Minecraft 設定
+  useSharedOptionsDesc: 這會將 options.txt 連結到跨實例的共用文件
+  useSharedServersList: 共享伺服器列表
+  useSharedServersListDesc: 這會將servers.dat連結到跨實例的共用文件
   versionHint: 此遊戲使用的 Minecraft 版本
   vmOptions: JVM 啟動選項
   vmOptionsHint: 額外的 JVM 的啟動引數
@@ -439,6 +449,9 @@ instanceAge:
   older: 三天前
   threeDay: 三天內
   today: 今天
+instanceDiscover:
+  gameFolder: 發現 {count} 個遊戲資料夾
+  instanceFolder: 找到 {count} 個實例
 instanceFileOperation:
   add: 新增
   backup-add: 備份並替換
@@ -477,21 +490,27 @@ instanceUpdate:
   update: 開始更新例項
 instances:
   add: 建立遊戲
+  addCurseForgeDescription: |-
+    從curseforge 資料資料夾匯入。
+    您需要選擇curseforge的根資料資料夾
   addDescription: 從頭開始建立一個新例項
-  addMMCDescription: 匯入已有的 MultiMC 例項，您需要選擇 MultiMC 例項的資料夾
+  addMMCDescription: |-
+    匯入現有的 MultiMC 執行個體。
+    您需要從 MultiMC 中選擇資料資料夾。
   addManually: 手動建立
   addModrinthDescription: |-
-    匯入現有的 Modrinth 例項。
-    您需要選擇 Modrinth 例項資料夾。
+    導入現有的 Modrinth 實例。
+    您需要選擇 Modrinth 根資料夾。
   addServer: 從伺服器建立
   addServerDescription: 這將建立一個直接啟動到伺服器的遊戲。
-  addTemplate: 從模板建立
+  addTemplate: 從下載的模組包創建
   addTemplateDescription: 從下載的整合包匯入
   addVanilla: 從原版 Minecraft 建立
   addVanillaDescription: |-
     從通用 .minecraft 資料夾匯入。
-    這會將原始遊戲配置檔案複製到 FMCL。
+    這會將原始遊戲配置檔案複製到 XMCL。
   choose: 選擇遊戲
+  fix: 修復
   folderSetting: 資料夾設定
   importFolder: 從資料夾匯入
   importFolderDescription: 匯入 Minecraft 到啟動器
@@ -525,6 +544,7 @@ launch:
   kill: 停止
   killServer: 停止本地伺服器
   launch: 啟動
+  launchAnyway: 直接啟動
 launchBlocked:
   ignore: 強制啟動
   launchBadVersion:
@@ -654,13 +674,26 @@ mod:
   deletionRestHint: 等 {rest} 個模組……
   denseView: 密集視圖
   dropHint: 將模組 Jar 檔案拖入此處來匯入
+  duplicatedDetected: 有 {count} 個模組重複了
+  duplicatedDetectedDescription: |-
+    找到具有相同 mod id 但檔案不同的 mod。
+    這可能會導致 Minecraft 崩潰。
+    請選擇您要保留的文件。
   enabled: 一共啟用了 {count} 個模組
   filter: 篩選模組
   groupInstalled: 分開顯示已安裝模組
   hideIncompatible: 隱藏不相容模組
   incompatible: 可能不相容目前版本。
+  incompatibleHint: 查看您的模組相容性報告
+  incompatibleHintDescription: |-
+    某些模組相依性可能會遺失。
+    或某些依賴項版本不符。
   manage: 管理模組
   maybeCompatible: 也許相容於目前版本。
+  modloaderSelectHint: |-
+    此模組支援以下模組載入器。
+    請選擇一個進行安裝。
+  modloaderSelectNotSupported: 找不到 Minecraft {minecraft} 的 {modloader}
   mods: '{count} 個模組'
   name: 模組 | 模組
   noModLoaderHint: 請不要忘記選擇模組載入器來載入模組
@@ -693,6 +726,7 @@ modInstall:
   recommendation: 探索 {modrinth} 和 {curseforge} 中的 {first} 或 {second} 模組！
   search: 搜尋結果
   searchHint: 搜尋並選擇模組
+  skipVersion: 忽略不同 Minecraft 版本的 Mod
   source: 模組來源
   switch: 切換版本
   upgrade: 更新模組
@@ -701,6 +735,11 @@ modSearchType:
   explore: 瀏覽市場
   installed: 本地
   local: 磁碟快取
+modUpgradePolicy:
+  curseforge: Curseforge 优先
+  curseforgeOnly: 限詛 Curseforge
+  modrinth: Modrinth  第一
+  modrinthOnly: 限 Modrinth
 modified:
   reset: 重置
   save: 儲存
@@ -908,6 +947,8 @@ multiplayer:
   disconnected: 斷開連線
   enterRemoteToken: 輸入對方的令牌
   enterRemoteTokenHint: 當您的聯機夥伴輸入您的令牌後，您需要將他的令牌輸入到下面的文字框中，並點選確定開始連線。
+  exposedPortDescription: 您向其他伙伴公開的端口
+  exposedPorts: 轉送連接埠
   gatheringIce: >
     請將<span class="v-chip v-chip--label v-size--small" style="text-font:
     bold">本地令牌</span>傳送給您的聯機夥伴，您的聯機夥伴在 <span class="v-chip v-chip--label
@@ -933,6 +974,7 @@ multiplayer:
   name: 跨區域網聯機
   networkInfo: 目前網路狀況
   next: 下一步
+  otherExposedPortDescription: '{user} 轉送的連接埠'
   placeholder: 和其他玩家建立連線，跨區域網聯機 Minecraft！
   previous: 上一步
   receiveHint: 在對方輸入您的令牌後，您們之間的連線會自動建立。現在您已經可以點選完成了。
@@ -1062,6 +1104,7 @@ save:
   shared: 實例使用共享存档資料夾
   showDirectory: 顯示儲存目錄
   unselected: 共享的存檔
+  useCurrent: 使用當前世界
 saves: {}
 screenshots:
   empty: 您還沒有截圖
@@ -1159,11 +1202,11 @@ setting:
   developerMode: 開發者模式
   developerModeDescription: 開發者模式旨在幫助您測試自己寫的模組
   disableTelemetry: 關閉遙測
-  disableTelemetryDescription: FMCL 會收集遊戲啟動以及使用者登入事件
+  disableTelemetryDescription: XMCL 會收集遊戲啟動以及使用者登入事件
   enableDedicatedGPUOptimization: 分配專用 GPU
   enableDedicatedGPUOptimizationDescription: 此選項將為 Minecraft 程序分配專用 GPU。
   enableDiscord: 啟用 Discord Presence
-  enableDiscordDescription: 根據 FMCL 實時更新 Discord 的狀態
+  enableDiscordDescription: 根據 XMCL 實時更新 Discord 的狀態
   general: 基本設定
   githubRelease: Github
   globalSetting: 全域性例項設定
@@ -1186,6 +1229,7 @@ setting:
   maxSockets: (每個網站)最大連線數
   maxSocketsDescription: 控制最大的併發 HTTP 連結數量。0 代表不限制數量。
   maxSocketsTitle: 最大 HTTP 連線數量
+  migrateFromOther: 從其他啟動器匯入
   name: 設定
   network: 網路設定
   officialWebsite: 官網地址
@@ -1238,7 +1282,7 @@ setup:
   appearance:
     name: '@:setting.appearance'
   dataRoot:
-    description: 資料儲存目錄不是常規的 .minecraft 目錄。因為 FMCL 的資料目錄格式特殊，不建議將常規 .minecraft 目錄設定為資料目錄。
+    description: 資料儲存目錄不是常規的 .minecraft 目錄。因為 XMCL 的資料目錄格式特殊，不建議將常規 .minecraft 目錄設定為資料目錄。
     drives: 推薦路徑
     name: 設定資料儲存目錄
   defaultLayoutDescription: |-
@@ -1279,12 +1323,17 @@ shaderPack:
   enabled: 已啟用的光影
   manage: 管理光影包
   name: 光影包
+  noShaderMod: 未安裝著色器模組
+  noShaderModHint: 沒有著色器模組就無法使用著色器
+  noShaderModInstallHint: 您需要安裝以下 mod 之一來載入著色器套件。
   searchHint: 搜尋光影包
   selectSearchHint: 檢視已選擇的光影包
   showDirectory: 顯示光影資料夾
   showFile: 在資料夾中顯示此光影包
 shared:
   accept: 接受
+  keepSelected: 保持選擇
+  skipForNow: 暫時跳過
 store:
   explore: 探索
   latestMinecraft: 使用近期 Minecraft 版本

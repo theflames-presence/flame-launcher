@@ -224,7 +224,7 @@ export class ElectronController implements LauncherAppController {
 
   async createBrowseWindow() {
     const browser = new BrowserWindow({
-      title: 'FMCL Launcher Browser',
+      title: 'XMCL Launcher Browser',
       frame: false,
       transparent: true,
       resizable: false,

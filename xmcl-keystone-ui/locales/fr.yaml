@@ -425,6 +425,8 @@ instance:
   changeIcon: Changer d'icône
   current: Instance actuelle
   delete: Supprimer le jeu
+  deleteFailed: Échec de la suppression de l'instance
+  deleteFailedPermission: Un autre programme a occupé le fichier
   deleteHint: |-
     Les données d'instance seront définitivement déplacées du disque. 
     Tu es sûr de faire ça ?
@@ -443,6 +445,8 @@ instance:
   lastPlayed: Dernier Joué
   launchArguments: Aperçu des Arguments au Lancement
   launchServer: Lancer le serveur localhost
+  linkFileDesc: "Cela écrasera le {file} local de l'instance par le {file} global. \nEtes-vous sûr de le lier\_?"
+  linkFileTitle: "Êtes-vous sûr de créer un lien vers {file}\_?"
   mcOptions: Options Minecraft
   mcOptionsHint: Arguments supplémentaires pour le lancement de Minecraft
   name: Nom de profil
@@ -455,6 +459,12 @@ instance:
   prependCommandHint: Cela ajoutera cette commande avant toutes les commandes de lancement
   requireName: Le nom est requis
   showInstance: Afficher le dossier du jeu
+  useSharedOptions: Utiliser les paramètres de jeu partagés
+  useSharedOptionsDesc: >-
+    Cela reliera le fichier options.txt à un fichier partagé entre les
+    instances.
+  useSharedServersList: Utiliser la liste des serveurs partagés
+  useSharedServersListDesc: Cela reliera le fichierservers.dat à un fichier partagé entre les instances.
   versionHint: La version Minecraft de ce jeu
   vmOptions: Options JVM
   vmOptionsHint: Arguments supplémentaires transmis à JVM
@@ -462,6 +472,9 @@ instanceAge:
   older: Plus âgée
   threeDay: Dans trois jours
   today: Aujourd'hui
+instanceDiscover:
+  gameFolder: Découvrez {count} dossiers de jeu
+  instanceFolder: "{count}\_instances trouvées"
 instanceFileOperation:
   add: Ajouter
   backup-add: Remplacer (Sauvegarde)
@@ -506,23 +519,27 @@ instanceUpdate:
   update: Démarrer la Mise à Jour
 instances:
   add: Créer un jeu
+  addCurseForgeDescription: |-
+    Importer depuis le dossier de données Curseforge. 
+    Vous devez sélectionner le dossier de données racine de Curseforge
   addDescription: Créer une nouvelle instance à partir de zéro
   addMMCDescription: |-
-    Importer une instance MultiMC existante. 
-    Vous devez sélectionner le dossier d'instance dans MultiMC.
+    Importez une instance MultiMC existante. 
+    Vous devez sélectionner le dossier de données de MultiMC.
   addManually: Créer manuellement
   addModrinthDescription: |-
-    L'importation existait par l'instance de Modrinth. 
-    Vous devez sélectionner le dossier de l'instance Modrinth.
+    Importez l’instance Modrinth existante. 
+    Vous devez sélectionner le dossier de données racine Modrinth.
   addServer: Créer à partir du serveur
   addServerDescription: Cela créera un jeu directement lancé sur le serveur.
-  addTemplate: Créer à partir d'un modèle
+  addTemplate: Créer à partir du modpack téléchargé
   addTemplateDescription: Importer à partir du Modpack téléchargé
   addVanilla: Créez à partir de Minecraft de type vanille
   addVanillaDescription: |-
     Importer à partir du dossier commun .minecraft. 
     Cela dupliquera le profil de jeu original vers XMLL.
   choose: Sélectionnez un jeu
+  fix: Réparer
   folderSetting: Paramètres du dossier
   importFolder: Importer depuis un dossier
   importFolderDescription: Importer Minecraft au launcher
@@ -551,6 +568,7 @@ java:
 launch:
   killServer: Tuer le serveur Localhost
   launch: Jouer
+  launchAnyway: Lancer quand même
 launchBlocked:
   ignore: Forcer le Lancement
   launchGeneralException:
@@ -721,13 +739,26 @@ mod:
   deletionRestHint: Et {rest} plus de Mods...
   denseView: Vue dense
   dropHint: Déposez le fichier .jar/.litemod du mod ici pour l'importer.
+  duplicatedDetected: "{count}\_mods dupliqués"
+  duplicatedDetectedDescription: |-
+    Mods trouvés avec le même identifiant de mod mais des fichiers différents. 
+    Cela pourrait provoquer un crash de Minecraft. 
+    Veuillez sélectionner le fichier que vous souhaitez conserver.
   enabled: '{count} mods activés'
   filter: Mods de filtrage
   groupInstalled: Groupe de modules installés
   hideIncompatible: Masquer les mods incompatibles
   incompatible: Mod incompatible.
+  incompatibleHint: Consultez votre rapport de compatibilité de mod
+  incompatibleHintDescription: |-
+    Certaines dépendances de mods peuvent manquer. 
+    Ou certaines versions de dépendances ne correspondent pas.
   manage: Gérer les Mods
   maybeCompatible: Peut-être compatibles.
+  modloaderSelectHint: |-
+    Le mod prend en charge les chargeurs de mod suivants. 
+    Veuillez en sélectionner un à installer.
+  modloaderSelectNotSupported: Introuvable {modloader} pour Minecraft {minecraft}
   mods: "{count}\_mods"
   name: Mod | Mods
   noModLoaderHint: N'oubliez pas d'activer un modloader pour utiliser les mods !
@@ -753,9 +784,15 @@ modInstall:
   recommendation: "Explorez les mods {first} ou {second} dans {modrinth} et {curseforge}\_!"
   search: Résultats
   searchHint: Rechercher et sélectionner un projet
+  skipVersion: Ignorez les mods avec une version différente de Minecraft
 modSearchType:
   all: Tous
   local: Cache disque
+modUpgradePolicy:
+  curseforge: Forgemalédiction en premier
+  curseforgeOnly: Forgemalédiction uniquement
+  modrinth: Modrinth premier
+  modrinthOnly: Modrinth uniquement
 modified:
   reset: Réinitialiser
   save: Sauvegarder
@@ -970,6 +1007,8 @@ multiplayer:
   enterRemoteTokenHint: >-
     Une fois que votre pair a entré votre token, vous devez entrer son token
     dans la zone de texte ci-dessous. Cliquez sur confirmer pour vous connecter.
+  exposedPortDescription: Le port que vous avez exposé à d'autres pairs
+  exposedPorts: Ports transférés
   gatheringIce: >
     "Veuillez attendre que le serveur ICE collecte suffisamment d'informations
     sur votre réseau. Si vous êtes impatient et qu'il y a suffisamment
@@ -1005,6 +1044,7 @@ multiplayer:
   name: Multijoueur sur LAN
   networkInfo: Infos réseau
   next: Suivant
+  otherExposedPortDescription: La préface du port par {user}
   placeholder: Connectez-vous avec un autre utilisateur pour jouer à Minecraft sur LAN !
   previous: Précédent
   receiveHint: >-
@@ -1155,6 +1195,7 @@ save:
   shared: L'instance utilise le dossier de sauvegarde partagé
   showDirectory: Afficher le répertoire de sauvegarde
   unselected: archives partagées
+  useCurrent: Utiliser le monde actuel
 saves: {}
 screenshots:
   empty: Vous n'avez pas de capture d'écran
@@ -1260,7 +1301,7 @@ setting:
   developerModeDescription: Le mode développeur vise à tester votre propre mod
   disableTelemetry: Désactiver la télémétrie
   disableTelemetryDescription: >-
-    FMCL collectera les événements de lancement du jeu et de connexion de
+    XMCL collectera les événements de lancement du jeu et de connexion de
     l'utilisateur.
   enableDedicatedGPUOptimization: Attribuer un GPU dédié
   enableDedicatedGPUOptimizationDescription: Cette option attribuera un GPU dédié au processus Minecraft.
@@ -1290,6 +1331,7 @@ setting:
     Limitez le nombre maximal de sockets à autoriser par hôte ou pour tous les
     hôtes au total. 0 signifie aucune limite.
   maxSocketsTitle: Sockets HTTP Max
+  migrateFromOther: Importer depuis un autre lanceur
   name: |-
     Paramètre global | 
     Paramètres globaux
@@ -1344,7 +1386,7 @@ setup:
   dataRoot:
     description: >-
       La racine des données n'est pas un répertoire .minecraft commun. Étant
-      donné que la structure du répertoire de données FMCL est différente de
+      donné que la structure du répertoire de données XMCL est différente de
       celle vanilla, nous ne recommandons pas d'utiliser le répertoire commun
       .minecraft comme racine de données.
     drives: Recommander des emplacements
@@ -1399,10 +1441,15 @@ shaderPack:
   enabled: Pack de shaders activé
   manage: Gérer les Shaderpacks
   name: Shaderpack
+  noShaderMod: Aucun module shader installé
+  noShaderModHint: Vous ne pouvez pas utiliser le shader sans un mod shader
+  noShaderModInstallHint: Vous devez installer l'un des mods suivants pour charger le pack de shaders.
   showDirectory: Afficher le répertoire du shaderpack
   showFile: Afficher ce pack de shaders dans le dossier
 shared:
   accept: Accepter
+  keepSelected: Garder la sélection
+  skipForNow: Passer pour l'instant
 summery: Résumé
 tag:
   create: Créer un tag

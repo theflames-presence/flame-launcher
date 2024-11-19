@@ -1,4 +1,4 @@
-import { LaunchService as ILaunchService, InstanceModsState, PartialResourceHash, Resource, ResourceDomain, ResourceMetadata, getInstanceModStateKey } from '@xmcl/runtime-api'
+import { LaunchService as ILaunchService, ResourceState, UpdateResourcePayload, Resource, ResourceDomain, ResourceMetadata, getInstanceModStateKey } from '@xmcl/runtime-api'
 import type { Contracts } from 'applicationinsights'
 import { randomUUID } from 'crypto'
 import { LauncherAppPlugin } from '~/app'
@@ -7,8 +7,8 @@ import { kFlights } from '~/flights'
 import { InstanceService } from '~/instance'
 import { JavaService } from '~/java'
 import { LaunchService } from '~/launch'
-import { PeerService, kPeerFacade } from '~/peer'
-import { ResourceService } from '~/resource'
+import { PeerService } from '~/peer'
+import { ResourceManager } from '~/resource'
 import { ServiceStateManager } from '~/service'
 import { kSettings } from '~/settings'
 import { UserService } from '~/user'
@@ -49,6 +49,7 @@ export const pluginTelemetry: LauncherAppPlugin = async (app) => {
     .setAutoCollectExceptions(true)
     .setAutoCollectPerformance(false)
     .setAutoCollectConsole(false)
+    .setAutoCollectHeartbeat(false)
     .setAutoCollectDependencies(false)
     .setAutoCollectRequests(false)
     .start()
@@ -107,6 +108,9 @@ export const pluginTelemetry: LauncherAppPlugin = async (app) => {
   })
 
   app.registryDisposer(async () => {
+    client.trackEvent({
+      name: 'app-stop',
+    })
     client.flush()
   })
 
@@ -128,7 +132,7 @@ export const pluginTelemetry: LauncherAppPlugin = async (app) => {
     // }
   })
 
-  app.on('engine-ready', async () => {
+  app.waitEngineReady().then(async () => {
     const settings = await app.registry.get(kSettings)
 
     let javaService: JavaService | undefined
@@ -201,8 +205,8 @@ export const pluginTelemetry: LauncherAppPlugin = async (app) => {
           name: 'minecraft-run-telemetry',
           async onBeforeLaunch(_, payload, ctx) {
             const path = payload.side === 'client' ? payload.options.gamePath : payload.options.extraExecOption!.cwd as string
-            const state = stateManager.get<InstanceModsState>(getInstanceModStateKey(path))
-            const mods = state?.mods.map(m => m.hash)
+            const state = stateManager.get<ResourceState>(getInstanceModStateKey(path))
+            const mods = state?.files.map(m => m.hash)
             const runtime = instanceService?.state.all[path]?.runtime
             if (mods) {
               ctx.mods = mods
@@ -266,6 +270,14 @@ export const pluginTelemetry: LauncherAppPlugin = async (app) => {
           modId: string
           version: string
         }[]
+        neoforge?: {
+          modId: string
+          version: string
+        }
+        quilt?: {
+          modId: string
+          version: string
+        }
         curseforge?: {
           projectId: number
           fileId: number
@@ -298,6 +310,18 @@ export const pluginTelemetry: LauncherAppPlugin = async (app) => {
           version: metadata.forge.version,
         }
       }
+      if (metadata.neoforge) {
+        trace.neoforge = {
+          modId: metadata.neoforge.modid,
+          version: metadata.neoforge.version,
+        }
+      }
+      if (metadata.quilt) {
+        trace.quilt = {
+          modId: metadata.quilt.quilt_loader.id,
+          version: metadata.quilt.quilt_loader.version,
+        }
+      }
       if (metadata.fabric) {
         if (metadata.fabric instanceof Array) {
           trace.fabric = metadata.fabric.map(f => ({
@@ -316,21 +340,31 @@ export const pluginTelemetry: LauncherAppPlugin = async (app) => {
     }
 
     // Collect resource metadata
-    app.registry.get(ResourceService).then((resourceService) => {
-      resourceService.on('resourceAdd', (res: Resource) => {
+    app.registry.get(ResourceManager).then((manager) => {
+      manager.context.eventBus.on('resourceParsed', (sha1: string, domain: ResourceDomain, metadata: ResourceMetadata) => {
         if (settings.disableTelemetry) return
         client.trackEvent({
           name: 'resource-metadata-v2',
-          properties: getPayload(res.hash, res.metadata, res.name, res.domain),
+          properties: getPayload(sha1, metadata, metadata.name, domain),
         })
       })
-      resourceService.on('resourceUpdate', (res: PartialResourceHash) => {
+      manager.context.eventBus.on('resourceUpdate', (payloads: UpdateResourcePayload[]) => {
         if (settings.disableTelemetry) return
-        if (res.metadata) {
-          client.trackEvent({
-            name: 'resource-metadata-v2',
-            properties: getPayload(res.hash, res.metadata, res.name),
-          })
+        for (const payload of payloads) {
+          if (payload.metadata) {
+            const copy = { ...payload.metadata } as any
+            for (const key of Object.keys(copy)) {
+              if (copy[key] === undefined || copy[key] === null) {
+                delete copy[key]
+              }
+            }
+            if (Object.keys(copy).length > 0) {
+              client.trackEvent({
+                name: 'resource-metadata-v2',
+                properties: getPayload(payload.hash, copy, copy.name),
+              })
+            }
+          }
         }
       })
     })
