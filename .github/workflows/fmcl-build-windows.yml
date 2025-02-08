@@ -27,13 +27,13 @@ jobs:
         version: 9.3.0
     - name: Fix node-gyp and Python
       run: python3 -m pip install packaging setuptools
-    - name: Use Node.js 16
+    - name: Use Node.js 20
       uses: actions/setup-node@v2
       with:
         node-version: 20
         cache: 'pnpm'
 
-    - name: Install
+    - name: Install dependencies
       run: pnpm install
 
     - name: Build all
@@ -59,25 +59,25 @@ jobs:
         options: /O+
 
     - name: FMCL-x64-Upload-App
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: FMCL-WINDOWS-x64-v${{ secrets.FMCL_VERSION }}-App
         path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
 
     - name: FMCL-x32-Upload-App
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: FMCL-WINDOWS-x32-v${{ secrets.FMCL_VERSION }}-App
         path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
 
     - name: FMCL-x64-Upload-Archive
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: FMCL-WINDOWS-x64-v${{ secrets.FMCL_VERSION }}-Zip
         path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
       
     - name: FMCL-x32-Upload-Archive
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: FMCL-WINDOWS-x32-v${{ secrets.FMCL_VERSION }}-Zip
         path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-ia32.zip
@@ -123,7 +123,7 @@ jobs:
         upload_url: ${{ steps.create-new-release.outputs.upload_url }}
         asset_path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
         asset_name: Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
-        asset_content_type: application/exe
+        asset_content_type: application/vnd.microsoft.portable-executable
     
     - name: FMCL-x32-Upload App to Github 
       id: upload-release-x32-app
@@ -134,4 +134,4 @@ jobs:
         upload_url: ${{ steps.create-new-release.outputs.upload_url }}
         asset_path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
         asset_name: Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
-        asset_content_type: application/exe
+        asset_content_type: application/vnd.microsoft.portable-executable
