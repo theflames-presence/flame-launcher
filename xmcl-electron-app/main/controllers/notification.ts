@@ -5,7 +5,7 @@ import { ControllerPlugin } from './plugin'
 export const notificationSetupPlugin: ControllerPlugin = function (this: ElectronController) {
   this.app.waitEngineReady().then(() => {
     if (this.app.platform.os === 'windows') {
-      app.setAppUserModelId('Flame Launcher')
+      app.setAppUserModelId('X Minecraft Launcher')
     }
   })
 }

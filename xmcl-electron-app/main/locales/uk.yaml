@@ -17,7 +17,7 @@ task:
   continue: Подивитись в лаунчері
   fail: Завдання не було виконано
   success: Завдання було виконано
-title: Flame Launcher
+title: X Minecraft Launcher
 urlFailed: >-
   Невідоме посилання {url}. Перевірте свою полсилання або зв'яжіться з
   розробниками

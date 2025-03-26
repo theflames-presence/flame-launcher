@@ -57,7 +57,15 @@ async function buildMain(options: BuildOptions, slient = false) {
 async function buildElectron(config: Configuration, dir: boolean) {
   console.log(chalk.bold.underline('Build electron'))
   const start = Date.now()
-  const files = await electronBuilder({ publish: 'never', config, dir })
+  const files = await electronBuilder({
+    publish: 'never',
+    config,
+    ...(dir ? {
+      dir: true,
+      x64: true,
+      arm64: process.platform !== 'win32'
+    } : {}),
+  })
 
   for (const file of files) {
     const fstat = await stat(file)
@@ -86,7 +94,7 @@ async function start() {
     await buildMain(esbuildConfig)
     return
   }
-  const dir = !process.env.BUILD_TARGET
+  const dir = !(process.env.BUILD_TARGET || (process.env.RELEASE === 'true'))
   // Create empty binding.gyp to let electron-rebuild trigger rebuild to it
   await ensureFile(resolve(__dirname, 'node_modules', 'node_datachannel', 'binding.gyp'))
   const config: Configuration = {
@@ -114,7 +122,7 @@ async function start() {
       const gzipDest = dest + '.gz'
       let src = join(context.appOutDir, 'resources/app.asar')
       if (!existsSync(src)) {
-        src = join(context.appOutDir, 'Flame Launcher.app/Contents/Resources/app.asar')
+        src = join(context.appOutDir, 'X Minecraft Launcher.app/Contents/Resources/app.asar')
       } else if (!existsSync(src)) {
         console.log(`  ${chalk.yellow('•')} fallback to ${chalk.yellow('Resources/app.asar')} for ${chalk.yellow('resources/app.asar')} not found`)
       }

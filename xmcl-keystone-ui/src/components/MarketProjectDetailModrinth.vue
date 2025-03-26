@@ -14,12 +14,13 @@ import { injection } from '@/util/inject'
 import { ProjectFile } from '@/util/search'
 import { SearchResultHit } from '@xmcl/modrinth'
 import { ProjectMapping, ProjectMappingServiceKey } from '@xmcl/runtime-api'
+import Hint from './Hint.vue'
 
 const props = defineProps<{
   modrinth?: SearchResultHit
   projectId: string
   installed: ProjectFile[]
-  loaders: string[]
+  loader?: string
   categories: string[]
   gameVersion: string
   allFiles: ProjectFile[]
@@ -36,22 +37,25 @@ const emit = defineEmits<{
 
 // Project
 const projectId = computed(() => props.projectId)
-const { project, isValidating: isValidatingModrinth, refresh } = useModrinthProject(projectId)
+const { project, isValidating: isValidatingModrinth, refresh, error } = useModrinthProject(projectId)
 const { lookupByModrinth } = useService(ProjectMappingServiceKey)
 
 const mapping = shallowRef(undefined as ProjectMapping | undefined)
 
 watch(projectId, async (id) => {
   const result = await lookupByModrinth(id).catch(() => undefined)
-  mapping.value = result
+  if (id === projectId.value) {
+    mapping.value = result
+  }
 }, { immediate: true })
 
 const model = useModrinthProjectDetailData(projectId, project, computed(() => props.modrinth), mapping)
 const loading = useLoading(isValidatingModrinth, project, projectId)
+const modLoader = computed(() => props.loader)
 
 // Versions
 const { data: versions, isValidating: loadingVersions } = useSWRVModel(
-  getModrinthVersionModel(projectId, undefined, computed(() => props.loaders), computed(() => [props.gameVersion])),
+  getModrinthVersionModel(projectId, undefined, modLoader, computed(() => props.gameVersion ? [props.gameVersion] : undefined)),
   inject(kSWRVConfig))
 const modVersions = useModrinthProjectDetailVersions(versions, computed(() => props.installed))
 
@@ -65,7 +69,7 @@ const supportedVersions = computed(() => {
 
 // Dependencies
 const version = computed(() => versions.value?.find(v => v.id === selectedVersion.value?.id))
-const { data: deps, isValidating, error } = useSWRVModel(getModrinthDependenciesModel(version))
+const { data: deps, isValidating } = useSWRVModel(getModrinthDependenciesModel(version, modLoader), { revalidateOnFocus: false })
 const dependencies = computed(() => {
   if (!version.value) return []
   if (!deps.value) return []
@@ -169,21 +173,37 @@ const curseforgeId = computed(() => props.curseforge ||
   props.allFiles.find(v => v.modrinth?.projectId === props.projectId && v.curseforge)?.curseforge?.projectId ||
   mapping.value?.curseforgeId)
 
-const archived = computed(() => {
-  return project.value?.status === 'archived'
-})
+const isNotFound = computed(() => error.value?.status === 404)
+const { replace } = useRouter()
+const goCurseforgeProject = (id: number) => {
+  replace({ query: { ...currentRoute.query, id: `curseforge:${id}` } })
+}
 
-// watchEffect(() => {
-//   console.log(project.value.status)
-// })
-
+const { t } = useI18n()
 </script>
 
 <template>
+  <Hint
+    v-if="isNotFound"
+    icon="warning"
+    color="red"
+    class="px-10"
+    :size="100"
+    :text="t('errors.NotFoundError')"
+  >
+    <div>
+      <v-btn color="primary" text v-if="curseforgeId" @click="goCurseforgeProject(curseforgeId)">
+        <v-icon left>$vuetify.icons.curseforge</v-icon>
+        Curseforge
+      </v-btn>
+    </div>
+  </Hint>
   <MarketProjectDetail
+    v-else
     :detail="model"
     :has-more="false"
     :enabled="enabled"
+    :error="error"
     :supported-versions="supportedVersions"
     :selected-installed="installed"
     :has-installed-version="hasInstalledVersion"

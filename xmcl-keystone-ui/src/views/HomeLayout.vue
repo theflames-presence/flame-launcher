@@ -8,9 +8,6 @@
     <HomeHeader class="sticky top-0 z-20" />
 
     <!-- This is to fix strange hover color issue... -->
-    <v-divider
-      class="border-transparent"
-    />
     <transition
       name="fade-transition"
       mode="out-in"
@@ -78,6 +75,8 @@ const { start, end } = useBlockSharedTooltip()
 const { arrivedState } = useScroll(containerRef)
 provide('scroll', arrivedState)
 
+// Scroll
+provide('scrollElement', containerRef)
 </script>
 
 <style>

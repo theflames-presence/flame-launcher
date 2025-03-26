@@ -1,8 +1,4 @@
 {
-    "eslint.validate": [
-        "typescript",
-        "vue"
-    ],
     "files.eol": "\n",
     "files.exclude": {
         "**/.git": true,
@@ -18,6 +14,7 @@
     "i18n-ally.editor.preferEditor": true,
     "i18n-ally.keystyle": "nested",
     "i18n-ally.sortKeys": true,
+    "typescript.tsdk": "xmcl-runtime/node_modules/typescript/lib",
     // "i18n-ally.keepFulfilled": true,
     "cSpell.words": [
         "bmcl",
@@ -36,12 +33,10 @@
         "optifine",
         "resourcepack",
         "vite",
-        "vuex",
         "windicss",
         "xmcl"
     ],
     "cSpell.enabled": true,
-    "cmake.configureOnOpen": false,
     "yaml.schemas": {
         "https://json.schemastore.org/github-workflow.json": "file:///.github/workflows/deploy.yml"
     },
@@ -57,5 +52,7 @@
         "curseforgeCategory.Vanilla+",
         "installForge.downloadInstaller",
         "dependencies.embedded"
-    ]
+    ],
+    "oxc.enable": true,
+    "oxc.configPath": "xmcl/packages/oxlint-config/oxlintrc.json"
 }
