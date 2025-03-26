@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-redeclare */
 import { TextComponent } from '@xmcl/text-component'
 import { Channel } from './channel'
 import { VarInt, String, Long as CLong, Short, Json } from './coders'

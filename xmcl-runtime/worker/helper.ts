@@ -1,5 +1,4 @@
 import { MessagePort, parentPort } from 'worker_threads'
-import { getSerializedError } from '~/util/error'
 import type { WorkPayload } from './index'
 
 if (parentPort !== null) {
@@ -32,11 +31,7 @@ function main(port: MessagePort) {
           port.postMessage({ result, id })
         }
       } catch (error) {
-        const err = error instanceof Error ? await getSerializedError(error, {}) : error
-        port.postMessage({
-          error: err,
-          id,
-        })
+        port.postMessage({ error, id })
       } finally {
         semaphore -= 1
         if (semaphore <= 0) {

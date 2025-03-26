@@ -1,4 +1,3 @@
-/* eslint-disable n/no-unsupported-features/node-builtins */
 import { GameProfile, GameProfileWithProperties } from './gameProfile'
 
 /**
@@ -86,7 +85,6 @@ export class YggdrasilError extends Error {
 
   constructor(readonly statusCode: number, message: string, o?: any) {
     super(message)
-    this.name = 'YggdrasilError'
     this.error = o?.error
     this.errorMessage = o?.errorMessage
     this.cause = o?.cause

@@ -179,6 +179,7 @@
             v-model="data.selected"
             selectable
             :scroll-element="scrollElement"
+            :search="filterText"
             :multiple="false"
           >
             <template #default="{ item, selected }">
@@ -345,7 +346,7 @@ watch(enableCurseforge, (v) => {
   }
 })
 
-const { leaves } = provideFileNodes(useInstanceFileNodesFromLocal(computed(() => data.files.filter(f => f.path.toLowerCase().includes(filterText.value.toLowerCase())))))
+const { leaves } = provideFileNodes(useInstanceFileNodesFromLocal(computed(() => data.files)))
 const translatedMods = computed(() => ({
   curseforge: t('exportModpackTarget.curseforge'),
   modrinth: t('exportModpackTarget.modrinth'),
@@ -394,26 +395,17 @@ function reset() {
   data.version = inc(modpackVersion.value || '0.0.0', 'patch') ?? '0.0.1'
 }
 
-const exclusions = [
-  'usernamecache.json',
-  'usercache.json',
-]
-
 // loading
 const { refresh, refreshing } = useRefreshable(async () => {
   const manifest = await getInstanceManifest({ path: instance.value.path })
   const files = manifest.files
   let selected = [] as string[]
   selected = files
-    .filter(file => file.path.startsWith('resourcepacks')
-        || file.path.startsWith('mods')
-        || file.path.startsWith('config')
-        || file.path.startsWith('scripts')
-        || file.path.startsWith('shaderpacks')
-        || file.path.startsWith('options.txt')
-        || file.path.startsWith('optionsof.txt')
-        || file.path.startsWith('servers.dat'))
-    .filter(file => !file.path.endsWith('.disabled'))
+    .filter(file => !file.path.startsWith('.'))
+    .filter(file => !file.path.startsWith('logs'))
+    .filter(file => !file.path.startsWith('crash-reports'))
+    .filter(file => !file.path.startsWith('saves'))
+    .filter(file => !file.path.startsWith('resourcepacks'))
     .map(file => file.path)
   nextTick().then(() => { data.selected = selected })
   data.files = files

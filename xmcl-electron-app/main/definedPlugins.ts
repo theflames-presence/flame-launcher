@@ -13,11 +13,10 @@ import { pluginGFW } from '@xmcl/runtime/gfw/pluginGFW'
 import { pluginImageStorage } from '@xmcl/runtime/imageStore/pluginImageStore'
 import { pluginLaunchPrecheck } from '@xmcl/runtime/launch/pluginLaunchPrecheck'
 import { pluginLogConsumer } from '@xmcl/runtime/logger/pluginLogConsumer'
-import { pluginMarketProvider } from '@xmcl/runtime/market/pluginMarketProvider'
 import { pluginCurseforgeModpackHandler } from '@xmcl/runtime/modpack/pluginCurseforgeModpackHandler'
 import { pluginMcbbsModpackHandler } from '@xmcl/runtime/modpack/pluginMcbbsModpackHandler'
-import { pluginMmcModpackHandler } from '@xmcl/runtime/modpack/pluginMmcModpackHandler'
 import { pluginModrinthModpackHandler } from '@xmcl/runtime/modpack/pluginModrinthModpackHandler'
+import { pluginMmcModpackHandler } from '@xmcl/runtime/modpack/pluginMmcModpackHandler'
 import { pluginNativeReplacer } from '@xmcl/runtime/nativeReplacer/pluginNativeReplacer'
 import { pluginNetworkInterface } from '@xmcl/runtime/network/pluginNetworkInterface'
 import { pluginUndiciLogger } from '@xmcl/runtime/network/pluginUndiciLogger'
@@ -33,8 +32,8 @@ import { pluginUncaughtError } from '@xmcl/runtime/uncaughtError/pluginUncaughtE
 import { pluginOfficialUserApi } from '@xmcl/runtime/user/pluginOfficialUserApi'
 import { pluginOffineUser } from '@xmcl/runtime/user/pluginOfflineUser'
 import { pluginUserTokenStorage } from '@xmcl/runtime/user/pluginUserTokenStorage'
-import { pluginYggdrasilApi } from '@xmcl/runtime/user/pluginYggdrasilApi'
 import { pluginYggdrasilHandler } from '@xmcl/runtime/yggdrasilServer/pluginYggdrasilHandler'
+import { pluginMarketProvider } from '@xmcl/runtime/market/pluginMarketProvider'
 
 import { LauncherAppPlugin } from '~/app'
 import { definedServices } from './definedServices'
@@ -53,7 +52,6 @@ export const definedPlugins: LauncherAppPlugin[] = [
   pluginNativeReplacer,
   elyByPlugin,
   pluginMarketProvider,
-  pluginYggdrasilApi,
 
   pluginMediaProtocol,
   pluginResourcePackLink,

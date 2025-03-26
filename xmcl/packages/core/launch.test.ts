@@ -28,11 +28,7 @@ describe('Launcher', () => {
 
   if (process.env.JAVA_HOME) {
     javaPath = `${process.env.JAVA_HOME}/bin/java`
-    try {
-      javaVersion = getJavaVersion(javaPath)
-    } catch {
-      javaPath = ''
-    }
+    javaVersion = getJavaVersion(javaPath)
   } else {
     javaPath = 'java'
     try {
@@ -44,12 +40,10 @@ describe('Launcher', () => {
 
   describe('#generateArgumentsServer', () => {
     test('should generate command arguments', async ({ mock }) => {
-      const args = generateArgumentsServer({
+      const args = await generateArgumentsServer({
         javaPath: '/test/java',
-        extraExecOption: {
-          cwd: mock,
-        }
-        // version: '1.7.10',
+        path: mock,
+        version: '1.7.10',
       })
       assert(args)
       expect(args[0]).toEqual('/test/java')

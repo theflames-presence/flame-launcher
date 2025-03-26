@@ -1,6 +1,6 @@
 import { ModrinthV2Client } from '@xmcl/modrinth'
-import { CreateInstanceOption, CurseforgeModpackManifest, ExportModpackOptions, ModpackService as IModpackService, InstallMarketOptions, Instance, InstanceData, InstanceFile, McbbsModpackManifest, ModpackException, ModpackInstallProfile, ModpackServiceKey, ModpackState, ModrinthModpackManifest, SharedState, ResourceDomain, ResourceMetadata, ResourceState, UpdateResourcePayload, findMatchedVersion, getCurseforgeModpackFromInstance, getMcbbsModpackFromInstance, getModrinthModpackFromInstance, isAllowInModrinthModpack } from '@xmcl/runtime-api'
-import { ensureDir, mkdir, readdir, remove, stat, unlink } from 'fs-extra'
+import { CreateInstanceOption, CurseforgeModpackManifest, ExportModpackOptions, ModpackService as IModpackService, InstallMarketOptions, Instance, InstanceData, InstanceFile, McbbsModpackManifest, ModpackException, ModpackInstallProfile, ModpackServiceKey, ModpackState, ModrinthModpackManifest, MutableState, ResourceDomain, ResourceMetadata, ResourceState, UpdateResourcePayload, findMatchedVersion, getCurseforgeModpackFromInstance, getMcbbsModpackFromInstance, getModrinthModpackFromInstance, isAllowInModrinthModpack } from '@xmcl/runtime-api'
+import { mkdir, readdir, remove, stat, unlink } from 'fs-extra'
 import { dirname, join } from 'path'
 import { Entry, ZipFile } from 'yauzl'
 import { Inject, LauncherApp, LauncherAppKey, PathResolver, kGameDataPath } from '~/app'
@@ -84,7 +84,6 @@ export class ModpackService extends AbstractService implements IModpackService {
     version?: string
     runtime: Instance['runtime']
   }> {
-    this.log(`Import modpack ${modpackFile}`)
     const zipManager = await this.app.registry.getOrCreate(ZipManager)
     const cached = await this.getCachedInstallProfile(modpackFile)
     const zip = await zipManager.open(modpackFile)
@@ -125,9 +124,6 @@ export class ModpackService extends AbstractService implements IModpackService {
       instance.runtime.optifine,
       instance.runtime.quiltLoader,
       instance.runtime.labyMod)
-    if (matchedVersion) {
-      this.log('Found matched version', matchedVersion, instance.runtime)
-    }
 
     const hasShaderpacks = files.some(f => f.path.startsWith('shaderpacks/'))
     const hasResourcepacks = files.some(f => f.path.startsWith('resourcepacks/'))
@@ -148,15 +144,7 @@ export class ModpackService extends AbstractService implements IModpackService {
 
     const path = await this.instanceService.createInstance(options)
 
-    instanceInstallService.installInstanceFiles(upstream ? {
-      path,
-      files,
-      upstream,
-    } : {
-      path,
-      files,
-      oldFiles: [],
-    }).catch((e) => {
+    instanceInstallService.installInstanceFiles({ path: this.getPath('instances', name), files }).catch((e) => {
       this.error(e)
     })
 
@@ -392,7 +380,7 @@ export class ModpackService extends AbstractService implements IModpackService {
     return files
   }
 
-  async openModpack(modpackFile: string): Promise<SharedState<ModpackState>> {
+  async openModpack(modpackFile: string): Promise<MutableState<ModpackState>> {
     const store = await this.app.registry.get(ServiceStateManager)
     const zipManager = await this.app.registry.getOrCreate(ZipManager)
 
@@ -483,12 +471,10 @@ export class ModpackService extends AbstractService implements IModpackService {
     this.app.shell.openDirectory(this.getPath('modpacks'))
   }
 
-  async watchModpackFolder(): Promise<SharedState<ResourceState>> {
+  async watchModpackFolder(): Promise<MutableState<ResourceState>> {
     const states = await this.app.registry.getOrCreate(ServiceStateManager)
     return states.registerOrGet('modpacks', async ({ doAsyncOperation }) => {
-      const dir = this.getPath('modpacks')
-      await ensureDir(dir)
-      const { dispose, revalidate, state } = this.resourceManager.watch(dir,
+      const { dispose, revalidate, state } = this.resourceManager.watch(this.getPath('modpacks'),
         ResourceDomain.Modpacks,
         (func) => doAsyncOperation(func()),
       )

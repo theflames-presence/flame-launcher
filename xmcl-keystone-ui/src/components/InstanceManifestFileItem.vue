@@ -24,23 +24,24 @@
         chevron_right
       </v-icon>
     </div>
-    <div
+    <dir
       v-if="!item.children"
       class="mr-4"
     >
-      <v-avatar size="24" v-if="item.avatar">
+      <v-avatar v-if="item.avatar">
         <v-img
           :src="item.avatar"
+          style="width: 24px; height: 24px;"
         />
       </v-avatar>
       <v-icon v-else>
         {{ getIcon(item) }}
       </v-icon>
-    </div>
+    </dir>
 
     <div class="flex-grow flex flex-col justify-center">
       <div :style="{ fontSize: '16px', lineHeight: '100%', ...item.style }">
-        {{ basename(item.name, '/') }}
+        {{ item.name }}
       </div>
       <div
         v-if="description"
@@ -54,7 +55,7 @@
       </div>
       <div
         v-if="item.size > 0"
-        class="inline-flex gap-2 items-center"
+        class="inline-flex gap-2"
       >
         <span :style="{ opacity: 0.6, fontStyle: 'italic', fontSize: '12px' }">
           {{ getExpectedSize(item.size) }}
@@ -80,7 +81,6 @@
 
 <script lang="ts" setup>
 import { InstanceFileNode } from '@/composables/instanceFileNodeData'
-import { basename } from '@/util/basename'
 import { getExpectedSize } from '@/util/size'
 import { TreeItem } from '@/util/tree'
 

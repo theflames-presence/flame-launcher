@@ -33,48 +33,14 @@ export class DiagnoseService extends AbstractService implements IDiagnoseService
     }
   }
 
-  async diagnoseAssets(currentVersion: ResolvedVersion, strict = false): Promise<{
-    index?: AssetIndexIssue
-    assets: AssetIssue[]
-  }> {
+  async diagnoseAssets(currentVersion: ResolvedVersion, strict = false): Promise<AssetIssue[]> {
     this.log(`Diagnose for version ${currentVersion.id} assets`)
     const minecraft = new MinecraftFolder(this.getPath())
+    const objects: Record<string, { hash: string; size: number }> = (await readFile(minecraft.getAssetsIndex(currentVersion.assets), 'utf-8').then((b) => JSON.parse(b.toString()))).objects
 
-    const assetIndexIssue = await diagnoseAssetIndex(currentVersion, minecraft, true)
-    if (assetIndexIssue) {
-      assetIndexIssue.version = currentVersion.id
-      return {
-        index: assetIndexIssue,
-        assets: [],
-      }
-    }
+    const assetsIssues = await diagnoseAssets(objects, minecraft, { strict, checksum: this.worker.checksum })
 
-    const assetsIndexPath = minecraft.getAssetsIndex(currentVersion.assetIndex?.sha1 ?? currentVersion.assets)
-
-    try {
-      const content = await readFile(assetsIndexPath, 'utf-8').then((b) => JSON.parse(b.toString()))
-
-      const objects: Record<string, { hash: string; size: number }> = content.objects
-
-      const assetsIssues = await diagnoseAssets(objects, minecraft, { strict, checksum: this.worker.checksum })
-
-      return {
-        assets: assetsIssues,
-      }
-    } catch (e) {
-      return {
-        index: {
-          type: 'missing',
-          role: 'assetIndex',
-          file: assetsIndexPath,
-          expectedChecksum: currentVersion.assetIndex?.sha1 ?? currentVersion.assets,
-          receivedChecksum: '',
-          hint: 'The asset index file is missing',
-          version: currentVersion.id,
-        },
-        assets: [],
-      }
-    }
+    return assetsIssues
   }
 
   async diagnoseJar(currentVersion: ResolvedVersion, side: 'client' | 'server' = 'client'): Promise<MinecraftJarIssue | undefined> {
@@ -95,9 +61,6 @@ export class DiagnoseService extends AbstractService implements IDiagnoseService
       let badInstall = false
       const librariesIssues: LibraryIssue[] = []
       for (const issue of report.issues) {
-        if (issue.role === 'processor' && issue.file.endsWith('mappings.tsrg')) {
-          continue
-        }
         if (issue.role === 'processor') {
           badInstall = true
         } else if (issue.role === 'library') {

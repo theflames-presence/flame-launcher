@@ -1,4 +1,3 @@
-/* eslint-disable n/no-unsupported-features/node-builtins */
 /* eslint-disable camelcase */
 export interface XBoxResponse {
   IssueInstant: string

@@ -29,32 +29,24 @@ function assignProject(a: ProjectEntry, b: ProjectEntry) {
  * Sort the projects by the keyword. It will also filter the project if the networkOnly is true
  * @param keyword The keyword to search
  * @param items The project items
- * @param mode The mod of the filtering project. 'online' only show the connected (curseforge/modrinth) projects. 'local' only show the installed projects.
+ * @param networkOnly If only show the network project
  * @returns The sorted and filtered project
  */
 export function useProjectsFilterSort<T extends ProjectEntry>(
   keyword: Ref<string>,
   items: Ref<T[]>,
-  mode: MaybeRef<'online' | 'local' | 'all'>,
+  networkOnly: MaybeRef<boolean>,
   isCurseforgeActive: MaybeRef<boolean>,
   isModrinthActive: MaybeRef<boolean>,
 ) {
   const filterSorted = computed(() => {
-    const theMode = get(mode)
-    const filtered = theMode === 'online'
+    const filtered = get(networkOnly)
       ? items.value.filter(p => {
         if (!get(isCurseforgeActive) && p.curseforge) return false
         if (!get(isModrinthActive) && p.modrinth) return false
         return p.curseforge || p.modrinth || p.id === 'OptiFine'
       })
-      : theMode === 'local'
-        ? items.value.filter(p => p.installed.length > 0)
-        : items.value.filter(p => {
-          if (p.installed.length > 0) return true
-          if (!get(isCurseforgeActive) && p.curseforge && !p.modrinth) return false
-          if (!get(isModrinthActive) && p.modrinth && !p.curseforge) return false
-          return true
-        })
+      : items.value
 
     if (!keyword.value) return filtered
 
@@ -70,13 +62,15 @@ export function useProjectsFilterSort<T extends ProjectEntry>(
 
 /**
  * Aggregate the modrinth/curseforge/local
- * @param external Project provided by modrinth/curseforge/other
+ * @param modrinth Project provided by modrinth
+ * @param curseforge Project provided by curseforge
  * @param local Project provieded by local cache
  * @param installedProjects The installed project
  * @returns The aggregated project
  */
 export function useAggregateProjects<T extends ProjectEntry>(
-  external: Ref<T[]>,
+  modrinth: Ref<T[]>,
+  curseforge: Ref<T[]>,
   local: Ref<T[]>,
   installedProjects: Ref<T[]>,
   allLocal: Ref<T[]>,
@@ -130,7 +124,8 @@ export function useAggregateProjects<T extends ProjectEntry>(
       }
     }
 
-    for (const mod of external.value) visit(mod)
+    for (const mod of modrinth.value) visit(mod)
+    for (const mod of curseforge.value) visit(mod)
     for (const mod of local.value) {
       mod.curseforge = undefined
       mod.modrinth = undefined

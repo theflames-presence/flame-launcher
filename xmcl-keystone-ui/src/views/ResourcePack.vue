@@ -35,7 +35,7 @@
         v-else-if="(typeof item === 'object')"
         :pack="item"
         :dense="denseView"
-        :draggable="mode === 'local' && !item.disabled"
+        :draggable="!networkOnly && !item.disabled"
         :selection-mode="selectionMode"
         :item-height="itemHeight"
         :selected="selected"
@@ -59,6 +59,7 @@
         :project-id="selectedModrinthId"
         :installed="selectedItem?.installed || getInstalledModrinth(selectedItem?.modrinth?.project_id || selectedModrinthId)"
         :game-version="gameVersion"
+        :loaders="modrinthLoaders"
         :categories="modrinthCategories"
         :all-files="files"
         :curseforge="selectedItem?.curseforge?.id || selectedCurseforgeId"
@@ -72,6 +73,7 @@
         :curseforge="selectedItem?.curseforge"
         :curseforge-id="Number(selectedItem?.curseforge?.id || selectedCurseforgeId)"
         :installed="selectedItem?.installed || getInstalledCurseforge(Number(selectedItem?.curseforge?.id || selectedCurseforgeId))"
+        :loaders="[]"
         :game-version="gameVersion"
         :category="curseforgeCategory"
         :all-files="files"
@@ -142,7 +144,7 @@ const {
   loadMoreCurseforge,
   loadMoreModrinth,
   keyword,
-  mode,
+  networkOnly,
   gameVersion,
   effect,
 } = injection(kResourcePackSearch)
@@ -175,6 +177,23 @@ const displayItems = computed(() => {
     )
   }
 
+  return result
+})
+
+const modrinthLoaders = computed(() => {
+  const result = [
+    'minecraft',
+    'datapack',
+  ] as string[]
+  if (runtime.value.forge || runtime.value.neoForged) {
+    result.push('forge', 'neoforged')
+  }
+  if (runtime.value.fabric) {
+    result.push('fabric')
+  }
+  if (runtime.value.quiltLoader) {
+    result.push('quilt')
+  }
   return result
 })
 
@@ -233,10 +252,8 @@ const { dragover } = useGlobalDrop({
     for (const f of t.files) {
       paths.push(f.path)
     }
-    if (paths.length > 0) {
-      const installed = await install(path.value, paths)
-      await enable(installed)
-    }
+    const installed = await install(path.value, paths)
+    await enable(installed)
   },
 })
 
@@ -262,7 +279,7 @@ provide(kCurseforgeInstaller, curseforgeInstaller)
 
 const onInstallProject = useProjectInstall(
   runtime,
-  ref(undefined),
+  modrinthLoaders,
   curseforgeInstaller,
   modrinthInstaller,
   (f) => {

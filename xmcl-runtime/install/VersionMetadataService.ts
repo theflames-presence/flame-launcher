@@ -6,7 +6,7 @@ import { LauncherApp } from '../app/LauncherApp'
 @ExposeServiceKey(VersionMetadataServiceKey)
 export class VersionMetadataService extends AbstractService implements IVersionMetadataService {
   private latest = {
-    release: '1.21.4',
+    release: '1.20.6',
     snapshot: '21w37a',
   }
 

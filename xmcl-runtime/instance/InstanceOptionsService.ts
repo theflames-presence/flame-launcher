@@ -1,15 +1,15 @@
 import { Frame, parse } from '@xmcl/gamesetting'
 import { EditGameSettingOptions, EditShaderOptions, GameOptionsState, getInstanceGameOptionKey, InstanceOptionsService as IInstanceOptionsService, InstanceOptionsServiceKey, parseShaderOptions, stringifyShaderOptions } from '@xmcl/runtime-api'
-import { FSWatcher } from 'chokidar'
 import { ensureDir, ensureFile, readFile, writeFile } from 'fs-extra'
+import watch from 'node-watch'
 import { basename, join } from 'path'
 import { Inject, kGameDataPath, LauncherAppKey, PathResolver } from '~/app'
 import { AbstractService, ExposeServiceKey, ServiceStateManager } from '~/service'
 import { LauncherApp } from '../app/LauncherApp'
 import { AnyError, isSystemError } from '../util/error'
-import { handleOnlyNotFound, hardLinkFiles, isHardLinked, missing, unHardLinkFiles } from '../util/fs'
+import { hardLinkFiles, isHardLinked, missing, unHardLinkFiles } from '../util/fs'
 import { requireString } from '../util/object'
-import { existsSync } from 'fs'
+import { InstanceService } from './InstanceService'
 
 /**
  * The service to watch game setting (options.txt) and shader options (optionsshader.txt)
@@ -86,43 +86,26 @@ export class InstanceOptionsService extends AbstractService implements IInstance
         }
       })
 
-      const loadEula = defineAsyncOperation(async (path: string) => {
-        try {
-          const result = await this.getEULA(path)
-          state.eulaSet(result)
-        } catch (e) {
-          if (isSystemError(e)) {
-            this.warn(`An error ocurred during parse eula of ${path}.`)
-            this.warn(e)
-          }
-        }
-      })
-
       this.log(`Start to watch instance options.txt in ${path}`)
 
-      const watcher = new FSWatcher({
-        cwd: path,
-        ignorePermissionErrors: true,
-      })
-      const dispose = () => {
-        watcher.close()
-      }
-
-      watcher.on('all', (event, file) => {
+      const watcher = watch(path, (event, file) => {
         if (basename(file) === ('options.txt')) {
           loadOptions(path)
         } else if (basename(file) === ('optionsshaders.txt')) {
           loadShaderOptions(path)
-        } else if (basename(file) === 'eula.txt') {
-          loadEula(path)
-        } else if (event === 'unlinkDir' && !file) {
-          dispose()
         }
-      }).add('options.txt')
-        .add('optionsshaders.txt')
-        .add(join('server', 'eula.txt'))
+      })
 
-      return [state, dispose]
+      const instanceService = await this.app.registry.get(InstanceService)
+      instanceService.registerRemoveHandler(path, () => {
+        watcher.close()
+      })
+
+      await Promise.all([loadOptions(path), loadShaderOptions(path)])
+
+      return [state, () => {
+        watcher.close()
+      }]
     })
   }
 
@@ -163,15 +146,7 @@ export class InstanceOptionsService extends AbstractService implements IInstance
 
   async getGameOptions(instancePath: string) {
     const optionsPath = join(instancePath, 'options.txt')
-    const result = await readFile(optionsPath, 'utf-8').then(parse, async (e) => {
-      if (isSystemError(e) && e.code === 'ENOENT') {
-        if (!existsSync(join(instancePath, 'config', 'yosby', 'options.txt'))
-          && !existsSync(join(instancePath, 'config', 'yosbr', 'options.txt'))) {
-          await writeFile(optionsPath, `lang:${this.app.host.getLocale().replace('-', '_')}\n`)
-        }
-      }
-      return ({} as Frame)
-    })
+    const result = await readFile(optionsPath, 'utf-8').then(parse, () => ({} as Frame))
 
     if (typeof result.resourcePacks === 'string') {
       try {
@@ -219,11 +194,9 @@ export class InstanceOptionsService extends AbstractService implements IInstance
 
   async #getProperties(instancePath: string, name: string) {
     const filePath = join(instancePath, 'config', name)
+    if (await missing(filePath)) return {}
 
-    const content = await readFile(filePath, 'utf-8').catch(handleOnlyNotFound)
-    if (!content) {
-      return {}
-    }
+    const content = await readFile(filePath, 'utf-8')
     const lines = content.split('\n').map(l => l.split('=').map(s => s.trim()))
     const options = lines.reduce((a, b) => Object.assign(a, { [b[0]]: b[1] }), {}) as Record<string, string>
     return options
@@ -231,6 +204,10 @@ export class InstanceOptionsService extends AbstractService implements IInstance
 
   async editShaderOptions(options: EditShaderOptions): Promise<void> {
     const instancePath = options.instancePath
+    // const instance = this.instanceService.state.all[instancePath]
+    // if (!instance) {
+    //   throw new InstanceOptionException({ type: 'instanceNotFound', instancePath: options.instancePath! })
+    // }
     const current = await this.getShaderOptions(instancePath)
 
     current.shaderPack = options.shaderPack

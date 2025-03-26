@@ -1,10 +1,10 @@
 {
   "name": "@xmcl/mod-parser",
-  "version": "3.4.0",
+  "version": "3.3.5",
   "main": "./index.ts",
   "description": "The utilities to parse Forge/Liteloader/Fabric/Quilt mod metadata.",
   "engines": {
-    "node": ">=20"
+    "node": ">=16"
   },
   "scripts": {
     "build:type": "tsc",
@@ -46,9 +46,9 @@
   "homepage": "https://github.com/Voxelum/minecraft-launcher-core-node#readme",
   "devDependencies": {
     "@types/node": "~18.15.11",
-    "@xmcl/oxlint-config": "workspace:^*",
+    "@xmcl/eslint-config": "workspace:^*",
     "esbuild": "^0.17.16",
-    "oxlint": "^0.15.5",
+    "eslint": "^8.37.0",
     "typescript": "^5.3.3"
   }
 }

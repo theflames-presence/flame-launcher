@@ -64,6 +64,8 @@
 
 <script lang=ts setup>
 import { set } from 'vue'
+
+import { baseService } from './baseService'
 import LogView from '@/components/LogView.vue'
 import { LogRecord, parseLog } from '@/util/log'
 import { kTheme } from '@/composables/theme'

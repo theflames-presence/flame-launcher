@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto'
 import { createReadStream } from 'fs'
 import { unlink } from 'fs-extra'
 import { join } from 'path'
+import { request } from 'undici'
 import { Inject, LauncherAppKey, kTempDataPath } from '~/app'
 import { InstanceService } from '~/instance'
 import { AbstractService, Singleton } from '~/service'
@@ -12,7 +13,6 @@ import { LauncherApp } from '../app/LauncherApp'
 import { missing } from '../util/fs'
 import { isValidUrl, joinUrl } from '../util/url'
 import { ZipTask } from '../util/zip'
-import { Readable } from 'stream'
 
 export class XUpdateService extends AbstractService implements IXUpdateService {
   constructor(@Inject(LauncherAppKey) app: LauncherApp,
@@ -79,21 +79,18 @@ export class XUpdateService extends AbstractService implements IXUpdateService {
 
       allHeaders['content-type'] = useJson ? 'application/json' : 'application/zip'
 
-      const res = await this.app.fetch(instance.fileApi, {
+      const res = await request(instance.fileApi, {
         method: 'POST',
         headers: allHeaders,
-        body: useJson ? JSON.stringify(manifest) : Readable.toWeb(createReadStream(tempZipFile)) as any,
+        body: useJson ? JSON.stringify(manifest) : createReadStream(tempZipFile),
       })
 
-      if (res.status !== 201) {
-        this.error(new Error(`Fail to upload ${instancePath} to ${instance.fileApi} as server rejected. Status code: ${res.status}, ${res.body}`))
-        throw new InstanceIOException({ type: 'instanceSetManifestFailed', httpBody: res.body, statusCode: res.status })
+      if (res.statusCode !== 201) {
+        this.error(new Error(`Fail to upload ${instancePath} to ${instance.fileApi} as server rejected. Status code: ${res.statusCode}, ${res.body}`))
+        throw new InstanceIOException({ type: 'instanceSetManifestFailed', httpBody: res.body, statusCode: res.statusCode })
       }
 
-      if (res.body) {
-        const readable = Readable.from(res.body as any)
-        for await (const _ of readable) { /* skip */ }
-      }
+      for await (const _ of res.body) { /* skip */ }
 
       this.log(`Uploaded instance ${instancePath} to ${instance.fileApi}. Took ${Date.now() - start}ms.`)
     } finally {
@@ -113,7 +110,7 @@ export class XUpdateService extends AbstractService implements IXUpdateService {
 
     let manifest: InstanceManifest
     try {
-      manifest = await (await this.app.fetch(instance.fileApi)).json() as any
+      manifest = await (await request(instance.fileApi)).body.json() as any
     } catch (e) {
       if (e instanceof Error) this.error(e)
       throw new InstanceIOException({

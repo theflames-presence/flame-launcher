@@ -1,9 +1,9 @@
 import { ServiceKey } from '@xmcl/runtime-api'
 import { Client, LauncherAppPlugin } from '../app'
-import { AnyError, getNormalizeException, getSerializedError } from '../util/error'
+import { AnyError, serializeError } from '../util/error'
 import { AbstractService, ServiceConstructor, getServiceKey } from './Service'
-import { ServiceStateManager } from './ServiceStateManager'
 import { isStateObject } from './stateUtils'
+import { ServiceStateManager } from './ServiceStateManager'
 
 export const pluginServicesHandler = (services: ServiceConstructor[]): LauncherAppPlugin => (app, manifest) => {
   const logger = app.getLogger('Services')
@@ -66,26 +66,16 @@ export const pluginServicesHandler = (services: ServiceConstructor[]): LauncherA
       return { result: r }
     } catch (e) {
       app.emit('service-call-end', serviceName, serviceMethod, Date.now() - start, false)
-      const exception = await getNormalizeException(e)
-
-      if (!exception) {
-        // only log the error if it is not a known exception
-        const err = Object.assign(
-          e instanceof Error
-            ? e
-            : new AnyError('ServiceUnknownError', typeof e === 'string' ? e : JSON.stringify(e), undefined),
-          { payload, serviceMethod },
-        )
-        logger.warn(`Error during service call ${serviceName}.${serviceMethod}:`)
-        logger.error(err, serviceName)
+      logger.warn(`Error during service call ${serviceName}.${serviceMethod}:`)
+      if (e instanceof Error) {
+        Object.assign(e, { payload })
+        logger.error(e, serviceName)
+      } else {
+        logger.error(new AnyError('UnknownServiceError', JSON.stringify(e), undefined, { payload }), serviceName)
       }
-
-      // serailize the error and send to client
-      const error = await getSerializedError(exception || e, {
-        serviceName,
-        serviceMethod,
-        payload,
-      })
+      const error = await serializeError(e)
+      error.serviceName = serviceName
+      error.serviceMethod = serviceMethod
       return { error }
     }
   }

@@ -1,8 +1,6 @@
 import { CompiledQuery, DatabaseConnection, Driver, QueryResult, SelectQueryNode } from 'kysely'
 import type { Database } from 'node-sqlite3-wasm'
-import { SQLite3Error } from 'node-sqlite3-wasm'
 import { SqliteWASMDialectDatabaseConfig, SqliteWASMDialectWorkerConfig } from './SqliteWASMDialectConfig'
-import { Exception } from '@xmcl/runtime-api'
 
 declare module 'node-sqlite3-wasm' {
   interface Statement {
@@ -58,7 +56,7 @@ export class SqliteWASMDriver extends AbstractSqliteDriver {
   readonly #config: SqliteWASMDialectDatabaseConfig
 
   #db?: Database
-  #connection?: SqliteConnection
+  #connection?: DatabaseConnection
 
   constructor(config: SqliteWASMDialectDatabaseConfig) {
     super()
@@ -78,21 +76,15 @@ export class SqliteWASMDriver extends AbstractSqliteDriver {
   }
 
   async destroy(): Promise<void> {
-    this.#connection?.dispose()
     this.#db?.close()
   }
 }
 
 class SqliteConnection implements DatabaseConnection {
   readonly #db: Database
-  #disposed = false
 
   constructor(db: Database) {
     this.#db = db
-  }
-
-  dispose() {
-    this.#disposed = true
   }
 
   executeQuery<O>(compiledQuery: CompiledQuery): Promise<QueryResult<O>> {
@@ -118,11 +110,6 @@ class SqliteConnection implements DatabaseConnection {
             : undefined,
         rows: [],
       })
-    } catch (e) {
-      if (this.#disposed && e instanceof SQLite3Error) {
-        return Promise.reject(new Exception({ type: 'sqlite3Exception' }, e.message, { cause: e }))
-      }
-      return Promise.reject(e)
     } finally {
       stmt.finalize()
     }

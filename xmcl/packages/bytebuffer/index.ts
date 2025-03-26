@@ -152,7 +152,7 @@ export class ByteBuffer {
      * @returns {Function} `Buffer` under node.js, `Uint8Array` respectively `DataView` in the browser (classes)
      * @expose
      */
-  static accessor = function () {
+  static accessor = function (): Function {
     return DataView
   }
 
@@ -217,7 +217,7 @@ export class ByteBuffer {
      * @returns {Function} `Buffer` under node.js, `ArrayBuffer` in the browser (classes)
      * @expose
      */
-  static type = function () {
+  static type = function (): Function {
     return ArrayBuffer
   }
 

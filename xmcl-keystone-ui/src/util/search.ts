@@ -19,8 +19,6 @@ export interface ProjectEntry<T extends ProjectFile = ProjectFile> {
   descriptionTextComponent?: TextComponent
   author: string
 
-  unsupported?: boolean
-
   disabled?: boolean
 
   downloadCount?: number

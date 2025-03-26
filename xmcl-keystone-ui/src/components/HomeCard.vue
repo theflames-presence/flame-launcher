@@ -20,7 +20,7 @@
       </v-icon>
       {{ title }}
     </v-card-title>
-    <v-card-text class="flex-grow relative pb-0">
+    <v-card-text class="flex-grow relative">
       <template v-if="refreshing && icons.length === 0">
         <v-skeleton-loader type="paragraph" />
       </template>
@@ -28,10 +28,7 @@
         <slot />
       </template>
       <template v-else>
-        <span
-          v-if="!error"
-          class="text-content"
-        >
+        <span v-if="!error">
           {{ text }}
         </span>
         <span
@@ -106,13 +103,5 @@ const highlighted = computed(() => globalDragover.value && dragover.value > 0)
 <style scoped>
 .highlighted {
   transform: scale(1.05);
-}
-
-.text-content {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 </style>

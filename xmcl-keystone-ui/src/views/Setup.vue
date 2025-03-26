@@ -49,7 +49,7 @@
           step="1"
         >
           <SetLocale
-            v-model="localeRef"
+            v-model="locale"
           />
         </v-stepper-content>
         <v-stepper-content
@@ -131,13 +131,6 @@ const prev = () => {
 }
 
 const { locale, t } = useI18n()
-const localeRef = computed({
-  get: () => state.value?.locale ?? locale.value,
-  set: (v) => {
-    state.value?.localeSet(v ?? locale.value)
-  },
-})
-
 const currentTitle = computed(() => {
   if (data.step === 1) return t('setup.locale.name')
   if (data.step === 2) return t('setup.dataRoot.name')
@@ -158,9 +151,6 @@ const data = reactive({
 provide('setup', data)
 bootstrap.preset().then(({ minecraftPath, defaultPath, locale: locale_, drives }) => {
   data.fetching = false
-  if (locale_.startsWith('en')) {
-    locale_ = 'en'
-  }
   locale.value = locale_
   data.minecraftPath = minecraftPath
   data.instancePath = minecraftPath

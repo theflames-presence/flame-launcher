@@ -25,7 +25,6 @@
 
 export interface CategoryChipProps {
   text: string
-  id: string
   icon?: string
 }
 

@@ -2,7 +2,7 @@ import { CancelledError, Task, TaskContext } from '@xmcl/task'
 import { randomUUID } from 'crypto'
 import { EventEmitter } from 'events'
 import { Client, LauncherAppPlugin } from '~/app'
-import { getNormalizeException, getSerializedError } from '../util/error'
+import { serializeError } from '../util/error'
 import { TaskEventEmitter, createTaskPusher, kTaskExecutor, kTasks, mapTaskToTaskPayload } from './task'
 
 export const pluginTasks: LauncherAppPlugin = (app) => {
@@ -76,18 +76,17 @@ export const pluginTasks: LauncherAppPlugin = (app) => {
         if (error instanceof CancelledError) {
           emitter.emit('cancel', uid, task)
         } else {
-          const exception = await getNormalizeException(error)
-          const serializedError = await getSerializedError(exception || error, {
-            task: task.name,
-          })
-          emitter.emit('fail', uid, task, serializedError)
-          Reflect.set(task, 'error', serializedError)
+          const e = await serializeError(error)
+          emitter.emit('fail', uid, task, e)
+          Reflect.set(task, 'error', e)
 
           logger.warn(`Task ${task.path} (${Object.getPrototypeOf(task).constructor.name}) ${task.name}(${uid}) failed!`)
-          if (exception) {
-            logger.warn(exception)
+          if (error instanceof Array) {
+            for (const e of error) {
+              logger.warn(e)
+            }
           } else {
-            logger.error(error)
+            logger.warn(error)
           }
         }
       },

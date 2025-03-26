@@ -25,14 +25,11 @@ import { kDatabaseStatus } from '@/composables/databaseStatus'
 import { injection } from '@/util/inject'
 
 const { t } = useI18n()
-const { isOpened, isNoEmptySpace } = injection(kDatabaseStatus)
+const { isOpened } = injection(kDatabaseStatus)
 const { push } = useRouter()
 const error = computed(() => {
   if (!isOpened.value) {
     return t('errors.DatabaseNotOpened')
-  }
-  if (isNoEmptySpace.value) {
-    return t('errors.DiskIsFull')
   }
   return ''
 })

@@ -8,30 +8,25 @@ import createSetupWorker from './setupWorkerEntry?worker'
 
 export const pluginSetup: LauncherAppPlugin = async (app) => {
   const logger = app.getLogger('Setup')
-  const [worker, dispose] = createLazyWorker<SetupWorker>(createSetupWorker, { methods: ['getDiskInfo'] }, logger)
-  app.registryDisposer(dispose)
+  const worker: SetupWorker = createLazyWorker(createSetupWorker, { methods: ['getDiskInfo'] }, logger)
   logger.log('Setup worker created')
 
   const getDiskInfo = async () => {
-    try {
-      const infos = await worker.getDiskInfo()
-      for (const i of infos) {
-        Object.setPrototypeOf(i, Drive.prototype)
-      }
-      return infos
-    } catch (e) {
-      throw Object.assign(new Error(), e)
+    const infos = await worker.getDiskInfo()
+    for (const i of infos) {
+      Object.setPrototypeOf(i, Drive.prototype)
     }
+    return infos
   }
 
   app.controller.handle('preset', async () => {
-    const defaultPath = join(app.host.getPath('home'), '.fmcl')
+    const defaultPath = join(app.host.getPath('home'), '.xmcl')
     const getPath = (driveSymbol: string) => {
       const parsedHome = parse(defaultPath)
       if (parsedHome.root.toLocaleLowerCase().startsWith(driveSymbol.toLocaleLowerCase())) {
         return defaultPath
       }
-      return join(driveSymbol, '.fmcl')
+      return join(driveSymbol, '.xmcl')
     }
     const getAllDrived = async () => {
       try {

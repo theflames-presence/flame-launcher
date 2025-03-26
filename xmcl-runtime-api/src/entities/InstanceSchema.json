@@ -117,10 +117,6 @@
                 "type": "string"
             }
         },
-        "env": {
-            "description": "The launch environment variables",
-            "$ref": "#/definitions/Record<string,string>"
-        },
         "prependCommand": {
             "type": "string"
         },
@@ -173,9 +169,11 @@
             }
         },
         "disableElybyAuthlib": {
+            "default": false,
             "type": "boolean"
         },
         "disableAuthlibInjector": {
+            "default": false,
             "type": "boolean"
         },
         "useLatest": {
@@ -198,9 +196,6 @@
                 },
                 {
                     "$ref": "#/definitions/FTBUpstream"
-                },
-                {
-                    "$ref": "#/definitions/PeerUpstream"
                 }
             ]
         }
@@ -277,9 +272,6 @@
                 "minecraft"
             ]
         },
-        "Record<string,string>": {
-            "type": "object"
-        },
         "ModrinthUpstream": {
             "type": "object",
             "properties": {
@@ -350,24 +342,6 @@
                 "id",
                 "type",
                 "versionId"
-            ]
-        },
-        "PeerUpstream": {
-            "type": "object",
-            "properties": {
-                "type": {
-                    "type": "string",
-                    "enum": [
-                        "peer"
-                    ]
-                },
-                "id": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id",
-                "type"
             ]
         }
     },

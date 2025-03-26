@@ -42,23 +42,36 @@
 import { AnnotationVisitor } from './AnnotationVisitor'
 import { Attribute } from './Attribute'
 import { ClassVisitor } from './ClassVisitor'
-import type { ClassWriter } from './ClassWriter'
-import * as ClassWriterConstant from './ClassWriterConstant'
+import { ClassWriter } from './ClassWriter'
 import { Context } from './Context'
-import type { FieldVisitor } from './FieldVisitor'
+import { FieldVisitor } from './FieldVisitor'
 import { Handle } from './Handle'
 import { Label } from './Label'
-import type { MethodVisitor } from './MethodVisitor'
+import { MethodVisitor } from './MethodVisitor'
 import { MethodWriter } from './MethodWriter'
 import { Opcodes } from './Opcodes'
 import { Type } from './Type'
 import { TypePath } from './TypePath'
 
 import { intBitsToFloat, longBitsToDouble } from './bits'
-import { ANNOTATIONS, FRAMES, SIGNATURES } from './ClassReaderConstant'
-import { assert } from './utils'
+import { assert, notnull } from './utils'
 
 export class ClassReader {
+  /**
+    * True to enable signatures support.
+    */
+  static SIGNATURES = true
+
+  /**
+     * True to enable annotations support.
+     */
+  static ANNOTATIONS = true
+
+  /**
+     * True to enable stack map frames support.
+     */
+  static FRAMES = true
+
   /**
      * True to enable bytecode writing support.
      */
@@ -176,27 +189,27 @@ export class ClassReader {
       this.items[i] = index + 1
       let size: number
       switch ((buffer[index])) {
-        case ClassWriterConstant.FIELD:
-        case ClassWriterConstant.METH:
-        case ClassWriterConstant.IMETH:
-        case ClassWriterConstant.INT:
-        case ClassWriterConstant.FLOAT:
-        case ClassWriterConstant.NAME_TYPE:
-        case ClassWriterConstant.INDY:
+        case ClassWriter.FIELD:
+        case ClassWriter.METH:
+        case ClassWriter.IMETH:
+        case ClassWriter.INT:
+        case ClassWriter.FLOAT:
+        case ClassWriter.NAME_TYPE:
+        case ClassWriter.INDY:
           size = 5
           break
-        case ClassWriterConstant.LONG:
-        case ClassWriterConstant.DOUBLE:
+        case ClassWriter.LONG:
+        case ClassWriter.DOUBLE:
           size = 9
           ++i
           break
-        case ClassWriterConstant.UTF8:
+        case ClassWriter.UTF8:
           size = 3 + this.readUnsignedShort(index + 1)
           if (size > max) {
             max = size
           }
           break
-        case ClassWriterConstant.HANDLE:
+        case ClassWriter.HANDLE:
           size = 4
           break
         default:
@@ -276,7 +289,7 @@ export class ClassReader {
      * @param attrs        prototypes of the attributes that must be parsed during the
      * visit of the class. Any attribute whose type is not equal to
      * the type of one the prototypes will not be parsed: its byte
-     * array value will be passed unchanged to the ClassWriterConstant.
+     * array value will be passed unchanged to the ClassWriter.
      * <i>This may corrupt it if this value contains references to
      * the constant pool, or has syntactic or semantic links with a
      * class element that has been transformed by a class adapter
@@ -324,22 +337,22 @@ export class ClassReader {
           enclosingName = this.readUTF8(this.items[item], c)
           enclosingDesc = this.readUTF8(this.items[item] + 2, c)
         }
-      } else if (SIGNATURES && (attrName === 'Signature')) {
+      } else if (ClassReader.SIGNATURES && (attrName === 'Signature')) {
         signature = this.readUTF8(u + 8, c)
-      } else if (ANNOTATIONS && (attrName === 'RuntimeVisibleAnnotations')) {
+      } else if (ClassReader.ANNOTATIONS && (attrName === 'RuntimeVisibleAnnotations')) {
         anns = u + 8
-      } else if (ANNOTATIONS && (attrName === 'RuntimeVisibleTypeAnnotations')) {
+      } else if (ClassReader.ANNOTATIONS && (attrName === 'RuntimeVisibleTypeAnnotations')) {
         tanns = u + 8
       } else if ((attrName === 'Deprecated')) {
         access |= Opcodes.ACC_DEPRECATED
       } else if ((attrName === 'Synthetic')) {
-        access |= Opcodes.ACC_SYNTHETIC | ClassWriterConstant.ACC_SYNTHETIC_ATTRIBUTE
+        access |= Opcodes.ACC_SYNTHETIC | ClassWriter.ACC_SYNTHETIC_ATTRIBUTE
       } else if ((attrName === 'SourceDebugExtension')) {
         const len: number = this.readInt(u + 4)
         sourceDebug = this.readUTF(u + 8, len, new Array(len))
-      } else if (ANNOTATIONS && (attrName === 'RuntimeInvisibleAnnotations')) {
+      } else if (ClassReader.ANNOTATIONS && (attrName === 'RuntimeInvisibleAnnotations')) {
         ianns = u + 8
-      } else if (ANNOTATIONS && (attrName === 'RuntimeInvisibleTypeAnnotations')) {
+      } else if (ClassReader.ANNOTATIONS && (attrName === 'RuntimeInvisibleTypeAnnotations')) {
         itanns = u + 8
       } else if ((attrName === 'BootstrapMethods')) {
         const bootstrapMethods: number[] = new Array(this.readUnsignedShort(u + 8))
@@ -364,23 +377,23 @@ export class ClassReader {
     if (enclosingOwner != null) {
       classVisitor.visitOuterClass(enclosingOwner, enclosingName, enclosingDesc)
     }
-    if (ANNOTATIONS && anns !== 0) {
+    if (ClassReader.ANNOTATIONS && anns !== 0) {
       for (let i: number = this.readUnsignedShort(anns), v: number = anns + 2; i > 0; --i) {
         v = this.readAnnotationValues(v + 2, c, true, classVisitor.visitAnnotation(this.readUTF8(v, c), true))
       }
     }
-    if (ANNOTATIONS && ianns !== 0) {
+    if (ClassReader.ANNOTATIONS && ianns !== 0) {
       for (let i: number = this.readUnsignedShort(ianns), v: number = ianns + 2; i > 0; --i) {
         v = this.readAnnotationValues(v + 2, c, true, classVisitor.visitAnnotation(this.readUTF8(v, c), false))
       }
     }
-    if (ANNOTATIONS && tanns !== 0) {
+    if (ClassReader.ANNOTATIONS && tanns !== 0) {
       for (let i: number = this.readUnsignedShort(tanns), v: number = tanns + 2; i > 0; --i) {
         v = this.readAnnotationTarget(context, v)
         v = this.readAnnotationValues(v + 2, c, true, classVisitor.visitTypeAnnotation(context.typeRef, context.typePath, this.readUTF8(v, c), true))
       }
     }
-    if (ANNOTATIONS && itanns !== 0) {
+    if (ClassReader.ANNOTATIONS && itanns !== 0) {
       for (let i: number = this.readUnsignedShort(itanns), v: number = itanns + 2; i > 0; --i) {
         v = this.readAnnotationTarget(context, v)
         v = this.readAnnotationValues(v + 2, c, true, classVisitor.visitTypeAnnotation(context.typeRef, context.typePath, this.readUTF8(v, c), false))
@@ -436,19 +449,19 @@ export class ClassReader {
       if ((attrName === 'ConstantValue')) {
         const item: number = this.readUnsignedShort(u + 8)
         value = item === 0 ? null : this.readConst(item, c)
-      } else if (SIGNATURES && (attrName === 'Signature')) {
+      } else if (ClassReader.SIGNATURES && (attrName === 'Signature')) {
         signature = this.readUTF8(u + 8, c)
       } else if ((attrName === 'Deprecated')) {
         access |= Opcodes.ACC_DEPRECATED
       } else if ((attrName === 'Synthetic')) {
-        access |= Opcodes.ACC_SYNTHETIC | ClassWriterConstant.ACC_SYNTHETIC_ATTRIBUTE
-      } else if (ANNOTATIONS && (attrName === 'RuntimeVisibleAnnotations')) {
+        access |= Opcodes.ACC_SYNTHETIC | ClassWriter.ACC_SYNTHETIC_ATTRIBUTE
+      } else if (ClassReader.ANNOTATIONS && (attrName === 'RuntimeVisibleAnnotations')) {
         anns = u + 8
-      } else if (ANNOTATIONS && (attrName === 'RuntimeVisibleTypeAnnotations')) {
+      } else if (ClassReader.ANNOTATIONS && (attrName === 'RuntimeVisibleTypeAnnotations')) {
         tanns = u + 8
-      } else if (ANNOTATIONS && (attrName === 'RuntimeInvisibleAnnotations')) {
+      } else if (ClassReader.ANNOTATIONS && (attrName === 'RuntimeInvisibleAnnotations')) {
         ianns = u + 8
-      } else if (ANNOTATIONS && (attrName === 'RuntimeInvisibleTypeAnnotations')) {
+      } else if (ClassReader.ANNOTATIONS && (attrName === 'RuntimeInvisibleTypeAnnotations')) {
         itanns = u + 8
       } else {
         const attr: Attribute = this.readAttribute(context.attrs, attrName, u + 8, this.readInt(u + 4), c, -1, null)
@@ -465,23 +478,23 @@ export class ClassReader {
     if (fv == null) {
       return u
     }
-    if (ANNOTATIONS && anns !== 0) {
+    if (ClassReader.ANNOTATIONS && anns !== 0) {
       for (let i: number = this.readUnsignedShort(anns), v: number = anns + 2; i > 0; --i) {
         v = this.readAnnotationValues(v + 2, c, true, fv.visitAnnotation(this.readUTF8(v, c), true))
       }
     }
-    if (ANNOTATIONS && ianns !== 0) {
+    if (ClassReader.ANNOTATIONS && ianns !== 0) {
       for (let i: number = this.readUnsignedShort(ianns), v: number = ianns + 2; i > 0; --i) {
         v = this.readAnnotationValues(v + 2, c, true, fv.visitAnnotation(this.readUTF8(v, c), false))
       }
     }
-    if (ANNOTATIONS && tanns !== 0) {
+    if (ClassReader.ANNOTATIONS && tanns !== 0) {
       for (let i: number = this.readUnsignedShort(tanns), v: number = tanns + 2; i > 0; --i) {
         v = this.readAnnotationTarget(context, v)
         v = this.readAnnotationValues(v + 2, c, true, fv.visitTypeAnnotation(context.typeRef, context.typePath, this.readUTF8(v, c), true))
       }
     }
-    if (ANNOTATIONS && itanns !== 0) {
+    if (ClassReader.ANNOTATIONS && itanns !== 0) {
       for (let i: number = this.readUnsignedShort(itanns), v: number = itanns + 2; i > 0; --i) {
         v = this.readAnnotationTarget(context, v)
         v = this.readAnnotationValues(v + 2, c, true, fv.visitTypeAnnotation(context.typeRef, context.typePath, this.readUTF8(v, c), false))
@@ -538,25 +551,25 @@ export class ClassReader {
           exceptions[j] = this.readClass(exception, c)
           exception += 2
         }
-      } else if (SIGNATURES && (attrName === 'Signature')) {
+      } else if (ClassReader.SIGNATURES && (attrName === 'Signature')) {
         signature = this.readUTF8(u + 8, c)
       } else if ((attrName === 'Deprecated')) {
         context.access |= Opcodes.ACC_DEPRECATED
-      } else if (ANNOTATIONS && (attrName === 'RuntimeVisibleAnnotations')) {
+      } else if (ClassReader.ANNOTATIONS && (attrName === 'RuntimeVisibleAnnotations')) {
         anns = u + 8
-      } else if (ANNOTATIONS && (attrName === 'RuntimeVisibleTypeAnnotations')) {
+      } else if (ClassReader.ANNOTATIONS && (attrName === 'RuntimeVisibleTypeAnnotations')) {
         tanns = u + 8
-      } else if (ANNOTATIONS && (attrName === 'AnnotationDefault')) {
+      } else if (ClassReader.ANNOTATIONS && (attrName === 'AnnotationDefault')) {
         dann = u + 8
       } else if ((attrName === 'Synthetic')) {
-        context.access |= Opcodes.ACC_SYNTHETIC | ClassWriterConstant.ACC_SYNTHETIC_ATTRIBUTE
-      } else if (ANNOTATIONS && (attrName === 'RuntimeInvisibleAnnotations')) {
+        context.access |= Opcodes.ACC_SYNTHETIC | ClassWriter.ACC_SYNTHETIC_ATTRIBUTE
+      } else if (ClassReader.ANNOTATIONS && (attrName === 'RuntimeInvisibleAnnotations')) {
         ianns = u + 8
-      } else if (ANNOTATIONS && (attrName === 'RuntimeInvisibleTypeAnnotations')) {
+      } else if (ClassReader.ANNOTATIONS && (attrName === 'RuntimeInvisibleTypeAnnotations')) {
         itanns = u + 8
-      } else if (ANNOTATIONS && (attrName === 'RuntimeVisibleParameterAnnotations')) {
+      } else if (ClassReader.ANNOTATIONS && (attrName === 'RuntimeVisibleParameterAnnotations')) {
         mpanns = u + 8
-      } else if (ANNOTATIONS && (attrName === 'RuntimeInvisibleParameterAnnotations')) {
+      } else if (ClassReader.ANNOTATIONS && (attrName === 'RuntimeInvisibleParameterAnnotations')) {
         impanns = u + 8
       } else if ((attrName === 'MethodParameters')) {
         methodParameters = u + 8
@@ -602,39 +615,39 @@ export class ClassReader {
         mv.visitParameter(this.readUTF8(v, c), this.readUnsignedShort(v + 2))
       }
     }
-    if (ANNOTATIONS && dann !== 0) {
+    if (ClassReader.ANNOTATIONS && dann !== 0) {
       const dv: AnnotationVisitor | null = mv.visitAnnotationDefault()
       this.readAnnotationValue(dann, c, null, dv)
       if (dv != null) {
         dv.visitEnd()
       }
     }
-    if (ANNOTATIONS && anns !== 0) {
+    if (ClassReader.ANNOTATIONS && anns !== 0) {
       for (let i: number = this.readUnsignedShort(anns), v: number = anns + 2; i > 0; --i) {
         v = this.readAnnotationValues(v + 2, c, true, mv.visitAnnotation(this.readUTF8(v, c), true))
       }
     }
-    if (ANNOTATIONS && ianns !== 0) {
+    if (ClassReader.ANNOTATIONS && ianns !== 0) {
       for (let i: number = this.readUnsignedShort(ianns), v: number = ianns + 2; i > 0; --i) {
         v = this.readAnnotationValues(v + 2, c, true, mv.visitAnnotation(this.readUTF8(v, c), false))
       }
     }
-    if (ANNOTATIONS && tanns !== 0) {
+    if (ClassReader.ANNOTATIONS && tanns !== 0) {
       for (let i: number = this.readUnsignedShort(tanns), v: number = tanns + 2; i > 0; --i) {
         v = this.readAnnotationTarget(context, v)
         v = this.readAnnotationValues(v + 2, c, true, mv.visitTypeAnnotation(context.typeRef, context.typePath, this.readUTF8(v, c), true))
       }
     }
-    if (ANNOTATIONS && itanns !== 0) {
+    if (ClassReader.ANNOTATIONS && itanns !== 0) {
       for (let i: number = this.readUnsignedShort(itanns), v: number = itanns + 2; i > 0; --i) {
         v = this.readAnnotationTarget(context, v)
         v = this.readAnnotationValues(v + 2, c, true, mv.visitTypeAnnotation(context.typeRef, context.typePath, this.readUTF8(v, c), false))
       }
     }
-    if (ANNOTATIONS && mpanns !== 0) {
+    if (ClassReader.ANNOTATIONS && mpanns !== 0) {
       this.readParameterAnnotations(mv, context, mpanns, true)
     }
-    if (ANNOTATIONS && impanns !== 0) {
+    if (ClassReader.ANNOTATIONS && impanns !== 0) {
       this.readParameterAnnotations(mv, context, impanns, false)
     }
     while ((attributes != null)) {
@@ -672,24 +685,24 @@ export class ClassReader {
     while ((u < codeEnd)) {
       const offset: number = u - codeStart
       let opcode: number = b[u] & 255
-      switch ((ClassWriterConstant.TYPE[opcode])) {
-        case ClassWriterConstant.NOARG_INSN:
-        case ClassWriterConstant.IMPLVAR_INSN:
+      switch ((ClassWriter.TYPE[opcode])) {
+        case ClassWriter.NOARG_INSN:
+        case ClassWriter.IMPLVAR_INSN:
           u += 1
           break
-        case ClassWriterConstant.LABEL_INSN:
+        case ClassWriter.LABEL_INSN:
           this.readLabel(offset + this.readShort(u + 1), labels)
           u += 3
           break
-        case ClassWriterConstant.ASM_LABEL_INSN:
+        case ClassWriter.ASM_LABEL_INSN:
           this.readLabel(offset + this.readUnsignedShort(u + 1), labels)
           u += 3
           break
-        case ClassWriterConstant.LABELW_INSN:
+        case ClassWriter.LABELW_INSN:
           this.readLabel(offset + this.readInt(u + 1), labels)
           u += 5
           break
-        case ClassWriterConstant.WIDE_INSN:
+        case ClassWriter.WIDE_INSN:
           opcode = b[u + 1] & 255
           if (opcode === Opcodes.IINC) {
             u += 6
@@ -697,7 +710,7 @@ export class ClassReader {
             u += 4
           }
           break
-        case ClassWriterConstant.TABL_INSN:
+        case ClassWriter.TABL_INSN:
           u = u + 4 - (offset & 3)
           this.readLabel(offset + this.readInt(u), labels)
           for (let i: number = this.readInt(u + 8) - this.readInt(u + 4) + 1; i > 0; --i) {
@@ -706,7 +719,7 @@ export class ClassReader {
           }
           u += 12
           break
-        case ClassWriterConstant.LOOK_INSN:
+        case ClassWriter.LOOK_INSN:
           u = u + 4 - (offset & 3)
           this.readLabel(offset + this.readInt(u), labels)
           for (let i: number = this.readInt(u + 4); i > 0; --i) {
@@ -715,20 +728,20 @@ export class ClassReader {
           }
           u += 8
           break
-        case ClassWriterConstant.VAR_INSN:
-        case ClassWriterConstant.SBYTE_INSN:
-        case ClassWriterConstant.LDC_INSN:
+        case ClassWriter.VAR_INSN:
+        case ClassWriter.SBYTE_INSN:
+        case ClassWriter.LDC_INSN:
           u += 2
           break
-        case ClassWriterConstant.SHORT_INSN:
-        case ClassWriterConstant.LDCW_INSN:
-        case ClassWriterConstant.FIELDORMETH_INSN:
-        case ClassWriterConstant.TYPE_INSN:
-        case ClassWriterConstant.IINC_INSN:
+        case ClassWriter.SHORT_INSN:
+        case ClassWriter.LDCW_INSN:
+        case ClassWriter.FIELDORMETH_INSN:
+        case ClassWriter.TYPE_INSN:
+        case ClassWriter.IINC_INSN:
           u += 3
           break
-        case ClassWriterConstant.ITFMETH_INSN:
-        case ClassWriterConstant.INDYMETH_INSN:
+        case ClassWriter.ITFMETH_INSN:
+        case ClassWriter.INDYMETH_INSN:
           u += 5
           break
         default:
@@ -797,19 +810,19 @@ export class ClassReader {
             v += 4
           }
         }
-      } else if (ANNOTATIONS && (attrName === 'RuntimeVisibleTypeAnnotations')) {
+      } else if (ClassReader.ANNOTATIONS && (attrName === 'RuntimeVisibleTypeAnnotations')) {
         tanns = this.readTypeAnnotations(mv, context, u + 8, true)
         ntoff = tanns.length === 0 || this.readByte(tanns[0]) < 67 ? -1 : this.readUnsignedShort(tanns[0] + 1)
-      } else if (ANNOTATIONS && (attrName === 'RuntimeInvisibleTypeAnnotations')) {
+      } else if (ClassReader.ANNOTATIONS && (attrName === 'RuntimeInvisibleTypeAnnotations')) {
         itanns = this.readTypeAnnotations(mv, context, u + 8, false)
         nitoff = itanns.length === 0 || this.readByte(itanns[0]) < 67 ? -1 : this.readUnsignedShort(itanns[0] + 1)
-      } else if (FRAMES && (attrName === 'StackMapTable')) {
+      } else if (ClassReader.FRAMES && (attrName === 'StackMapTable')) {
         if ((context.flags & ClassReader.SKIP_FRAMES) === 0) {
           stackMap = u + 10
           stackMapSize = this.readInt(u + 4)
           frameCount = this.readUnsignedShort(u + 8)
         }
-      } else if (FRAMES && (attrName === 'StackMap')) {
+      } else if (ClassReader.FRAMES && (attrName === 'StackMap')) {
         if ((context.flags & ClassReader.SKIP_FRAMES) === 0) {
           zip = false
           stackMap = u + 10
@@ -830,7 +843,7 @@ export class ClassReader {
       u += 6 + this.readInt(u + 4)
     }
     u += 2
-    if (FRAMES && stackMap !== 0) {
+    if (ClassReader.FRAMES && stackMap !== 0) {
       frame = context
       frame.offset = -1
       frame.mode = 0
@@ -873,7 +886,7 @@ export class ClassReader {
           }
         }
       }
-      while ((FRAMES && frame != null && (frame.offset === offset || frame.offset === -1))) {
+      while ((ClassReader.FRAMES && frame != null && (frame.offset === offset || frame.offset === -1))) {
         if (frame.offset !== -1) {
           if (!zip || unzip) {
             mv.visitFrame(Opcodes.F_NEW, frame.localCount, frame.local, frame.stackCount, frame.stack)
@@ -889,12 +902,12 @@ export class ClassReader {
         }
       }
       let opcode: number = b[u] & 255
-      switch ((ClassWriterConstant.TYPE[opcode])) {
-        case ClassWriterConstant.NOARG_INSN:
+      switch ((ClassWriter.TYPE[opcode])) {
+        case ClassWriter.NOARG_INSN:
           mv.visitInsn(opcode)
           u += 1
           break
-        case ClassWriterConstant.IMPLVAR_INSN:
+        case ClassWriter.IMPLVAR_INSN:
           if (opcode > Opcodes.ISTORE) {
             opcode -= 59
             mv.visitVarInsn(Opcodes.ISTORE + (opcode >> 2), opcode & 3)
@@ -904,15 +917,15 @@ export class ClassReader {
           }
           u += 1
           break
-        case ClassWriterConstant.LABEL_INSN:
+        case ClassWriter.LABEL_INSN:
           mv.visitJumpInsn(opcode, labels[offset + this.readShort(u + 1)])
           u += 3
           break
-        case ClassWriterConstant.LABELW_INSN:
+        case ClassWriter.LABELW_INSN:
           mv.visitJumpInsn(opcode + opcodeDelta, labels[offset + this.readInt(u + 1)])
           u += 5
           break
-        case ClassWriterConstant.ASM_LABEL_INSN:
+        case ClassWriter.ASM_LABEL_INSN:
         {
           opcode = opcode < 218 ? opcode - 49 : opcode - 20
           const target: Label = labels[offset + this.readUnsignedShort(u + 1)]
@@ -924,14 +937,14 @@ export class ClassReader {
             mv.visitJumpInsn(opcode, endif)
             mv.visitJumpInsn(200, target)
             mv.visitLabel(endif)
-            if (FRAMES && stackMap !== 0 && (frame == null || frame.offset !== offset + 3)) {
-              mv.visitFrame(ClassWriterConstant.F_INSERT, 0, null, 0, null)
+            if (ClassReader.FRAMES && stackMap !== 0 && (frame == null || frame.offset !== offset + 3)) {
+              mv.visitFrame(ClassWriter.F_INSERT, 0, null, 0, null)
             }
           }
           u += 3
           break
         }
-        case ClassWriterConstant.WIDE_INSN:
+        case ClassWriter.WIDE_INSN:
           opcode = b[u + 1] & 255
           if (opcode === Opcodes.IINC) {
             mv.visitIincInsn(this.readUnsignedShort(u + 2), this.readShort(u + 4))
@@ -941,7 +954,7 @@ export class ClassReader {
             u += 4
           }
           break
-        case ClassWriterConstant.TABL_INSN:
+        case ClassWriter.TABL_INSN:
         {
           u = u + 4 - (offset & 3)
           const label: number = offset + this.readInt(u)
@@ -956,7 +969,7 @@ export class ClassReader {
           mv.visitTableSwitchInsn(min, max, labels[label], ...table)
           break
         }
-        case ClassWriterConstant.LOOK_INSN:
+        case ClassWriter.LOOK_INSN:
         {
           u = u + 4 - (offset & 3)
           const label: number = offset + this.readInt(u)
@@ -972,31 +985,31 @@ export class ClassReader {
           mv.visitLookupSwitchInsn(labels[label], keys, values)
           break
         }
-        case ClassWriterConstant.VAR_INSN:
+        case ClassWriter.VAR_INSN:
           mv.visitVarInsn(opcode, b[u + 1] & 255)
           u += 2
           break
-        case ClassWriterConstant.SBYTE_INSN:
+        case ClassWriter.SBYTE_INSN:
           mv.visitIntInsn(opcode, b[u + 1])
           u += 2
           break
-        case ClassWriterConstant.SHORT_INSN:
+        case ClassWriter.SHORT_INSN:
           mv.visitIntInsn(opcode, this.readShort(u + 1))
           u += 3
           break
-        case ClassWriterConstant.LDC_INSN:
+        case ClassWriter.LDC_INSN:
           mv.visitLdcInsn(this.readConst(b[u + 1] & 255, c))
           u += 2
           break
-        case ClassWriterConstant.LDCW_INSN:
+        case ClassWriter.LDCW_INSN:
           mv.visitLdcInsn(this.readConst(this.readUnsignedShort(u + 1), c))
           u += 3
           break
-        case ClassWriterConstant.FIELDORMETH_INSN:
-        case ClassWriterConstant.ITFMETH_INSN:
+        case ClassWriter.FIELDORMETH_INSN:
+        case ClassWriter.ITFMETH_INSN:
         {
           let cpIndex: number = this.items[this.readUnsignedShort(u + 1)]
-          const itf: boolean = b[cpIndex - 1] === ClassWriterConstant.IMETH
+          const itf: boolean = b[cpIndex - 1] === ClassWriter.IMETH
           const iowner: string = this.readClass(cpIndex, c)
           cpIndex = this.items[this.readUnsignedShort(cpIndex + 2)]
           const iname: string | null = this.readUTF8(cpIndex, c)
@@ -1013,7 +1026,7 @@ export class ClassReader {
           }
           break
         }
-        case ClassWriterConstant.INDYMETH_INSN:
+        case ClassWriter.INDYMETH_INSN:
         {
           let cpIndex: number = this.items[this.readUnsignedShort(u + 1)]
           let bsmIndex: number = context.bootstrapMethods[this.readUnsignedShort(cpIndex)]
@@ -1032,11 +1045,11 @@ export class ClassReader {
           u += 5
           break
         }
-        case ClassWriterConstant.TYPE_INSN:
+        case ClassWriter.TYPE_INSN:
           mv.visitTypeInsn(opcode, this.readClass(u + 1, c))
           u += 3
           break
-        case ClassWriterConstant.IINC_INSN:
+        case ClassWriter.IINC_INSN:
           mv.visitIincInsn(b[u + 1] & 255, b[u + 2])
           u += 3
           break
@@ -1922,25 +1935,25 @@ export class ClassReader {
   public readConst(item: number, buf: number[]): any {
     const index: number = this.items[item]
     switch ((this.buf[index - 1])) {
-      case ClassWriterConstant.INT:
+      case ClassWriter.INT:
         return this.readInt(index)
-      case ClassWriterConstant.FLOAT:
+      case ClassWriter.FLOAT:
         return intBitsToFloat(this.readInt(index))
-      case ClassWriterConstant.LONG:
+      case ClassWriter.LONG:
         return this.readLong(index)
-      case ClassWriterConstant.DOUBLE:
+      case ClassWriter.DOUBLE:
         return longBitsToDouble(this.readLong(index))
-      case ClassWriterConstant.CLASS:
+      case ClassWriter.CLASS:
         return Type.getObjectType(this.readUTF8(index, buf))
-      case ClassWriterConstant.STR:
+      case ClassWriter.STR:
         return this.readUTF8(index, buf)
-      case ClassWriterConstant.MTYPE:
+      case ClassWriter.MTYPE:
         return Type.getMethodType(this.readUTF8(index, buf))
       default:
         const tag: number = this.readByte(index)
         const items: number[] = this.items
         let cpIndex: number = items[this.readUnsignedShort(index + 1)]
-        const itf: boolean = this.buf[cpIndex - 1] === ClassWriterConstant.IMETH
+        const itf: boolean = this.buf[cpIndex - 1] === ClassWriter.IMETH
         const owner: string = this.readClass(cpIndex, buf)
         cpIndex = items[this.readUnsignedShort(cpIndex + 2)]
         const name: string = this.readUTF8(cpIndex, buf)

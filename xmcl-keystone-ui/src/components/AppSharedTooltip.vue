@@ -11,28 +11,7 @@
     :right="cached.right"
     :bottom="cached.bottom"
   >
-    {{ cached.text }}
-    <div v-if="cached.items">
-      <template v-for="r of cached.items">
-        <v-avatar
-          :key="r.icon + 'icon'"
-          size="28"
-        >
-          <img :src="r.icon">
-        </v-avatar>
-        {{ r.text }}
-      </template>
-    </div>
-    <template v-if="cached.list">
-      <ul>
-        <li
-          v-for="i in cached.list"
-          :key="i"
-        >
-          {{ i }}
-        </li>
-      </ul>
-    </template>
+    {{ cached?.text }}
   </v-tooltip>
 </template>
 
@@ -53,8 +32,6 @@ watch(cur, (v) => {
       bottom: v.direction === 'bottom',
       color: v.color,
       text: v.text,
-      items: v.items,
-      list: v.list,
     }
     cached.value = newValue
   }
@@ -69,8 +46,6 @@ const cached = shallowRef({
   bottom: false,
   color: '',
   text: '',
-  items: [] as ({ icon: string; text: string }[]) | undefined,
-  list: [] as string[] | undefined,
 })
 
 </script>

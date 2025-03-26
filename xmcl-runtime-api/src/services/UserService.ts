@@ -2,9 +2,8 @@ import { GameProfile } from '@xmcl/user'
 import { Exception } from '../entities/exception'
 import { GameProfileAndTexture, UserProfile } from '../entities/user.schema'
 import { GenericEventEmitter } from '../events'
-import { SharedState } from '../util/SharedState'
+import { MutableState } from '../util/MutableState'
 import { ServiceKey } from './Service'
-import { AuthlibInjectorApiProfile } from '../entities/yggdrasil.schema'
 
 export interface RefreshSkinOptions {
   gameProfileId?: string
@@ -148,7 +147,7 @@ export interface RefreshUserOptions {
 }
 
 export interface UserService extends GenericEventEmitter<UserServiceEventMap> {
-  getUserState(): Promise<SharedState<UserState>>
+  getUserState(): Promise<MutableState<UserState>>
   /**
    * Refresh the current user login status.
    *
@@ -198,48 +197,9 @@ export interface UserService extends GenericEventEmitter<UserServiceEventMap> {
    */
   abortRefresh(): Promise<void>
   /**
-   * Get the supported authorities for login
+   * Get mojang selected user id
    */
-  getSupportedAuthorityMetadata(): Promise<AuthorityMetadata[]>
-  /**
-   * Add a third-party account system satisfy the authlib-injector format
-   * @param url The account api url
-   */
-  addYggdrasilService(url: string): Promise<void>
-  /**
-   * Remove a third-party account system satisfy the authlib-injector format
-   * @param url The account api url
-   */
-  removeYggdrasilService(url: string): Promise<void>
-}
-
-export interface AuthorityMetadata {
-  /**
-   * The url of the authority
-   */
-  authority: string
-  /**
-   * Is this a built-in service
-   */
-  kind: 'builtin' | 'yggdrasil'
-  /**
-   * The cache for authlib injector compatible api.
-   * 
-   * This is only available for authlib-injector compatible service.
-   */
-  authlibInjector?: AuthlibInjectorApiProfile
-  /**
-   * The favicon of the service
-   */
-  favicon?: string
-  /**
-   * The login flow of the service
-   */
-  flow: Array<'grant-code' | 'device-code' | 'password' | 'anonymous'>
-  /**
-   * Only allow email login
-   */
-  emailOnly?: boolean
+  getMojangSelectedUser(): Promise<string>
 }
 
 export const UserServiceKey: ServiceKey<UserService> = 'UserService'

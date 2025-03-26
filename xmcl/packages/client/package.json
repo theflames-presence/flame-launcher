@@ -1,10 +1,10 @@
 {
   "name": "@xmcl/client",
-  "version": "3.2.0",
+  "version": "3.1.1",
   "main": "./index.ts",
   "description": "Minecraft socket pipeline utilities. Support Minecraft lan server discovery.",
   "engines": {
-    "node": ">=20"
+    "node": ">=16"
   },
   "publishConfig": {
     "access": "public",
@@ -40,9 +40,9 @@
   "homepage": "https://github.com/Voxelum/minecraft-launcher-core-node#readme",
   "devDependencies": {
     "@types/node": "~18.15.11",
-    "@xmcl/oxlint-config": "workspace:^*",
+    "@xmcl/eslint-config": "workspace:^*",
     "esbuild": "^0.17.16",
-    "oxlint": "^0.15.5",
+    "eslint": "^8.37.0",
     "tslib": "^2.5.0",
     "typescript": "^5.3.3"
   }

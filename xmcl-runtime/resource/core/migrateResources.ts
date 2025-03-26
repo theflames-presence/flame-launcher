@@ -13,63 +13,16 @@ export class ResourceMigrateProvider implements MigrationProvider {
   }
 }
 
-async function fixSnapshotTable(db: Kysely<Database>) {
-  let columns = await sql`PRAGMA table_info(snapshots)`.execute(db)
-  if (columns.rows.some((c: any) => c.name === 'ctime')) {
-    await v21.up(db)
-  }
-  columns = await sql`PRAGMA table_info(snapshots)`.execute(db)
-  if (columns.rows.some((c: any) => c.name === 'ctime')) {
-    // force recreate the table
-    await db.schema
-      .createTable('snapshots_temp')
-      .addColumn('domainedPath', 'varchar', (col) => col.primaryKey())
-      .addColumn('ino', 'integer', (col) => col.notNull())
-      .addColumn('mtime', 'integer', (col) => col.notNull())
-      .addColumn('fileType', 'varchar', (col) => col.notNull())
-      .addColumn('sha1', 'char(40)', (col) => col.notNull())
-      .execute()
-    // copy data
-    await sql`insert into snapshots_temp select domainedPath, ino, mtime, fileType, sha1 from snapshots`.execute(db)
-    // drop old table
-    await db.schema.dropTable('snapshots').execute()
-    // rename new table
-    await db.schema.alterTable('snapshots_temp').renameTo('snapshots').execute()
-    await db.schema
-      .createIndex('snapshots_ino_index')
-      .on('snapshots')
-      .column('ino')
-      .execute()
-
-    await db.schema
-      .createIndex('snapshots_sha1_index')
-      .on('snapshots')
-      .column('sha1')
-      .execute()
-  }
-}
-
-async function fixResourceTable(db: Kysely<Database>) {
-  let columns = await sql`PRAGMA table_info(resources)`.execute(db)
-  // check neoforge column
-  if (!columns.rows.some((c: any) => c.name === ResourceType.Neoforge)) {
-    await v22.up(db)
-  }
-}
-
 /**
  * Migrate the database to latest version
  * @param db The sqldatabase
  */
-export async function migrate(db: Kysely<Database>) {
+export function migrate(db: Kysely<Database>) {
   const migrator = new Migrator({
     db,
     provider: new ResourceMigrateProvider(),
   })
-  await migrator.migrateToLatest()
-
-  await fixSnapshotTable(db)
-  await fixResourceTable(db)
+  return migrator.migrateToLatest()
 }
 
 const v1: Migration = {
@@ -90,8 +43,6 @@ const v1: Migration = {
       .addColumn(ResourceType.Modpack, 'json')
       .addColumn(ResourceType.Save, 'json')
       .addColumn(ResourceType.ShaderPack, 'json')
-      .addColumn(ResourceType.MMCModpack, 'json')
-      .addColumn(ResourceType.Neoforge, 'json')
       .addColumn('instance', 'json')
       .addColumn('github', 'json')
       .addColumn('curseforge', 'json')
@@ -124,7 +75,9 @@ const v1: Migration = {
       .createTable('snapshots')
       .addColumn('domainedPath', 'varchar', (col) => col.primaryKey())
       .addColumn('ino', 'integer', (col) => col.notNull())
+      .addColumn('ctime', 'integer', (col) => col.notNull())
       .addColumn('mtime', 'integer', (col) => col.notNull())
+      .addColumn('size', 'integer', (col) => col.notNull())
       .addColumn('fileType', 'varchar', (col) => col.notNull())
       .addColumn('sha1', 'char(40)', (col) => col.notNull())
       .execute()
@@ -141,45 +94,66 @@ const v1: Migration = {
       .column('sha1')
       .execute()
   },
+  async down(db: Kysely<Database>): Promise<void> {
+    await db.schema.dropTable('resources').execute()
+    await db.schema.dropTable('tags').execute()
+    await db.schema.dropTable('uris').execute()
+    await db.schema.dropTable('icons').execute()
+    await db.schema.dropTable('snapshots').execute()
+    await db.schema.dropIndex('snapshots_ino_index').execute()
+    await db.schema.dropIndex('snapshots_sha1_index').execute()
+  },
 }
 
 const v2: Migration = {
   async up(db: Kysely<Database>): Promise<void> {
-    // check if the resource table has ResourceType.MMCModpack column
-    const columns = await sql`PRAGMA table_info(resources)`.execute(db)
-    if (columns.rows.some((c: any) => c.name === ResourceType.MMCModpack)) {
-      return
-    }
+    await sql`update icons set icon = REPLACE(icon, 'image://', 'http://launcher/image/') where "icon" like 'image:%';`.execute(db)
     await db.schema
       .alterTable('resources')
       .addColumn(ResourceType.MMCModpack, 'json')
+      .execute()
+  },
+  async down(db: Kysely<Database>): Promise<void> {
+    await db.schema
+      .alterTable('resources')
+      .dropColumn(ResourceType.MMCModpack)
       .execute()
   },
 }
 
 const v21: Migration = {
   async up(db: Kysely<Database>): Promise<void> {
+    await sql`update icons set icon = REPLACE(icon, 'image://', 'http://launcher/image/') where "icon" like 'image:%';`.execute(db)
     await db.schema
       .alterTable('snapshots')
       .dropColumn('ctime')
-      .execute().catch(() => { })
+      .execute()
+
     await db.schema
       .alterTable('snapshots')
       .dropColumn('size')
-      .execute().catch(() => { })
+      .execute()
+  },
+  async down(db: Kysely<Database>): Promise<void> {
+    await db.schema
+      .alterTable('snapshots')
+      .addColumn('ctime', 'integer', (col) => col.notNull())
+      .addColumn('size', 'integer', (col) => col.notNull())
+      .execute()
   },
 }
 
 const v22: Migration = {
   async up(db: Kysely<Database>): Promise<void> {
-    await sql`update icons set icon = REPLACE(icon, 'image://', 'http://launcher/image/') where "icon" like 'image:%';`.execute(db)
-    const columns = await sql`PRAGMA table_info(resources)`.execute(db)
-    if (columns.rows.some((c: any) => c.name === ResourceType.Neoforge)) {
-      return
-    }
     await db.schema
       .alterTable('resources')
       .addColumn(ResourceType.Neoforge, 'json')
+      .execute()
+  },
+  async down(db: Kysely<Database>): Promise<void> {
+    await db.schema
+      .alterTable('resources')
+      .dropColumn(ResourceType.Neoforge)
       .execute()
   },
 }

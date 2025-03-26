@@ -1,11 +1,9 @@
 <template>
   <div
-    ref="scrollElement"
     class="relative mx-3 select-none"
   >
     <HomeDatabaseError />
     <GridLayout
-      class="z-1"
       :layout.sync="layout"
       :responsive-layouts="layouts"
       :is-draggable="true"
@@ -275,9 +273,6 @@ const saveRowCount = computed(() => getRowCount(containerWidths[CardType.Save]))
 //   newsLayout.value = layout
 // })
 
-const scrollElement = ref(null as HTMLElement | null)
-provide('scrollElement', scrollElement)
-
 const { t } = useI18n()
 useTutorial(computed(() => {
   const steps: DriveStep[] = [
@@ -288,6 +283,7 @@ useTutorial(computed(() => {
   ]
   return steps
 }))
+
 </script>
 
 <style scoped>

@@ -148,10 +148,7 @@ export function installOptifineTask(installer: string, minecraft: MinecraftLocat
       const mcJar = mc.getVersionJar(mcversion)
 
       await ensureFile(dest)
-      await spawnProcess(options, ['-cp', installer, 'optifine.Patcher', mcJar, installer, dest]).catch((e) => {
-        e.name = 'OptifinePatchError'
-        throw e
-      })
+      await spawnProcess(options, ['-cp', installer, 'optifine.Patcher', mcJar, installer, dest])
     }))
 
     return versionJSON.id

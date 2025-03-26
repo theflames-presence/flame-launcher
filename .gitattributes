@@ -6,7 +6,6 @@
 *.json text
 
 *.png binary
-*.exe binary
 *.jpg binary
 *.zip binary
 *.jar binary

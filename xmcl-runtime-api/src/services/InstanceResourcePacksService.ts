@@ -1,6 +1,6 @@
 import { InstallMarketOptionWithInstance } from '../entities/market'
 import { Resource, ResourceState } from '../entities/resource'
-import { SharedState } from '../util/SharedState'
+import { MutableState } from '../util/MutableState'
 import { ServiceKey } from './Service'
 
 /**
@@ -27,7 +27,7 @@ export interface InstanceResourcePacksService {
    * Watch the `resourcepacks` directory under the instance path and import the resource packs.
    * @param instancePath The instance path
    */
-  watch(instancePath: string): Promise<SharedState<ResourceState>>
+  watch(instancePath: string): Promise<MutableState<ResourceState>>
   /**
    * Manually install the resource packs to the instance.
    *

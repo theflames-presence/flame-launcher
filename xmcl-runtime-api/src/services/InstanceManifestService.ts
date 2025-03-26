@@ -1,4 +1,4 @@
-import { InstanceFile, InstanceManifest } from '../entities/instanceManifest.schema'
+import { InstanceManifest } from '../entities/instanceManifest.schema'
 import { ServiceKey } from './Service'
 
 export interface GetManifestOptions {
@@ -19,8 +19,6 @@ export interface InstanceManifestService {
    * Compute the instance manifest for current local files.
    */
   getInstanceManifest(options: GetManifestOptions): Promise<InstanceManifest>
-
-  getInstanceServerManifest(options: GetManifestOptions): Promise<Array<InstanceFile>>
 }
 
 export const InstanceManifestServiceKey: ServiceKey<InstanceManifestService> = 'InstanceManifestService'

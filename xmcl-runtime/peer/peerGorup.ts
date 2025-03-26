@@ -35,9 +35,6 @@ type RelayPeerMessage = {
   type: 'ME'
   sender: string
   profile: ConnectionUserInfo
-} | {
-  type: 'PONG'
-  timestamp: number
 }
 
 function convertUUIDToUint8Array(id: string) {
@@ -56,7 +53,6 @@ export function createPeerGroup(
   onjoin = (groupId: string) => { },
   onleave = () => { },
   onuser = (sender: string, profile: ConnectionUserInfo) => { },
-  onping = (ping: number, timestamp: number) => { },
 ) {
   let _group: PeerGroup | undefined
 
@@ -105,7 +101,6 @@ export function createPeerGroup(
     _group.onuser = onuser
     _group.onstate = onstate
     _group.onerror = onerror
-    _group.onwebsocketping = onping
 
     onstate(_group.state)
     onjoin(groupId)
@@ -143,7 +138,6 @@ export class PeerGroup {
   ondescriptor = (sender: string, sdp: string, type: DescriptionType, candidates: Array<{ candidate: string; mid: string }>, iceServer?: RTCIceServer, allServers?: RTCIceServer[]) => { }
   onerror: (error: unknown) => void = () => { }
   onuser = (sender: string, profile: ConnectionUserInfo) => { }
-  onwebsocketping = (ping: number, timestamp: number) => { }
 
   constructor(readonly groupId: string, id: string, readonly gameProfile: () => GameProfileAndTexture) {
     this.#id = id
@@ -151,13 +145,9 @@ export class PeerGroup {
     this.socket = new WebSocket(this.#url)
     this.state = 'connecting'
     const idBinary = convertUUIDToUint8Array(id)
-    const heartbeatMessage = new Uint8Array(16 + 8)
-    heartbeatMessage.set(idBinary)
-    const heartbeatView = new DataView(heartbeatMessage.buffer)
     this.#heartbeat = setInterval(() => {
       if (this.socket.readyState === this.socket.OPEN) {
-        heartbeatView.setFloat64(16, Date.now())
-        this.socket.send(heartbeatMessage)
+        this.socket.send(idBinary)
       }
     }, 4_000)
     this.#initiate()
@@ -207,7 +197,7 @@ export class PeerGroup {
           if ('receiver' in payload && payload.receiver !== id) {
             return
           }
-          if ('sender' in payload && payload.sender === id) {
+          if (payload.sender === id) {
             return
           }
           if (payload.type === 'DESCRIPTOR') {
@@ -237,10 +227,6 @@ export class PeerGroup {
             })
           } else if (payload.type === 'ME') {
             this.onuser?.(payload.sender, payload.profile)
-          } else if (payload.type === 'PONG') {
-            const now = Date.now()
-            const ping = (now - payload.timestamp) / 2
-            this.onwebsocketping?.(ping, payload.timestamp)
           }
         } catch (e) {
           this.onerror?.(e)

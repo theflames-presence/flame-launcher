@@ -1,3 +1,5 @@
+import { URL } from 'url'
+
 /**
  * The controller that maintain the download status
  */

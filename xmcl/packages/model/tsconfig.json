@@ -7,7 +7,6 @@
     ],
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "lib": ["DOM"],
         "outDir": "./dist",
         "skipLibCheck": true
     },

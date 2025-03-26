@@ -33,7 +33,7 @@
  *
  * @author Eric Bruneton
  */
-import type { Label } from './Label'
+import { Label } from './Label'
 import { TypePath } from './TypePath'
 import { Attribute } from './Attribute'
 

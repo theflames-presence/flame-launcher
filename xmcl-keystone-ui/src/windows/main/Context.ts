@@ -7,7 +7,6 @@ import { kInstance, useInstance } from '@/composables/instance'
 import { kInstanceDefaultSource, useInstanceDefaultSource } from '@/composables/instanceDefaultSource'
 import { kInstanceFiles, useInstanceFiles } from '@/composables/instanceFiles'
 import { kInstanceJava, useInstanceJava } from '@/composables/instanceJava'
-import { kInstanceJavaDiagnose, useInstanceJavaDiagnose } from '@/composables/instanceJavaDiagnose'
 import { kInstanceLaunch, useInstanceLaunch } from '@/composables/instanceLaunch'
 import { kInstanceModsContext, useInstanceMods } from '@/composables/instanceMods'
 import { kInstanceOptions, useInstanceOptions } from '@/composables/instanceOptions'
@@ -34,7 +33,7 @@ import { kTutorial, useTutorialModel } from '@/composables/tutorial'
 import { kUILayout, useUILayout } from '@/composables/uiLayout'
 import { kUserContext, useUserContext } from '@/composables/user'
 import { kLocalVersions, useLocalVersions } from '@/composables/versionLocal'
-import { kSupportedAuthorityMetadata, useSupportedAuthority } from '@/composables/yggrasil'
+import { kYggdrasilServices, useYggdrasilServices } from '@/composables/yggrasil'
 import { vuetify } from '@/vuetify'
 import 'virtual:uno.css'
 import { provide } from 'vue'
@@ -55,7 +54,6 @@ export default defineComponent({
     const settings = useSettingsState()
     const instanceVersion = useInstanceVersion(instance.instance, localVersions.versions, localVersions.servers)
     const instanceJava = useInstanceJava(instance.instance, instanceVersion.resolvedVersion, java.all)
-    provide(kInstanceJavaDiagnose, useInstanceJavaDiagnose(instanceJava))
     const instanceDefaultSource = useInstanceDefaultSource(instance.path)
     const options = useInstanceOptions(instance.path)
     const saves = useInstanceSaves(instance.path)
@@ -76,7 +74,7 @@ export default defineComponent({
 
     useTelemetryTrack(settings.state)
 
-    provide(kDatabaseStatus, useDatabaseStatus(settings.state))
+    provide(kDatabaseStatus, useDatabaseStatus())
 
     provide(kUserContext, user)
     provide(kJavaContext, java)
@@ -114,7 +112,7 @@ export default defineComponent({
     provide(kUILayout, useUILayout())
     provide(kImageDialog, useImageDialog())
     provide(kFilterCombobox, useFilterComboboxData())
-    provide(kSupportedAuthorityMetadata, useSupportedAuthority())
+    provide(kYggdrasilServices, useYggdrasilServices())
     provide(kTutorial, useTutorialModel())
     provide(kModrinthTags, useModrinthTags())
     provide(kCurseforgeCategories, useCurseforgeCategories())

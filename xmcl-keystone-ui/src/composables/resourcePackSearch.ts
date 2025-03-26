@@ -101,8 +101,8 @@ function useLocalSearch(keyword: Ref<string>, enabled: Ref<InstanceResourcePack[
   // }
 
   function effect() {
-    // watch(enabled, update, { immediate: true })
-    // watch(disabled, update, { immediate: true })
+  //   watch(enabled, update, { immediate: true })
+  //   watch(disabled, update, { immediate: true })
   }
 
   return {
@@ -122,14 +122,13 @@ export function useResourcePackSearch(runtime: Ref<InstanceData['runtime']>, _en
   const sort = ref(0)
   const isCurseforgeActive = ref(true)
   const isModrinthActive = ref(true)
-  const localOnly = ref(false)
 
   const { modrinthSort, curseforgeSort } = useMarketSort(sort)
 
   const { loadMoreModrinth, loadingModrinth, modrinth, modrinthError, effect: modrinthEffect } = useModrinthSearch<ResourcePackProject>('resourcepack', keyword, ref([]), modrinthCategories,
-    modrinthSort, gameVersion, localOnly)
-  const { loadMoreCurseforge, loadingCurseforge, curseforge, curseforgeError, effect: curseforgeEffect } = useCurseforgeSearch(CurseforgeBuiltinClassId.resourcePack, keyword, shallowRef(undefined), curseforgeCategory,
-    curseforgeSort, gameVersion, localOnly)
+    modrinthSort, gameVersion)
+  const { loadMoreCurseforge, loadingCurseforge, curseforge, curseforgeError, effect: curseforgeEffect } = useCurseforgeSearch(CurseforgeBuiltinClassId.resourcePack, keyword, ref([]), curseforgeCategory,
+    curseforgeSort, gameVersion)
   const { enabled, disabled, all: filtered, loadingCached, effect: localEffect } = useLocalSearch(keyword, _enabled, _disabled)
   const loading = computed(() => loadingModrinth.value || loadingCached.value || loadingCurseforge.value)
 
@@ -144,30 +143,26 @@ export function useResourcePackSearch(runtime: Ref<InstanceData['runtime']>, _en
     enabled,
   )
 
-  const mode = computed(() =>
-    (modrinthCategories.value.length > 0 || curseforgeCategory.value !== undefined)
-      ? 'online'
-      : (keyword.value ? 'all' : 'local'),
-  )
+  const networkOnly = computed(() => modrinthCategories.value.length > 0 || curseforgeCategory.value !== undefined)
 
   const _installed = useProjectsFilterSort(
     keyword,
     installed,
-    mode,
+    networkOnly,
     isCurseforgeActive,
     isModrinthActive,
   )
   const _notInstalledButCached = useProjectsFilterSort(
     keyword,
     notInstalledButCached,
-    mode,
+    networkOnly,
     isCurseforgeActive,
     isModrinthActive,
   )
   const _others = useProjectsFilterSort(
     keyword,
     others,
-    mode,
+    networkOnly,
     isCurseforgeActive,
     isModrinthActive,
   )
@@ -187,8 +182,7 @@ export function useResourcePackSearch(runtime: Ref<InstanceData['runtime']>, _en
   }
 
   return {
-    localOnly,
-    mode,
+    networkOnly,
     sort,
     gameVersion,
 

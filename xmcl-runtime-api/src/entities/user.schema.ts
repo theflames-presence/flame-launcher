@@ -105,10 +105,6 @@ export interface UserProfile {
    * The avatar uri. This can be base64 data uri.
    */
   avatar?: string
-  /**
-   * oidc home account id
-   */
-  homeAccountId?: string
 }
 
 export interface UserSchema {

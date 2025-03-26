@@ -2,8 +2,6 @@ import { InjectionKey, Ref } from 'vue'
 import { InstanceFile } from '@xmcl/runtime-api'
 import { basename } from '@/util/basename'
 import { CSSProperties } from 'vue/types/jsx'
-import { injection } from '@/util/inject'
-import { kInstanceModsContext } from './instanceMods'
 
 export interface InstanceFileNode<T = never> {
   name: string
@@ -30,7 +28,6 @@ export type InstanceFileExportData = {
 }
 
 export function useInstanceFileNodesFromLocal(local: Ref<InstanceFile[]>) {
-  const { modsIconsMap } = injection(kInstanceModsContext)
   function getFileNode(f: InstanceFile): InstanceFileNode<InstanceFileExportData> {
     return reactive({
       name: basename(f.path),
@@ -45,9 +42,6 @@ export function useInstanceFileNodesFromLocal(local: Ref<InstanceFile[]>) {
         modrinth: !!f.modrinth,
       },
       children: undefined,
-      curseforge: !!f.curseforge,
-      modrinth: !!f.modrinth,
-      avatar: modsIconsMap.value[basename(f.path, '/')],
     })
   }
   const result = ref(local.value.map(getFileNode))

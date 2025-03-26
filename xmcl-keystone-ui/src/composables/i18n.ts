@@ -17,10 +17,6 @@ export function useI18nSync(framework: Framework, state: Ref<Settings | undefine
       lang.current = 'en'
     }
 
-    if (!locales[`../../locales/${newValue}.yaml`]) {
-      newValue = 'en'
-    }
-
     locales[`../../locales/${newValue}.yaml`]().then((message: any) => {
       setLocaleMessage(newValue, message.default)
       locale.value = newValue
@@ -43,7 +39,6 @@ export function useAutoI18nCommunityContent(allowLocale: string[] = []) {
       headers: {
         'Accept-Language': locale.value,
       },
-      cache: 'force-cache',
     })
 
     if (!response.ok) {

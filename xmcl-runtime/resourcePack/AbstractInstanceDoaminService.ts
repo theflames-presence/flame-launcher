@@ -7,9 +7,9 @@ import { InstanceService } from '~/instance'
 import { kMarketProvider } from '~/market'
 import { ResourceManager } from '~/resource'
 import { AbstractService, ServiceStateManager } from '~/service'
-import { AnyError, isSystemError } from '~/util/error'
-import { isNotFoundError, linkOrCopyFile } from '../util/fs'
-import { isLinked, readdirSafe, tryLink } from '../util/linkResourceFolder'
+import { AnyError } from '~/util/error'
+import { linkOrCopyFile } from '../util/fs'
+import { isLinked, tryLink } from '../util/linkResourceFolder'
 
 export abstract class AbstractInstanceDomainService extends AbstractService {
   protected abstract resourceManager: ResourceManager
@@ -43,19 +43,11 @@ export abstract class AbstractInstanceDomainService extends AbstractService {
 
     const key = `instance-${this.domain}://${instancePath}`
 
-    if (linkedStatus) {
-      try {
-        await unlink(destPath)
-        await mkdir(destPath)
+    if (typeof linkedStatus === 'boolean') {
+      await unlink(destPath)
+      await mkdir(destPath)
 
-        this.store.get(key)?.revalidate()
-      } catch (e) {
-        if (isSystemError(e) && e.code === 'EPERM') {
-          return
-        }
-        (e as any).name = 'UnlinkResourceFolderError'
-        throw e
-      }
+      this.store.get(key)?.revalidate()
     }
   }
 
@@ -77,16 +69,14 @@ export abstract class AbstractInstanceDomainService extends AbstractService {
         const isLinked = await this.isLinked(instancePath)
         if (!isLinked) {
           // Backup the old folder
-          const files = await readdirSafe(destPath)
-          if (files.length > 0) {
-            const backupDir = join(destPath, '.backup')
-            await ensureDir(backupDir)
-            for (const f of files) {
-              const s = await stat(join(destPath, f))
-              if (s.isDirectory()) {
-                // move to backup dir
-                await rename(join(destPath, f), join(backupDir, f))
-              }
+          const files = await readdir(destPath)
+          const backupDir = join(destPath, '.backup')
+          await ensureDir(backupDir)
+          for (const f of files) {
+            const s = await stat(join(destPath, f))
+            if (s.isDirectory()) {
+              // move to backup dir
+              await rename(join(destPath, f), join(backupDir, f))
             }
           }
           await remove(destPath)
@@ -112,22 +102,17 @@ export abstract class AbstractInstanceDomainService extends AbstractService {
       const fileName = basename(file)
       const src = this.getPath(this.domain, fileName)
       const dest = join(instancePath, this.domain, fileName)
+      if (!existsSync(src)) {
+        throw Object.assign(new Error(), { name: 'FileNotFound' })
+      }
       if (dest === src) {
         continue
       }
       if (isLinked && join(sharedDir, fileName) === src) {
         continue
       }
-      const fstat = await stat(src).catch(e => {
-        if (isNotFoundError(e)) {
-          throw Object.assign(new Error(), { name: 'FileNotFound' })
-        }
-        throw e
-      })
+      const fstat = await stat(src)
       if (fstat.isDirectory()) continue
-      const dstat = await stat(dest).catch(_ => undefined)
-      if (dstat?.ino === fstat.ino) continue
-      if (dstat?.size === fstat.size) continue
       result.push(await linkOrCopyFile(src, dest))
     }
     return result
@@ -148,42 +133,36 @@ export abstract class AbstractInstanceDomainService extends AbstractService {
     return this.store.registerOrGet(key, async () => {
       let watcher: ReturnType<ResourceManager['watchSecondary']> | undefined
 
-      const tryWatch = () => {
-        try {
+      const folder = join(instancePath, this.domain)
+
+      if (existsSync(folder)) {
+        if (!await this.isLinked(instancePath)) {
           watcher = manager.watchSecondary(
             instancePath,
             this.domain,
           )
-          this.log(`Watching instance ${instancePath} for ${this.domain}`)
-        } catch (e) {
-          if (isSystemError(e)) {
-            if (e.code === 'ENOENT') {
-              // ignore
-              // this.log(`Instance ${instancePath} not exist. Skip watching.`) // verbose
-            } else {
-              throw e
-            }
-          }
         }
       }
 
-      if (!await this.isLinked(instancePath)) {
-        tryWatch()
-      }
-
       const instanceService = await this.app.registry.get(InstanceService)
-      const dispose = () => {
+      instanceService.registerRemoveHandler(instancePath, () => {
         watcher?.dispose()
-      }
-      instanceService.registerRemoveHandler(instancePath, dispose)
+      })
 
-      return [this.state, dispose, async () => {
-        const isLinked = await this.isLinked(instancePath)
-        if (!isLinked && !watcher) {
-          tryWatch()
-        } else if (isLinked && watcher) {
-          watcher.dispose()
-          watcher = undefined
+      return [this.state, () => {
+        watcher?.dispose()
+      }, async () => {
+        if (existsSync(folder)) {
+          const isLinked = await this.isLinked(instancePath)
+          if (!isLinked && !watcher) {
+            watcher = manager.watchSecondary(
+              instancePath,
+              this.domain,
+            )
+          } else if (isLinked && watcher) {
+            watcher.dispose()
+            watcher = undefined
+          }
         }
 
         await watcher?.revalidate()
@@ -195,10 +174,9 @@ export abstract class AbstractInstanceDomainService extends AbstractService {
 
   async installFromMarket(options: InstallMarketOptionWithInstance): Promise<string[]> {
     const provider = await this.app.registry.get(kMarketProvider)
-    const result = await provider.installInstanceFile({
+    const result = await provider.installFile({
       ...options,
-      domain: this.domain,
-      instancePath: options.instancePath,
+      directory: join(options.instancePath, this.domain),
     })
     return result.map((r) => r.path)
   }

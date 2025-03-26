@@ -1,21 +1,15 @@
 import { Schema } from '@xmcl/runtime-api'
-import Ajv, { ErrorObject } from 'ajv'
+import Ajv from 'ajv'
 import { Logger } from '~/logger'
 import { AnyError } from './error'
 
 export interface Serializer<D, T> {
   serialize(value: T): D | Promise<D>
-  deserialize(data: D, throwIfError?: boolean): T | Promise<T>
+  deserialize(data: D): T | Promise<T>
 }
 
 const AJV_INSTANCE = new Ajv({ useDefaults: true, removeAdditional: true })
 
-export class DeserializeJsonError extends Error {
-  constructor(public original: string, public errors: ErrorObject[]) {
-    super('Deserialize json error')
-    this.name = 'DeserializeJsonError'
-  }
-}
 /**
  * The type safe serializer between object to json string
  */
@@ -32,13 +26,13 @@ export class SafeJsonSerializer<T> implements Serializer<Buffer, T> {
     const valid = validation(deepCopy)
     if (!valid) {
       if (validation.errors) {
-        this.logger?.error(new AnyError('SerializeJsonError', `Error to serialize the datatype ${typeof data}:\n` + JSON.stringify(validation.errors) + '\n' + JSON.stringify(data)))
+        this.logger?.error(new Error(`Error to serialize the datatype ${typeof data}:\n` + JSON.stringify(validation.errors) + '\n' + JSON.stringify(data)))
       }
     }
     return Buffer.from(JSON.stringify(deepCopy, undefined, 2), 'utf-8')
   }
 
-  async deserialize(b: Buffer, throwIfError = false) {
+  async deserialize(b: Buffer) {
     const originalString = b.toString('utf-8')
     let object
     try {
@@ -99,14 +93,11 @@ export class SafeJsonSerializer<T> implements Serializer<Buffer, T> {
             retry = true
           }
         } catch (e) {
-          this.logger?.warn(e)
+          this.logger?.error(new AnyError('DeserializeJsonError', originalString, { cause: e }))
         }
       } while (retry && totalRetryCount < MAX_RETRY)
       if (validation.errors) {
-        const error = new DeserializeJsonError(originalString, validation.errors)
-        if (throwIfError) {
-          throw error
-        }
+        this.logger?.error(new AnyError('DeserializeJsonError', 'Cannot fix the type error. This might cause problems!' + validation.errors ? ` ${JSON.stringify(validation.errors)}` : ''))
       }
     }
     return object
