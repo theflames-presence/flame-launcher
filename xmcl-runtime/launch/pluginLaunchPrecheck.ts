@@ -23,17 +23,35 @@ export const pluginLaunchPrecheck: LauncherAppPlugin = async (app) => {
       // relink
       if (linkTarget !== fromPath) {
         await unlink(toPath)
-        await linkDirectory(fromPath, toPath, launchService)
+        await linkDirectory(fromPath, toPath, launchService).catch(e => {
+          e.name = 'LaunchLinkError'
+          e.stage = 'relink'
+          launchService.error(e)
+        })
       }
       return
     }
     const fstat = await stat(toPath).catch((e) => undefined)
     if (!fstat) {
-      await linkDirectory(fromPath, toPath, launchService)
+      await linkDirectory(fromPath, toPath, launchService).catch(e => {
+        e.name = 'LaunchLinkError'
+        e.stage = 'link'
+        launchService.error(e)
+      })
       return
     }
-    await move(toPath, join(toPath + '.bk'))
-    await linkDirectory(fromPath, toPath, launchService)
+    try {
+      await move(toPath, join(toPath + '.bk'))
+    } catch (e) {
+      if ((e as any).message === 'dest already exists.') {
+        await move(toPath, join(toPath + Date.now() + '.bk'))
+      }
+    }
+    await linkDirectory(fromPath, toPath, launchService).catch(e => {
+      e.name = 'LaunchLinkError'
+      e.stage = 'after move'
+      launchService.error(e)
+    })
   }
   const ensureLinkFolderFromRoot = async (gameDirectory: string, folder: string) => {
     const fromPath = getPath(folder)

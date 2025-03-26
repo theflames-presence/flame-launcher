@@ -5,12 +5,12 @@ import { EventEmitter } from 'events'
 import { createWriteStream, existsSync } from 'fs'
 import { link, mkdir, readFile, writeFile } from 'fs/promises'
 import { EOL } from 'os'
-import { basename, delimiter, dirname, isAbsolute, join, resolve } from 'path'
+import { basename, delimiter, dirname, isAbsolute, join, resolve, sep } from 'path'
 import { pipeline } from 'stream'
 import { promisify } from 'util'
 import { MinecraftFolder } from './folder'
 import { Platform, getPlatform } from './platform'
-import { checksum, validateSha1 } from './utils'
+import { checksum, isNotNull, validateSha1 } from './utils'
 import { ResolvedLibrary, ResolvedVersion, Version } from './version'
 
 function format(template: string, args: any) {
@@ -122,7 +122,7 @@ export interface LaunchOption {
   /**
    * Prepend command before java command.
    */
-  prependCommand?: string
+  prependCommand?: string | string[]
   /**
    * Assign the spawn options to the process.
    *
@@ -237,7 +237,7 @@ export namespace LaunchPrecheck {
    * Link assets to the assets/virtual/legacy.
    */
   export async function linkAssets(resource: MinecraftFolder, version: ResolvedVersion, option: LaunchOption) {
-    if (version.assets !== 'legacy') {
+    if (version.assets !== 'legacy' && !version.assets.startsWith('pre-')) {
       return
     }
     const assetsIndexPath = resource.getAssetsIndex(version.assets)
@@ -342,6 +342,10 @@ export namespace LaunchPrecheck {
         return os === platform.name && platformArch === platform.arch
       }
 
+      if (!n.download.path) {
+        throw Object.assign(new TypeError(`Library ${n.name}(${version.id}) has no download path!`), { library: n })
+      }
+
       const from = resource.getLibraryByPath(n.download.path)
       const promises: Promise<void>[] = []
       const zip = await open(from, { lazyEntries: true, autoClose: false })
@@ -378,10 +382,18 @@ export namespace LaunchPrecheck {
       }
       const missingNatives = natives.filter((n) => !validEntries[n.name])
       if (missingNatives.length !== 0) {
-        await Promise.all(missingNatives.map(extractJar))
+        const result = await Promise.allSettled(missingNatives.map(extractJar))
+        const errors = result.map((r) => r.status === 'rejected' ? r.reason as Error : undefined).filter(isNotNull)
+        if (errors.length === 0) {
+          return
+        }
+        if (errors.length === 1) {
+          throw errors[0]
+        }
+        throw new AggregateError(errors, 'Some natives failed to extract')
       }
     } else {
-      await Promise.all(natives.map(extractJar))
+      const result = await Promise.allSettled(natives.map(extractJar))
       const entries = await Promise.all(extractedNatives.map(async (n) => ({
         ...n,
         sha1: await checksum(join(native, n.file), 'sha1'),
@@ -391,6 +403,15 @@ export namespace LaunchPrecheck {
         libraries: includedLibs,
       })
       await writeFile(checksumFile, fileContent)
+
+      const errors = result.map((r) => r.status === 'rejected' ? r.reason as Error : undefined).filter(isNotNull)
+      if (errors.length === 0) {
+        return
+      }
+      if (errors.length === 1) {
+        throw errors[0]
+      }
+      throw new AggregateError(errors, 'Some natives failed to extract')
     }
   }
 }
@@ -410,7 +431,7 @@ export interface BaseServerOptions {
   extraMCArgs?: string[]
   extraExecOption?: SpawnOptions
 
-  prependCommand?: string
+  prependCommand?: string | string[]
 
   /**
    * The spawn process function. Used for spawn the java process at the end. By default, it will be the spawn function from "child_process" module. You can use this option to change the 3rd party spawn like [cross-spawn](https://www.npmjs.com/package/cross-spawn)
@@ -435,8 +456,8 @@ export interface ServerOptions extends BaseServerOptions {
 }
 
 export async function launchServer(options: ServerOptions) {
-  const args = await generateArgumentsServer(options)
-  const spawnOption = { env: process.env, ...(options.extraExecOption || {}) }
+  const args = generateArgumentsServer(options)
+  const spawnOption = { env: process.env, ...options.extraExecOption }
   return (options.spawn ?? spawn)(args[0], args.slice(1), spawnOption)
 }
 
@@ -559,7 +580,7 @@ export async function launch(options: LaunchOption): Promise<ChildProcess> {
   const minecraftFolder = MinecraftFolder.from(resourcePath)
   const prechecks = options.prechecks || LaunchPrecheck.DEFAULT_PRECHECKS
   await Promise.all(prechecks.map((f) => f(minecraftFolder, version, options)))
-  const spawnOption = { cwd: options.gamePath, ...(options.extraExecOption || {}) }
+  const spawnOption = { cwd: options.gamePath, ...options.extraExecOption }
 
   if (options.extraExecOption?.shell) {
     args = args.map((a) => `"${a}"`)
@@ -572,10 +593,23 @@ export async function launch(options: LaunchOption): Promise<ChildProcess> {
   return (options.spawn ?? spawn)(args[0], args.slice(1), spawnOption)
 }
 
+function unshiftPrependCommand(cmd: string[], prependCommand?: string[] | string) {
+  if (prependCommand) {
+    if (typeof prependCommand === 'string') {
+      if (prependCommand.trim().length > 0) {
+        cmd.push(prependCommand.trim())
+      }
+    } else {
+      const prepended = prependCommand.filter((c) => c.trim().length > 0)
+      cmd.unshift(...prepended)
+    }
+  }
+}
+
 /**
  * Generate the argument for server
  */
-export async function generateArgumentsServer(options: ServerOptions) {
+export function generateArgumentsServer(options: ServerOptions, _delimiter: string = delimiter, _sep: string = sep) {
   const { javaPath, minMemory, maxMemory, extraJVMArgs = [], extraMCArgs = [], extraExecOption = {} } = options
   const cmd = [
     javaPath,
@@ -591,11 +625,11 @@ export async function generateArgumentsServer(options: ServerOptions) {
   )
 
   if (options.classPath && options.classPath.length > 0) {
-    cmd.push('-cp', options.classPath.join(delimiter))
+    cmd.push('-cp', options.classPath.map(v => v.replaceAll(sep, _sep)).join(_delimiter))
   }
 
   if (options.serverExectuableJarPath) {
-    cmd.push('-jar', options.serverExectuableJarPath)
+    cmd.push('-jar', options.serverExectuableJarPath.replaceAll(sep, _sep))
   } else if (options.mainClass) {
     cmd.push(options.mainClass)
   }
@@ -606,9 +640,7 @@ export async function generateArgumentsServer(options: ServerOptions) {
     cmd.push('nogui')
   }
 
-  if (options.prependCommand && options.prependCommand.trim().length > 0) {
-    cmd.unshift(options.prependCommand.trim())
-  }
+  unshiftPrependCommand(cmd, options.prependCommand)
 
   return cmd
 }
@@ -790,9 +822,7 @@ export async function generateArguments(options: LaunchOption) {
     }
   }
 
-  if (options.prependCommand && options.prependCommand.trim().length > 0) {
-    cmd.unshift(options.prependCommand.trim())
-  }
+  unshiftPrependCommand(cmd, options.prependCommand)
 
   return cmd
 }

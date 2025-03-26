@@ -10,6 +10,7 @@ import { setTimeout } from 'timers/promises'
 import { Logger } from '~/logger'
 import { IS_DEV, LAUNCHER_NAME } from '../constant'
 import { isSystemError } from '../util/error'
+import { handleMigrateRoot } from './migrate'
 import { listen } from '../util/server'
 import { createDummyLogger } from './DummyLogger'
 import { Host } from './Host'
@@ -19,12 +20,12 @@ import { LauncherAppPlugin } from './LauncherAppPlugin'
 import { LauncherAppUpdater } from './LauncherAppUpdater'
 import { LauncherProtocolHandler } from './LauncherProtocolHandler'
 import { SecretStorage } from './SecretStorage'
-import SemaphoreManager from './SemaphoreManager'
+import MutexManager from './MutexManager'
 import { Shell } from './Shell'
 import { kGameDataPath, kTempDataPath } from './gameDataPath'
 import { InjectionKey, ObjectFactory } from './objectRegistry'
 
-export const LauncherAppKey: InjectionKey<LauncherApp> = Symbol('LauncherAppKeyunchAppKey')
+export const LauncherAppKey: InjectionKey<LauncherApp> = Symbol('LauncherAppKey')
 
 export interface LauncherApp {
   on(channel: 'app-booted', listener: (manifest: InstalledAppManifest) => void): this
@@ -32,18 +33,21 @@ export interface LauncherApp {
   on(channel: 'root-migrated', listener: (newRoot: string) => void): this
   on(channel: 'service-call-end', listener: (serviceName: string, serviceMethod: string, duration: number, success: boolean) => void): this
   on(channel: 'service-state-init', listener: (stateKey: string) => void): this
+  on(channel: 'download-cdn', listener: (reason: string, file: string) => void): this
 
   once(channel: 'app-booted', listener: (manifest: InstalledAppManifest) => void): this
   once(channel: 'window-all-closed', listener: () => void): this
   once(channel: 'root-migrated', listener: (newRoot: string) => void): this
   once(channel: 'service-call-end', listener: (serviceName: string, serviceMethod: string, duration: number, success: boolean) => void): this
   once(channel: 'service-state-init', listener: (stateKey: string) => void): this
+  once(channel: 'download-cdn', listener: (reason: string, file: string) => void): this
 
   emit(channel: 'app-booted', manifest: InstalledAppManifest): this
   emit(channel: 'service-call-end', serviceName: string, serviceMethod: string, duration: number, success: boolean): this
   emit(channel: 'window-all-closed'): boolean
   emit(channel: 'root-migrated', root: string): this
   emit(channel: 'service-state-init', stateKey: string): this
+  emit(channel: 'download-cdn', reason: string, file: string): this
 }
 
 export interface LogEmitter extends EventEmitter {
@@ -67,7 +71,7 @@ export class LauncherApp extends EventEmitter {
    */
   readonly minecraftDataPath: string
 
-  readonly semaphoreManager: SemaphoreManager
+  readonly mutex: MutexManager
   readonly launcherAppManager: LauncherAppManager
   /**
    * The log event emitter. This should only be used for log consumer like telemetry or log file writer.
@@ -90,6 +94,8 @@ export class LauncherApp extends EventEmitter {
     const version = IS_DEV ? '0.0.0' : this.host.getVersion()
     return `voxelum/x_minecraft_launcher/${version} (xmcl.app)`
   }
+
+  #disposed = false
 
   /**
    * The launcher server/non-server protocol handler. Register the protocol handler to handle the request.
@@ -149,7 +155,7 @@ export class LauncherApp extends EventEmitter {
   /**
    * The disposers to dispose when the app is going to quit.
    */
-  #disposers: (() => Promise<void>)[] = []
+  #disposers: (() => (Promise<void> | void))[] = []
 
   protected logger: Logger = this.getLogger('App')
 
@@ -181,7 +187,7 @@ export class LauncherApp extends EventEmitter {
     this.controller = getController(this)
     this.updater = getUpdater(this)
 
-    this.semaphoreManager = new SemaphoreManager(this)
+    this.mutex = new MutexManager(this)
     this.launcherAppManager = new LauncherAppManager(this)
 
     for (const plugin of plugins) {
@@ -211,12 +217,16 @@ export class LauncherApp extends EventEmitter {
    * Reigster the disposer. The disposer will be called when the app is going to quit.
    * @param disposer The function to dispose the resource
    */
-  registryDisposer(disposer: () => Promise<void>) {
+  registryDisposer(disposer: () => Promise<void> | void) {
     this.#disposers.push(disposer)
   }
 
+  get disposed() { return this.#disposed }
+
   async dispose() {
-    await Promise.all(this.#disposers.map(m => m().catch(() => { })))
+    if (this.#disposed) return
+    this.#disposed = true
+    await Promise.allSettled(this.#disposers.map(m => m()))
   }
 
   /**
@@ -228,10 +238,13 @@ export class LauncherApp extends EventEmitter {
     try {
       await Promise.race([
         setTimeout(10000).then(() => false),
-        Promise.all(this.#disposers.map(m => m())).then(() => true),
+        this.dispose().then(() => true),
       ])
     } finally {
       this.host.quit()
+      setTimeout(10_000).then(() => {
+        this.host.exit(1)
+      })
     }
   }
 
@@ -246,7 +259,7 @@ export class LauncherApp extends EventEmitter {
     return this.host.whenReady()
   }
 
-  relaunch(): void { this.host.relaunch() }
+  relaunch(args?: string[]): void { this.host.relaunch({ args }) }
 
   // setup code
 
@@ -288,6 +301,7 @@ export class LauncherApp extends EventEmitter {
     let gameDataPath: string
     try {
       gameDataPath = await readFile(join(this.appDataPath, 'root')).then((b) => b.toString().trim())
+      gameDataPath = await handleMigrateRoot(gameDataPath, this.logger, this)
       this.#isBootstrapSignal.resolve(false)
     } catch (e) {
       if (isSystemError(e) && e.code === 'ENOENT') {
@@ -328,12 +342,6 @@ export class LauncherApp extends EventEmitter {
     this.registry.register(kTempDataPath, (...args) => {
       return join(this.#gamePath, 'temp', ...args)
     })
-  }
-
-  async migrateRoot(newRoot: string) {
-    await writeFile(join(this.appDataPath, 'root'), newRoot)
-    this.#gamePath = newRoot
-    this.emit('root-migrated', newRoot)
   }
 
   protected async getStartupUrl(): Promise<string | undefined> {
@@ -414,4 +422,6 @@ export class LauncherApp extends EventEmitter {
   }
 
   fetch = fetch
+
+  setProxy(url: string) {}
 }
