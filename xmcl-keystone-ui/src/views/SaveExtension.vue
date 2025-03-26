@@ -21,7 +21,6 @@
       :modrinth-category-filter="''"
       :enable-curseforge.sync="isCurseforgeActive"
       :sort.sync="sort"
-      :local-only.sync="localOnly"
       :game-version.sync="gameVersion"
     />
   </div>
@@ -37,7 +36,7 @@ import { kCompact } from '@/composables/scrollTop'
 import { getExtensionItemsFromRuntime } from '@/util/extensionItems'
 import { injection } from '@/util/inject'
 
-const { keyword, localOnly, gameVersion, curseforgeCategory, isCurseforgeActive, sort } = injection(kSaveSearch)
+const { keyword, curseforge, gameVersion, curseforgeCategory, isCurseforgeActive, sort } = injection(kSaveSearch)
 
 const { runtime: version } = injection(kInstance)
 const { isInstanceLinked } = injection(kInstanceSave)

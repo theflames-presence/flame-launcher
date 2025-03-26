@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-redeclare */
-import { fetch, FormData } from 'undici'
+import { Dispatcher, fetch, File, FormData } from 'undici'
 
 /**
  * Users defined question when they register this account
@@ -215,7 +214,7 @@ export interface MojangClientOptions {
 export class MojangClient {
   private fetch: typeof fetch
 
-  constructor(options?: MojangClientOptions) {
+  constructor(options?: MojangClientOptions) { 
     this.fetch = options?.fetch || fetch
   }
 

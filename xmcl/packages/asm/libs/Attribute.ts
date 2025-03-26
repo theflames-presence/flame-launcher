@@ -34,9 +34,9 @@
  * @author Eric Bruneton
  * @author Eugene Kuleshov
  */
-import type { Label } from './Label'
-import type { ClassReader } from './ClassReader'
-import type { ClassWriter } from './ClassWriter'
+import { Label } from './Label'
+import { ClassReader } from './ClassReader'
+import { ClassWriter } from './ClassWriter'
 import { ByteVector } from './ByteVector'
 import { assert } from './utils'
 

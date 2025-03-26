@@ -17,7 +17,6 @@ import { ModpackServiceKey, ModrinthUpstream } from '@xmcl/runtime-api'
 import HomeUpstreamBase from './HomeUpstreamBase.vue'
 import { UpstreamHeaderProps } from './HomeUpstreamHeader.vue'
 import { ProjectVersionProps } from './HomeUpstreamVersion.vue'
-import { notNullish } from '@vueuse/core'
 
 const props = defineProps<{
   id: string
@@ -39,12 +38,11 @@ const headerData = computed(() => {
     description: project.value?.description || '',
     categories: project.value.categories.map((c) => {
       const cat = categories.value.find(cat => cat.name === c)
-      return !cat ? undefined : {
-        text: t(`modrinth.categories.${cat.name}`) || '',
-        icon: cat.icon || '',
-        id: cat.name || '',
+      return {
+        text: t(`modrinth.categories.${cat?.name}`) || '',
+        icon: cat?.icon || '',
       }
-    }).filter(notNullish),
+    }),
     type: 'modrinth',
     store: '/store/modrinth/' + project.value.id,
     infos: [{
@@ -103,7 +101,7 @@ const items = computed(() => {
     if (!result[date]) {
       result[date] = []
     }
-    result[date].push(markRaw({
+    result[date].push({
       id: d.id,
       name: d.name,
       versionType: d.version_type as any,
@@ -113,7 +111,7 @@ const items = computed(() => {
       datePublished: (d.date_published),
       downloads: d.downloads,
       changelog: d.changelog ? render(d.changelog) : '',
-    }))
+    })
   }
 
   return result
@@ -145,11 +143,6 @@ async function onUpdate(v: ProjectVersionProps) {
       type: 'upstream',
       modpack: result,
       instancePath,
-      upstream: {
-        type: 'modrinth-modpack',
-        versionId: v.id,
-        projectId: props.id,
-      }
     })
   } finally {
     updating.value = false

@@ -55,6 +55,7 @@
         :project-id="selectedModrinthId"
         :installed="selectedItem?.installed || getInstalledModrinth(selectedModrinthId)"
         :game-version="gameVersion"
+        :loaders="shaderLoaderFilters"
         :categories="modrinthCategories"
         :all-files="shaderProjectFiles"
         :curseforge="selectedItem?.curseforge?.id || selectedItem?.curseforgeProjectId"
@@ -69,6 +70,7 @@
         :curseforge-id="Number(selectedCurseforgeId)"
         :installed="selectedItem?.installed || getInstalledCurseforge(Number(selectedCurseforgeId))"
         :game-version="gameVersion"
+        :loaders="[]"
         :category="curseforgeCategory"
         :all-files="shaderProjectFiles"
         :modrinth="selectedModrinthId"
@@ -263,6 +265,7 @@ const {
   keyword,
   curseforgeCategory,
   shaderProjectFiles,
+  shaderLoaderFilters,
   modrinthCategories,
   loadMore,
   gameVersion,
@@ -411,7 +414,7 @@ provide(kCurseforgeInstaller, curseforgeInstaller)
 
 const onInstallProject = useProjectInstall(
   runtime,
-  ref(undefined),
+  shaderLoaderFilters,
   curseforgeInstaller,
   modrinthInstaller,
   (f) => {

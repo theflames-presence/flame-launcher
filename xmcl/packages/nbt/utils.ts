@@ -1,5 +1,5 @@
 import { ByteBuffer } from '@xmcl/bytebuffer'
-import type { ReadContext, WriteContext } from './index'
+import { ReadContext, WriteContext } from '.'
 
 export function writeUTF8(out: ByteBuffer, str = '', context: WriteContext) {
   const strlen = str.length

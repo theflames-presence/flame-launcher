@@ -1,11 +1,11 @@
 {
   "name": "@xmcl/system",
-  "version": "2.2.8",
+  "version": "2.2.7",
   "main": "./index.ts",
   "browser": "./index.browser.ts",
   "description": "An abstract layer for file system on reading zip or plain dictionary/file",
   "engines": {
-    "node": ">=20"
+    "node": ">=16"
   },
   "scripts": {
     "build:type": "tsc",
@@ -21,7 +21,6 @@
   },
   "dependencies": {
     "@xmcl/unzip": "workspace:^*",
-    "yauzl": "^2.10.0",
     "jszip": "^3.10.1"
   },
   "repository": {
@@ -40,9 +39,9 @@
   "devDependencies": {
     "@types/node": "~18.15.11",
     "@types/yauzl": "^2.10.0",
-    "@xmcl/oxlint-config": "workspace:^*",
+    "@xmcl/eslint-config": "workspace:^*",
     "esbuild": "^0.17.16",
-    "oxlint": "^0.15.5",
+    "eslint": "^8.37.0",
     "typescript": "^5.3.3"
   },
   "license": "MIT",

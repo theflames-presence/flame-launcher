@@ -3,9 +3,9 @@ import {
   CloneSaveOptions, DeleteSaveOptions, ExportSaveOptions,
   getInstanceSaveKey,
   InstanceSavesService as IInstanceSavesService,
-  ImportSaveException,
   ImportSaveOptions,
   InstallMarketOptionWithInstance,
+  InstanceSaveException,
   InstanceSavesServiceKey,
   LaunchOptions,
   LinkSaveAsServerWorldOptions,
@@ -15,19 +15,19 @@ import {
   ShareSaveOptions,
 } from '@xmcl/runtime-api'
 import { open, readAllEntries } from '@xmcl/unzip'
-import { FSWatcher } from 'chokidar'
 import filenamify from 'filenamify'
 import { existsSync } from 'fs'
-import { ensureDir, ensureFile, readdir, rename, rm, rmdir, stat, unlink, writeFile } from 'fs-extra'
-import { basename, dirname, extname, isAbsolute, join, relative, resolve } from 'path'
+import { ensureDir, ensureFile, readdir, readlink, rename, rm, rmdir, stat, unlink, writeFile } from 'fs-extra'
+import debounce from 'lodash.debounce'
+import watch, { Watcher } from 'node-watch'
+import { basename, extname, isAbsolute, join, resolve } from 'path'
 import { Inject, kGameDataPath, LauncherAppKey, PathResolver } from '~/app'
 import { InstanceService } from '~/instance'
 import { LaunchService } from '~/launch'
 import { kMarketProvider } from '~/market'
 import { ResourceManager } from '~/resource'
 import { AbstractService, ExposeServiceKey, ServiceStateManager } from '~/service'
-import { AnyError, isSystemError } from '~/util/error'
-import { readlinkSafe } from '~/util/linkResourceFolder'
+import { isSystemError } from '~/util/error'
 import { LauncherApp } from '../app/LauncherApp'
 import { copyPassively, isDirectory, linkDirectory, missing, readdirIfPresent } from '../util/fs'
 import { isNonnull, requireObject, requireString } from '../util/object'
@@ -72,7 +72,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
       return undefined
     }
     // check if is a link, if so, then read the link and return the link path
-    const linked = await readlinkSafe(serverWorldPath).catch(() => '')
+    const linked = await readlink(serverWorldPath).catch(() => '')
     if (linked) {
       return linked
     }
@@ -89,7 +89,8 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     const savePath = isAbsolute(saveName) ? saveName : join(instancePath, 'saves', saveName)
 
     if (await missing(savePath)) {
-      throw new AnyError('InstanceLinkSaveNotFoundError', 'The save is not found.', undefined, { saveName })
+      // @ts-ignore
+      throw new InstanceSaveException({ type: 'instanceLinkSaveNotFound', name: saveName })
     }
 
     const serverWorldPath = join(instancePath, 'server', 'world')
@@ -146,7 +147,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
    */
   async watch(path: string) {
     requireString(path)
-    const lock = this.mutex.of(LockKey.instance(path))
+    const lock = this.semaphoreManager.getLock(LockKey.instance(path))
 
     const stateManager = await this.app.registry.get(ServiceStateManager)
     const launchService = await this.app.registry.get(LaunchService)
@@ -166,84 +167,104 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
       }
       launchService.on('minecraft-exit', onExit)
 
-      const updateSave = defineAsyncOperation(async (filePath: string) => {
-        await lock.runExclusive(() => readInstanceSaveMetadata(filePath, baseName).then((save) => {
+      const updateSave = debounce(defineAsyncOperation(async (filePath: string) => {
+        const fileName = basename(filePath)
+        if (fileName.startsWith('.')) return
+        if (fileName.endsWith('.zip')) return
+        await lock.read(() => readInstanceSaveMetadata(filePath, baseName).then((save) => {
           state.instanceSaveUpdate(save)
         }).catch((e) => {
           this.warn(`Parse save in ${filePath} failed. Skip it.`)
           this.warn(e)
         }))
-      })
+      }), 500)
 
-      const watcher = new FSWatcher({
-        awaitWriteFinish: true,
-        ignorePermissionErrors: true,
-        followSymlinks: true,
-        cwd: path,
-        depth: 2,
-        ignored: (path, stat) => {
-          if (resolve(path) === savesDir) return false
-          const depth = relative(savesDir, path).split('/').length
-          if (depth === 2) {
-            const fileName = basename(path)
-            return fileName === 'level.dat'
+      const onFileUpdate = (event: 'update' | 'remove', filename: string) => {
+        if (filename.startsWith('.')) return
+        const filePath = filename
+        if (event === 'update') {
+          if (launchService.isParked(path)) {
+            pending.add(filePath)
+          } else {
+            updateSave(filePath)
           }
-          if (depth > 2) {
-            return true
-          }
-          return false
-        },
-      })
-
-      watcher
-        .on('error', (e) => {
-          if (isSystemError(e)) {
-            if (e.code === 'EBUSY') {
-              return
-            }
-          }
-          if ((e as any).name === 'Error') {
-            (e as any).name = 'FSWatcherError'
-          }
-          this.error(e as any)
-        })
-        .on('all', (event, file, stat) => {
-          const absPath = resolve(path, file)
-          if (file.endsWith('level.dat')) {
-            const savePath = dirname(absPath)
-            if (event === 'add' || event === 'change') {
-              if (launchService.isParked(path)) {
-                pending.add(savePath)
-              } else {
-                updateSave(savePath)
-              }
-            } else if (event === 'unlink') {
-              state.instanceSaveRemove(savePath)
-            }
-          } else if (file.endsWith('.zip')) {
-            if (dirname(absPath) === resolve(savesDir)) {
-              // deploy the zip
-              this.importSave({
-                instancePath: path,
-                path: absPath,
-              })
-            }
-          } else if (event === 'unlinkDir' && (file === path || !file)) {
-            dispose()
-          }
-        })
-        .add(savesDir)
-
-      const revalidate = async () => {
-        // TODO: getWatched and revalidate
+        } else if (state.saves.some((s) => s.path === filename)) {
+          state.instanceSaveRemove(filePath)
+        }
       }
 
-      const dispose = () => {
+      const tryWatch = () => {
+        try {
+          watcher = watch(savesDir, onFileUpdate)
+          watcher.once('error', (e) => {
+            if (isSystemError(e) && e.code === 'ENOENT') {
+              this.log(`Skip watch saves directory ${savesDir} because it does not exist.`)
+            }
+            watcher?.close()
+            watcher = undefined
+          })
+        } catch (e) {
+          if (isSystemError(e) && e.code === 'ENOENT') {
+            this.log(`Skip watch saves directory ${savesDir} because it does not exist.`)
+          }
+          watcher = undefined
+        }
+      }
+
+      let isLinkedMemo = await this.isSaveLinked(path)
+      let watcher: Watcher | undefined
+
+      tryWatch()
+
+      const readAll = async (savePaths: string[]) => {
+        const saves = await Promise.all(savePaths
+          .filter((d) => !d.startsWith('.') && !d.endsWith('.zip'))
+          .map((d) => join(savesDir, d))
+          .map((p) => readInstanceSaveMetadata(p, baseName).catch((e) => {
+            this.warn(`Parse save in ${p} failed. Skip it.`)
+            this.warn(e)
+            return undefined
+          })))
+        return saves.filter(isNonnull)
+      }
+
+      if (!isLinkedMemo) {
+        await ensureDir(savesDir)
+        const saves = await lock.read(async () => await readAll(await readdir(savesDir)))
+        this.log(`Found ${saves.length} saves in instance ${path}`)
+        state.saves = saves
+      }
+
+      const revalidate = () => lock.read(async () => {
+        const newIsLink = !!await readlink(savesDir).catch(() => '')
+        if (newIsLink !== isLinkedMemo) {
+          isLinkedMemo = !!newIsLink
+          tryWatch()
+          const savePaths = await readdir(savesDir)
+          const saves = await readAll(savePaths)
+          state.instanceSaves(saves)
+        } else if (!newIsLink) {
+          const savePaths = await readdir(savesDir)
+          if (savePaths.length !== state.saves.length) {
+            const toRemove = state.saves.filter((s) => !savePaths.includes(basename(s.path)))
+            toRemove.forEach((s) => state.instanceSaveRemove(s.path))
+            const toAdd = savePaths.filter((s) => !state.saves.some((ss) => ss.name === s))
+            const saves = await readAll(toAdd)
+            state.instanceSaves(saves)
+          }
+        }
+      })
+
+      const instanceService = await this.app.registry.get(InstanceService)
+      instanceService.registerRemoveHandler(path, () => {
         launchService.off('minecraft-exit', onExit)
         watcher?.close()
-      }
+      })
 
-      return [state, dispose, revalidate]
+      return [state, () => {
+        launchService.off('minecraft-exit', onExit)
+        watcher?.close()
+      }, revalidate]
     })
   }
 
@@ -264,15 +285,21 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     const srcSavePath = join(srcInstancePath, saveName)
 
     if (await missing(srcSavePath)) {
-      throw new AnyError('CloneSaveSaveNotFoundError', `Cannot find save ${saveName}`, undefined, {
-        saveName,
-      })
+      throw new InstanceSaveException({ type: 'instanceCopySaveNotFound', src: srcSavePath, dest: destInstancePaths },
+        `Cancel save copying of ${saveName}`)
     }
+    // if (!this.instanceService.state.all[srcInstancePath]) {
+    //   throw new InstanceSaveException({
+    //     type: 'instanceNotFound',
+    //     instancePath: srcInstancePath,
+    //   }, `Cannot find managed instance ${srcInstancePath}`)
+    // }
     if (destInstancePaths.some(p => !this.instanceService.state.all[p])) {
       const notFound = destInstancePaths.find(p => !this.instanceService.state.all[p])!
-      throw new AnyError('CloneSaveInstanceNotFoundError', `Cannot find managed instance ${notFound}`, undefined, {
+      throw new InstanceSaveException({
+        type: 'instanceNotFound',
         instancePath: notFound,
-      })
+      }, `Cannot find managed instance ${notFound}`)
     }
 
     const destSavePaths = destInstancePaths.map(d => join(d, 'saves', destSaveName))
@@ -295,7 +322,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     const savePath = instancePath ? join(instancePath, 'saves', saveName) : this.getPath('saves', saveName)
 
     if (await missing(savePath)) {
-      return
+      throw new InstanceSaveException({ type: 'instanceDeleteNoSave', name: saveName })
     }
 
     await rm(savePath, { recursive: true, force: true })
@@ -309,9 +336,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     const savePath = join(instancePath, 'saves', saveName)
 
     if (await missing(savePath)) {
-      throw new AnyError('InstanceDeleteNoSave', `Cannot find save ${saveName}`, undefined, {
-        saveName,
-      })
+      throw new InstanceSaveException({ type: 'instanceDeleteNoSave', name: saveName })
     }
 
     await ensureDir(this.getPath('saves'))
@@ -345,7 +370,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
 
     if (isDir) {
       if (!existsSync(join(path, 'level.dat'))) {
-        throw new ImportSaveException({ type: 'instanceImportIllegalSave', path })
+        throw new InstanceSaveException({ type: 'instanceImportIllegalSave', path })
       }
 
       const sharedSavesDir = this.getPath('saves')
@@ -373,7 +398,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
       }
 
       if (saveRoot === undefined) {
-        throw new ImportSaveException({ type: 'instanceImportIllegalSave', path })
+        throw new InstanceSaveException({ type: 'instanceCopySaveUnexpected', src: path, dest: [dest] })
       }
 
       const root = saveRoot
@@ -437,7 +462,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   async isSaveLinked(instancePath: string) {
     const sharedSave = this.getPath('saves')
     const instanceSave = join(instancePath, 'saves')
-    const isLinked = await readlinkSafe(instanceSave).catch(() => '') === sharedSave
+    const isLinked = await readlink(instanceSave).catch(() => '') === sharedSave
     return isLinked
   }
 
@@ -446,7 +471,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     const instanceSaves = join(instancePath, 'saves')
     await ensureDir(sharedSave)
 
-    if (await readlinkSafe(instanceSaves).catch(() => '') === sharedSave) {
+    if (await readlink(instanceSaves).catch(() => '') === sharedSave) {
       return
     }
 
@@ -462,7 +487,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
       const savePath = join(instanceSaves, saveName)
       // check if shared folder has the same save
       const sharedSavePath = join(sharedSave, saveName)
-      const isLinked = await readlinkSafe(savePath).catch(() => '')
+      const isLinked = await readlink(savePath).catch(() => '')
 
       if (isLinked) {
         await unlink(savePath)
@@ -485,7 +510,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   async unlinkSharedSave(instancePath: string) {
     const sharedSave = this.getPath('saves')
     const instanceSave = join(instancePath, 'saves')
-    if (await readlinkSafe(instanceSave).catch(() => '') !== sharedSave) {
+    if (await readlink(instanceSave).catch(() => '') !== sharedSave) {
       return
     }
 
@@ -509,7 +534,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
 
   async installFromMarket(options: InstallMarketOptionWithInstance): Promise<string> {
     if (options.market !== MarketType.CurseForge) {
-      throw new TypeError('Unsupported market type')
+      throw new Error('Unsupported market type')
     }
     const provider = await this.app.registry.get(kMarketProvider)
     const [result] = await provider.installFile({

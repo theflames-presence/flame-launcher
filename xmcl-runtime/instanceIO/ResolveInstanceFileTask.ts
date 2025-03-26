@@ -6,11 +6,7 @@ import { errors } from 'undici'
 import { guessCurseforgeFileUrl } from '../util/curseforge'
 import { RequiredPick } from './instanceInstall'
 
-/**
- * Resolve instance file download link via curseforge and modrinth.
- * This will in-place update the instance file.
- */
-export class ResolveInstanceFileTask extends AbortableTask<boolean> {
+export class ResolveInstanceFileTask extends AbortableTask<void> {
   private controller?: AbortController
 
   constructor(private files: InstanceFile[], private curseforgeClient: CurseforgeV1Client, private modrinthClient: ModrinthV2Client) {
@@ -18,7 +14,7 @@ export class ResolveInstanceFileTask extends AbortableTask<boolean> {
     this.name = 'resolve'
   }
 
-  protected async process(): Promise<boolean> {
+  protected async process(): Promise<void> {
     const curseforgeProjects = [] as RequiredPick<InstanceFile, 'curseforge'>[]
     const modrinthProjects = [] as RequiredPick<InstanceFile, 'modrinth'>[]
     const modrinthFileHashProjects = [] as InstanceFile[]
@@ -41,8 +37,6 @@ export class ResolveInstanceFileTask extends AbortableTask<boolean> {
     const controller = new AbortController()
     this.controller = controller
 
-    let hasUpdate = false
-
     const processCurseforge = async () => {
       if (curseforgeProjects.length === 0) return
       const result = await this.curseforgeClient.getFiles(curseforgeProjects.map(p => p.curseforge.fileId), controller.signal)
@@ -50,12 +44,7 @@ export class ResolveInstanceFileTask extends AbortableTask<boolean> {
         const p = curseforgeProjects.find(p => p.curseforge.fileId === r.id)!
         if (!p.downloads) { p.downloads = [] }
         const url = r.downloadUrl ? [r.downloadUrl] : guessCurseforgeFileUrl(r.id, r.fileName)
-        for (const u of url) {
-          if (p.downloads.indexOf(u) === -1) {
-            p.downloads.push(u)
-            hasUpdate = true
-          }
-        }
+        p.downloads = [...new Set<string>([...url, ...p.downloads])]
       }
     }
 
@@ -67,7 +56,6 @@ export class ResolveInstanceFileTask extends AbortableTask<boolean> {
         if (!p.downloads) { p.downloads = [] }
         if (p.downloads.indexOf(r.files[0].url) === -1) {
           p.downloads.push(r.files[0].url)
-          hasUpdate = true
         }
       }
     }
@@ -81,14 +69,12 @@ export class ResolveInstanceFileTask extends AbortableTask<boolean> {
         if (!instanceFile.downloads) { instanceFile.downloads = [] }
         if (instanceFile.downloads.indexOf(file.url) === -1) {
           instanceFile.downloads.push(file.url)
-          hasUpdate = true
         }
         if (!instanceFile.modrinth) {
           instanceFile.modrinth = {
             projectId: version.project_id,
             versionId: version.id,
           }
-          hasUpdate = true
         }
       }
     }
@@ -98,8 +84,6 @@ export class ResolveInstanceFileTask extends AbortableTask<boolean> {
       processModrinth(),
       processModrinthLike(),
     ])
-
-    return hasUpdate
   }
 
   protected abort(isCancelled: boolean): void {

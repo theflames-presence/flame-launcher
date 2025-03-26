@@ -5,12 +5,12 @@
     scrollable
     width="800"
   >
-    <v-card class="select-none max-h-[90vh]!">
+    <v-card>
       <v-toolbar
         flat
         tabs
       >
-        <v-toolbar-title>
+        <v-toolbar-title class="text-white">
           {{ t('instanceUpdate.title') }}
         </v-toolbar-title>
       </v-toolbar>
@@ -24,7 +24,7 @@
         ref="scrollRef"
         class="visible-scroll mx-0 max-h-screen items-center justify-center overflow-y-auto overflow-x-hidden px-6 py-2"
       >
-        <template v-if="upgrade && upgrade.edit">
+        <template v-if="upgrade && upgrade.instance">
           <v-subheader>
             {{ t('instanceUpdate.basic') }}
           </v-subheader>
@@ -120,17 +120,15 @@
         <div>
           <v-subheader>
             {{ t('instanceUpdate.files') }}
-            <v-spacer />
-            <v-btn class="z-3" icon @click="filterKeep = !filterKeep">
-              <v-icon v-if="filterKeep">visibility_off</v-icon>
-              <v-icon v-else>visibility</v-icon>
-            </v-btn>
           </v-subheader>
+          <!--<v-text-field v-model="search" />-->
         </div>
 
         <InstanceManifestFileTree
-          :value="selected"
-          :selectable="selectable"
+          v-model="selected"
+          :search="search"
+          open-all
+          selectable
           :multiple="false"
           :scroll-element="scrollRef"
         >
@@ -149,17 +147,6 @@
             </v-chip>
           </template>
         </InstanceManifestFileTree>
-        <Hint
-          v-if="fileNodes.length === 0 && counts.hidden > 0"
-          class="min-h-80 static"
-          icon="visibility_off"
-          :text="t('instanceUpdate.summary', { add: counts.add, remove: counts.remove, keep: counts.keep })"
-        />
-        <div v-else class="flex items-center gap-4 h-4 my-8">
-          <v-divider />
-          {{ t('instanceUpdate.summary', { add: counts.add, remove: counts.remove, keep: counts.keep }) }}
-          <v-divider />
-        </div>
       </div>
       <v-card-actions class="items-baseline gap-5">
         <v-btn
@@ -187,12 +174,10 @@
 
 <script lang="ts" setup>
 import ErrorView from '@/components/ErrorView.vue'
-import Hint from '@/components/Hint.vue'
 import InstanceManifestFileTree from '@/components/InstanceManifestFileTree.vue'
 import { useRefreshable, useService } from '@/composables'
 import { kInstance } from '@/composables/instance'
 import { InstanceFileNode, provideFileNodes } from '@/composables/instanceFileNodeData'
-import { kInstanceFiles } from '@/composables/instanceFiles'
 import { InstanceInstallDialog, InstanceInstallOptions } from '@/composables/instanceUpdate'
 import { kInstances } from '@/composables/instances'
 import { kJavaContext } from '@/composables/java'
@@ -200,7 +185,7 @@ import { useVuetifyColor } from '@/composables/vuetify'
 import { basename } from '@/util/basename'
 import { getFTBTemplateAndFile } from '@/util/ftb'
 import { injection } from '@/util/inject'
-import { EditInstanceOptions, InstallInstanceOptions, InstanceFileUpdate, InstanceInstallServiceKey, ModpackServiceKey } from '@xmcl/runtime-api'
+import { EditInstanceOptions, InstanceFileOperation, InstanceFileUpdate, InstanceInstallServiceKey, InstanceUpdateServiceKey } from '@xmcl/runtime-api'
 import { useDialog } from '../composables/dialog'
 import { BuiltinImages } from '../constant'
 
@@ -216,18 +201,17 @@ const { isShown } = useDialog(InstanceInstallDialog, (parm) => {
   upgrade.value = undefined
 })
 
-const { openModpack } = useService(ModpackServiceKey)
-const { installInstanceFiles, previewInstanceFiles } = useService(InstanceInstallServiceKey)
+const { getInstanceUpdateProfile, getInstanceUpdateProfileRaw } = useService(InstanceUpdateServiceKey)
+const { installInstanceFiles } = useService(InstanceInstallServiceKey)
 
 const { edit } = injection(kInstances)
 const { t } = useI18n()
 
-type UpgradeValueType = {
-  edit?: EditInstanceOptions
-  installation: InstallInstanceOptions
-  delta: InstanceFileUpdate[]
-}
-const upgrade = ref(undefined as undefined | UpgradeValueType)
+const upgrade = ref(undefined as undefined | {
+  instance?: EditInstanceOptions
+  files: InstanceFileUpdate[]
+  id?: string
+})
 
 const tOperations = computed(() => ({
   add: t('instanceFileOperation.add'),
@@ -238,7 +222,7 @@ const tOperations = computed(() => ({
 } as Record<string, string>))
 
 const { getColorCode } = useVuetifyColor()
-const runtime = computed(() => upgrade.value?.edit?.runtime || {} as Record<string, string>)
+const runtime = computed(() => upgrade.value?.instance?.runtime || {} as Record<string, string>)
 
 const getVersionString = (oldVersion?: string, newVersion?: string) => oldVersion !== newVersion ? `${oldVersion} -> ${newVersion}` : newVersion
 
@@ -278,108 +262,73 @@ function getFileNode(f: InstanceFileUpdate): FileOperationNode {
   }
 }
 
-const filterKeep = ref(false)
-
-const fileNodes = shallowRef([] as FileOperationNode[])
-const counts = shallowRef({ add: 0, remove: 0, keep: 0, hidden: 0 })
-watch([upgrade, filterKeep], ([newVal, keep]) => {
-  if (!newVal?.delta) {
-    fileNodes.value = []
-    return
+const result = shallowRef(upgrade.value?.files.map(getFileNode) || [])
+watch(upgrade, (newVal) => {
+  if (newVal?.files.length && newVal.files.length > 0) {
+    result.value = newVal.files.map(getFileNode)
+  } else {
+    result.value = []
   }
-  const delta = newVal.delta
-  const nodes = delta.map(getFileNode)
-  const filtered = nodes.filter(n => n.data?.operation === 'keep' ? !keep : true)
+})
 
-  counts.value = nodes.reduce((acc, n) => {
-    const op = n.data?.operation === 'backup-add' ? 'add' : n.data?.operation === 'backup-remove' ? 'remove' : n.data?.operation
-    if (op) {
-      acc[op]++
-    }
-    return acc
-  }, { add: 0, remove: 0, keep: 0, hidden: nodes.length - filtered.length })
-
-  fileNodes.value = filtered
-}, { immediate: true })
-provideFileNodes(fileNodes)
+provideFileNodes(result)
 
 const { runtime: oldRuntime, path: instancePath } = injection(kInstance)
 
 const { all: javas } = injection(kJavaContext)
+const { refresh, refreshing, error } = useRefreshable<InstanceInstallOptions>(async (param) => {
+  if (!param) {
+    return
+  }
 
-async function getUpgradeValueFromParam(param: InstanceInstallOptions): Promise<Omit<UpgradeValueType, 'delta'>> {
   if (param.type === 'ftb') {
     const oldManifest = param.oldManifest
     const newManifest = param.newManifest
     // FTB
     const [config, newVersionFiles] = getFTBTemplateAndFile(newManifest, javas.value)
     const [_, oldVersionFiles] = getFTBTemplateAndFile(oldManifest, javas.value)
-    return markRaw({
-      edit: config,
-      installation: {
-        path: instancePath.value,
-        oldFiles: oldVersionFiles,
-        files: newVersionFiles,
-        upstream: param.upstream,
-      }
-    })
-  }
-
-  if (param.type === 'upstream') {
+    config.upstream = {
+      type: 'ftb-modpack',
+      id: newManifest.parent,
+      versionId: newManifest.id,
+    }
+    upgrade.value = {
+      instance: config,
+      files: markRaw(await getInstanceUpdateProfileRaw({
+        instancePath: instancePath.value,
+        oldVersionFiles,
+        newVersionFiles,
+      })),
+    }
+  } else if (param.type === 'upstream') {
     const instancePath = param.instancePath
     const modpack = param.modpack
 
-    const state = await openModpack(modpack)
-    const files = state.files
-    const config = state.config
-
-    return markRaw({
-      edit: config,
-      installation: {
-        path: instancePath,
-        files: files,
-        upstream: param.upstream,
-      }
+    const { config, files } = await getInstanceUpdateProfile({
+      instancePath,
+      modpack,
     })
-  } 
-  
-  return markRaw({
-    installation: {
-      path: instancePath.value,
-      oldFiles: param.oldFiles,
-      files: param.files,
+
+    upgrade.value = {
+      instance: config,
+      files,
+    }
+  } else if (param.type === 'updates') {
+    upgrade.value = {
+      files: param.updates,
       id: param.id,
     }
-  })
-}
-
-const { refresh, refreshing, error } = useRefreshable<InstanceInstallOptions>(async (param) => {
-  if (!param) {
-    return
   }
 
-  const upgradeValue = await getUpgradeValueFromParam(param)
-  const updateDelta = await previewInstanceFiles(upgradeValue.installation)
-  upgrade.value = {
-    ...upgradeValue,
-    delta: updateDelta,
-  }
-  if (selectable.value) {
-    const selectedResult = upgradeValue.installation.files.map(f => f.path)
-    if ('oldFiles' in upgradeValue.installation) {
-      selectedResult.push(...upgradeValue.installation.oldFiles.map(f => f.path))
+  if (upgrade.value) {
+    if (param.type === 'updates' && param.selectOnlyAdd) {
+      selected.value = upgrade.value.files
+        .filter(f => f.operation === 'add')
+        .map(f => f.file.path)
+    } else {
+      selected.value = upgrade.value.files.map(f => f.file.path)
     }
-    selected.value = selectedResult
   }
-})
-
-const selectable = computed(() => {
-  const upgradeValue = upgrade.value
-  const install = upgradeValue?.installation
-  if (install && 'upstream' in upgradeValue.installation) {
-    return false
-  }
-  return true
 })
 
 const loaderDifferences = computed(() => {
@@ -404,41 +353,37 @@ const loaderDifferences = computed(() => {
 })
 
 const confirm = async () => {
-  const up = upgrade.value
-  if (!up) {
-    return
-  }
-  const { edit: instance, installation } = up
-  isShown.value = false
-  const selectedPath = selected.value
-  const path = instancePath.value
-  try {
-    if (selectable.value) {
-      if ('oldFiles' in installation) {
-        installation.oldFiles = installation.oldFiles.filter(f => selectedPath.includes(f.path))
-      }
-      installation.files = installation.files.filter(f => selectedPath.includes(f.path))
+  if (upgrade.value) {
+    const { instance, files, id } = upgrade.value
+    isShown.value = false
+    const select = selected.value
+    const filtered = files.filter(f => f.operation !== 'keep' && select.includes(f.file.path))
+    try {
+      await installInstanceFiles({
+        path: instancePath.value,
+        files: filtered.map(f => ({ ...f.file, operation: f.operation as InstanceFileOperation })),
+        id,
+      })
+    } catch (e) {
+      Object.assign(e as any, {
+        instanceInstallErrorId: id,
+      })
+      throw e
     }
-    await installInstanceFiles(installation)
-  } catch (e) {
-    Object.assign(e as any, {
-      instanceInstallErrorId: installation.id,
-    })
-    throw e
-  }
-  if (instance) {
-    await edit({
-      instancePath: path,
-      runtime: {
-        minecraft: instance.runtime?.minecraft || oldRuntime.value.minecraft,
-        forge: instance.runtime?.forge,
-        fabricLoader: instance.runtime?.fabricLoader,
-        quiltLoader: instance.runtime?.quiltLoader,
-        neoForged: instance.runtime?.neoForged,
-      },
-      modpackVersion: instance.modpackVersion,
-      upstream: instance.upstream,
-    })
+    if (instance) {
+      await edit({
+        instancePath: instancePath.value,
+        runtime: {
+          minecraft: instance.runtime?.minecraft || oldRuntime.value.minecraft,
+          forge: instance.runtime?.forge,
+          fabricLoader: instance.runtime?.fabricLoader,
+          quiltLoader: instance.runtime?.quiltLoader,
+          neoForged: instance.runtime?.neoForged,
+        },
+        modpackVersion: instance.modpackVersion,
+        upstream: instance.upstream,
+      })
+    }
   }
 }
 

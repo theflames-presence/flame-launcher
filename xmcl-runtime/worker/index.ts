@@ -1,20 +1,15 @@
-import { Exception } from '@xmcl/runtime-api'
 import { Worker, WorkerOptions } from 'worker_threads'
 import { Logger } from '~/logger'
 
 export const createLazyWorker = <T>(factory: (options?: WorkerOptions) => Worker, signatures: {
   methods: Array<keyof T>
   asyncGenerators?: Array<keyof T>
-}, logger: Logger, options?: WorkerOptions): [T, () => void] => {
+}, logger: Logger, options?: WorkerOptions): T => {
   let threadWorker: Worker | undefined
   let counter = 0
   let destroyTimer: undefined | ReturnType<typeof setTimeout>
   const queue: Record<number, { resolve: (r: any) => void; reject: (e: any) => void }> = {}
-  let disposed = false
   const createWorker = () => {
-    if (disposed) {
-      throw new Exception({ type: 'workerDisposedError' }, 'The worker is disposed')
-    }
     const worker = factory(options)
     logger.log(`Awake the worker ${factory}`)
     worker.on('message', (message: 'idle' | WorkerResponse) => {
@@ -25,7 +20,7 @@ export const createLazyWorker = <T>(factory: (options?: WorkerOptions) => Worker
         destroyTimer = setTimeout(() => {
           if (threadWorker) {
             logger.log(`Dispose the worker ${factory}`)
-            threadWorker.terminate()
+            threadWorker?.terminate()
             threadWorker = undefined
             destroyTimer = undefined
           }
@@ -91,14 +86,7 @@ export const createLazyWorker = <T>(factory: (options?: WorkerOptions) => Worker
       }
     }
   }
-  return [obj, () => {
-    if (threadWorker) {
-      threadWorker.terminate()
-      threadWorker = undefined
-      destroyTimer = undefined
-      disposed = true
-    }
-  }]
+  return obj
 }
 
 export interface WorkPayload {

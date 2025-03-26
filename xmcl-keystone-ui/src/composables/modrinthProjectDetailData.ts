@@ -23,9 +23,7 @@ export function useModrinthProjectDetailData(projectId: Ref<string>, project: Re
     watch(projectId, async (id) => {
       localizedBody.value = ''
       const result = await getContent('modrinth', id)
-      if (id === projectId.value) {
-        localizedBody.value = result
-      }
+      localizedBody.value = result
     }, { immediate: true })
   }
 

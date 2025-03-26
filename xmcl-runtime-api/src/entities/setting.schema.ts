@@ -117,11 +117,6 @@ export interface SettingSchema {
    */
   globalPrependCommand: string
   /**
-   * The launch environment variables
-   * @default {}
-   */
-  globalEnv: Record<string, string>
-  /**
    * @default true
    */
   discordPresence: boolean

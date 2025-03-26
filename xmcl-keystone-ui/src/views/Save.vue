@@ -58,6 +58,7 @@
         :curseforge-id="Number(selectedCurseforgeId)"
         :installed="selectedItem.installed"
         :game-version="gameVersion"
+        :loaders="[]"
         :all-files="[]"
         :category="curseforgeCategory"
         :updating="updating"

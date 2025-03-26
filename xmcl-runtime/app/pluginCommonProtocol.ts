@@ -24,7 +24,16 @@ export const pluginCommonProtocol: LauncherAppPlugin = (app) => {
       response.headers = resp.headers
       response.body = resp.body instanceof ReadableStream ? Readable.fromWeb(resp.body as any) : (resp.body ?? undefined)
     } catch (e) {
-      throw e
+      const resp = await fetch(request.url.toString(), {
+        headers: request.headers,
+        method: request.method,
+        body: body instanceof Readable ? Readable.toWeb(body) as any : body,
+        redirect: 'follow',
+        duplex: body ? 'half' : undefined,
+      })
+      response.status = resp.status
+      response.headers = resp.headers
+      response.body = resp.body instanceof ReadableStream ? Readable.fromWeb(resp.body as any) : (resp.body as any ?? undefined)
     }
   }
   app.protocol.registerHandler('http', handler)

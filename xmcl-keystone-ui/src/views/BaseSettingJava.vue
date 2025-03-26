@@ -1,5 +1,6 @@
 <template>
   <v-list
+    two-line
     style="background: transparent; width: 100%"
   >
     <v-subheader style="padding-right: 2px">
@@ -121,36 +122,6 @@
         </v-list-item-subtitle>
       </v-list-item-content>
     </v-list-item>
-    <v-list-item>
-      <v-list-item-content>
-        <v-list-item-title>
-          {{ t("instance.vmVar") }}
-        </v-list-item-title>
-        <v-list-item-subtitle>
-          {{ t("instance.vmVarHint") }}
-        </v-list-item-subtitle>
-      </v-list-item-content>
-      <v-list-item-action>
-        <v-btn
-          icon
-          @click="onAddEnvVar"
-        >
-          <v-icon>add</v-icon>
-        </v-btn>
-      </v-list-item-action>
-    </v-list-item>
-
-    <EnvVarTableItem
-      :env="allEnv"
-      :readonly="readonlyEnv"
-      @delete="onEnvVarDeleted"
-    />
-
-    <EnvVarAddItem
-      v-if="adding"
-      @clear="onEnvVarCleared"
-      @add="onEnvVarAdded"
-    />
   </v-list>
 </template>
 
@@ -166,8 +137,6 @@ import BaseSettingGlobalLabel from './BaseSettingGlobalLabel.vue'
 import JavaList from './BaseSettingJavaList.vue'
 import SettingJavaMemory from './SettingJavaMemory.vue'
 import SettingJavaMemoryAssign from './SettingJavaMemoryAssign.vue'
-import EnvVarTableItem from '@/components/EnvVarTableItem.vue'
-import EnvVarAddItem from '@/components/EnvVarAddItem.vue'
 
 const { t } = useI18n()
 const { showOpenDialog } = windowController
@@ -181,8 +150,6 @@ const {
   assignMemory,
   isGlobalPrependCommand,
   prependCommand,
-  env,
-  globalEnv,
   resetPrependCommand,
   resetAssignMemory,
   resetVmOptions,
@@ -191,20 +158,6 @@ const {
   minMemory: minMem,
   javaPath,
 } = injection(InstanceEditInjectionKey)
-
-const allEnv = computed(() => ({
-  ...globalEnv.value,
-  ...env.value,
-}))
-const readonlyEnv = computed(() => {
-  const envs = { ...globalEnv.value }
-  for (const e in envs) {
-    if (env.value[e] !== undefined) {
-      delete envs[e]
-    }
-  }
-  return Object.keys(envs)
-})
 
 const java = computed({
   get: () => javas.value.find(v => v.path === javaPath.value) || { path: '', valid: false, majorVersion: 0, version: '' },
@@ -223,23 +176,6 @@ async function browseFile() {
     title: t('java.importFromFile'),
   })
   filePaths.forEach(add)
-}
-
-const adding = ref(false)
-function onAddEnvVar() {
-  adding.value = true
-}
-function onEnvVarCleared() {
-  adding.value = false
-}
-function onEnvVarAdded(key: string, value: string) {
-  adding.value = false
-  if (key === '') return
-  env.value = { ...env.value, [key]: value }
-}
-function onEnvVarDeleted(key: string) {
-  const { [key]: _, ...rest } = env.value
-  env.value = rest
 }
 
 </script>

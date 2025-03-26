@@ -59,9 +59,6 @@ t('installJre.name')
 t('installJre.download')
 t('installJre.decompress')
 
-// Upload Server
-t('server.upload')
-
 // Modrinth category
 t('modrinth.categories.128x')
 t('modrinth.categories.16x')

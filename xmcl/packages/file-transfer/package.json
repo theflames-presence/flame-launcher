@@ -1,10 +1,10 @@
 {
   "name": "@xmcl/file-transfer",
-  "version": "2.0.1",
+  "version": "1.0.6",
   "main": "./index.ts",
   "description": "A high performance downloader based on undici",
   "engines": {
-    "node": ">=20"
+    "node": ">=16.0"
   },
   "scripts": {
     "build:type": "tsc",
@@ -19,7 +19,7 @@
   "dependencies": {
     "@types/http-cache-semantics": "^4.0.1",
     "http-cache-semantics": "^4.1.1",
-    "undici": "7.2.3"
+    "undici": "6.19.4"
   },
   "repository": {
     "type": "git",
@@ -41,9 +41,9 @@
   "homepage": "https://github.com/Voxelum/minecraft-launcher-core-node#readme",
   "devDependencies": {
     "@types/node": "~18.15.11",
-    "@xmcl/oxlint-config": "workspace:^*",
+    "@xmcl/eslint-config": "workspace:^*",
     "esbuild": "^0.17.16",
-    "oxlint": "^0.15.5",
+    "eslint": "^8.37.0",
     "typescript": "^5.3.3"
   }
 }

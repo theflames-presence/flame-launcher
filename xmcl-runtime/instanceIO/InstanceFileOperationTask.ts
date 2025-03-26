@@ -1,74 +1,85 @@
-import { InstanceFile, Platform } from '@xmcl/runtime-api'
+import { InstanceFile, InstanceFileWithOperation, Platform, Resource } from '@xmcl/runtime-api'
 import { AbortableTask } from '@xmcl/task'
-import { copyFile, ensureDir, stat, unlink } from 'fs-extra'
+import { Stats } from 'fs'
+import { copyFile, ensureDir, rename, stat, unlink } from 'fs-extra'
 import { dirname } from 'path'
-import { ENOENT_ERROR, isInSameDisk, linkWithTimeoutOrCopy } from '../util/fs'
-import { isSystemError } from '~/util/error'
+import { isInSameDisk, linkWithTimeoutOrCopy } from '../util/fs'
 
-/**
- * Link existed files into temp folder.
- * 
- * All returned files are unhandled.
- */
-export class InstanceFileLinkTask extends AbortableTask<void> {
+export class InstanceFileOperationTask extends AbortableTask<void> {
   constructor(
-    readonly files: Array<{ file: InstanceFile; src: string; destination: string }>,
+    readonly copyOrLinkQueue: Array<{ file: InstanceFile; src: string; destination: string }>,
+    readonly filesQueue: Array<{ file: InstanceFileWithOperation; destination: string }>,
     readonly platform: Platform,
-    readonly finished: Set<string>,
-    readonly unhandled: Array<InstanceFile>,
+    readonly finished: Set<InstanceFile>,
   ) {
     super()
-    this._total = files.length
+    this._total = copyOrLinkQueue.length
     this.name = 'link'
     this.param = { count: this._total }
   }
 
-  handleLink = async (job: { file: InstanceFile; src: string; destination: string }) => {
-    if (this.finished.has(job.file.path)) return
-    const src = job.src
-    const dest = job.destination
-
-    const destStat = await stat(dest).catch(() => undefined)
-    const srcStat = await stat(src)
-
-    if (destStat) {
-      if (destStat.ino === srcStat.ino) {
-        // existed file, but same
-        this.finished.add(job.file.path)
-        return
-      }
-
-      // existed file, but different
-      await unlink(dest)
+  tryLink = async (filePath: string, destination: string, size?: number, fstat?: Stats) => {
+    if (fstat) {
+      // existed file
+      await unlink(destination)
     }
-
-    await ensureDir(dirname(dest))
-
-    if (isInSameDisk(src, dest, this.platform.os)) {
-      await linkWithTimeoutOrCopy(src, dest)
+    await ensureDir(dirname(destination))
+    if (isInSameDisk(filePath, destination, this.platform.os)) {
+      await linkWithTimeoutOrCopy(filePath, destination)
     } else {
-      await copyFile(src, dest)
+      await copyFile(filePath, destination)
     }
-
     this._progress++
-    this.update(srcStat.size)
-    this.finished.add(job.file.path)
+    this.update(size ?? 0)
+  }
+
+  handleFile = async (job: { file: InstanceFile; src: string; destination: string }) => {
+    if (this.finished.has(job.file)) return
+    const filePath = job.src
+    const fstat = await stat(job.destination).catch(() => undefined)
+    if (fstat && fstat.ino === (await stat(filePath)).ino) {
+      // existed file, but same
+      this.finished.add(job.file)
+      return
+    }
+    await this.tryLink(filePath, job.destination, job.file.size, fstat)
+    this.finished.add(job.file)
+  }
+
+  handleResource = async (job: { file: InstanceFile; resource: Resource; destination: string }) => {
+    if (this.finished.has(job.file)) return
+    const fstat = await stat(job.destination).catch(() => undefined)
+    if (fstat && fstat.ino === job.resource.ino) {
+      // existed file, but same
+      this.finished.add(job.file)
+      return
+    }
+    await this.tryLink(job.resource.path, job.destination, job.resource.size, fstat)
+    this.finished.add(job.file)
+  }
+
+  handleCommon = async ({ destination, file }: { file: InstanceFileWithOperation; destination: string }) => {
+    if (this.finished.has(file)) return
+    if (file.operation === 'remove') {
+      await unlink(destination)
+      this.finished.add(file)
+    } else if (file.operation === 'backup-remove') {
+      await rename(destination, destination + '.backup').catch(() => { })
+      this.finished.add(file)
+    } else if (file.operation === 'backup-add') {
+      await rename(destination, destination + '.backup').catch(() => undefined)
+      this.finished.add(file)
+    }
   }
 
   protected async process(): Promise<void> {
-    const unhandled = this.unhandled
-    // second pass, link or copy all files
-    const result = await Promise.allSettled(this.files.map(async (job) => this.handleLink(job).catch(e => {
-      if (isSystemError(e) && e.name === ENOENT_ERROR) {
-        // Only the not found error can continue
-        unhandled.push(job.file)
-      }
-      throw e
-    })))
-
+    const result = await Promise.allSettled([
+      ...this.copyOrLinkQueue.map(async (job) => this.handleFile(job)),
+      ...this.filesQueue.map(async (job) => this.handleCommon(job)),
+    ])
     const errors = result.filter((r) => r.status === 'rejected').map((r) => (r as any).reason)
     if (errors.length > 0) {
-      throw new AggregateError(errors.flatMap((e) => e instanceof AggregateError ? e.errors : e))
+      throw new AggregateError(errors)
     }
   }
 

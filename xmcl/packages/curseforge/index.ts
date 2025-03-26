@@ -1,4 +1,3 @@
-/* eslint-disable n/no-unsupported-features/node-builtins */
 /**
  * @module @xmcl/curseforge
  */
@@ -573,7 +572,7 @@ export class CurseforgeV1Client {
   constructor(private apiKey: string, options?: CurseforgeClientOptions) {
     this.headers = {
       'x-api-key': this.apiKey,
-      ...options?.headers,
+      ...(options?.headers || {}),
     }
     this.baseUrl = options?.baseUrl || 'https://api.curseforge.com'
     this.fetch = options?.fetch || ((...args) => fetch(...args))

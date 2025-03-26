@@ -6,8 +6,8 @@ import { InstanceService } from '~/instance'
 import { LaunchService } from '~/launch'
 import { AbstractService, ExposeServiceKey } from '~/service'
 import { LauncherApp } from '../app/LauncherApp'
+import { Queue } from '../util/mutex'
 import { InstanceResourcePackService } from './InstanceResourcePacksService'
-import { Mutex } from 'async-mutex'
 
 interface NamedResourcePackWrapper extends ResourcePackWrapper {
   path: string
@@ -23,7 +23,7 @@ export class ResourcePackPreviewService extends AbstractService implements IReso
 
   private cachedJsonVersion: string | undefined
 
-  private queue = new Mutex()
+  private queue = new Queue()
 
   private active = false
 
@@ -35,7 +35,7 @@ export class ResourcePackPreviewService extends AbstractService implements IReso
     super(app)
     launchService.on('minecraft-start', () => {
       if (this.active) {
-        this.queue.waitForUnlock().then(() => {
+        this.queue.waitUntilEmpty().then(() => {
           // deactivate once game started
           this.active = false
           this.resourceManager.clear()
@@ -149,11 +149,11 @@ export class ResourcePackPreviewService extends AbstractService implements IReso
 
     if (this.resourceManager.list.length === 0) {
       // if no resource packs loaded, load it...
-      if (!this.queue.isLocked()) {
+      if (!this.queue.isWaiting()) {
         // TODO: fix this
         // await this.updateResourcePacks(this.instanceGameSettingService.state.resourcePacks)
       } else {
-        await this.queue.waitForUnlock()
+        await this.queue.waitUntilEmpty()
       }
     }
 

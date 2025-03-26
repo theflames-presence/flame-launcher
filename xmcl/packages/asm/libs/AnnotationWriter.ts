@@ -38,10 +38,10 @@
 
 import type { ClassWriter } from './ClassWriter'
 import { AnnotationVisitor } from './AnnotationVisitor'
-import type { ByteVector } from './ByteVector'
+import { ByteVector } from './ByteVector'
 import { Opcodes } from './Opcodes'
-import type { Item } from './Item'
-import type { TypePath } from './TypePath'
+import { Item } from './Item'
+import { TypePath } from './TypePath'
 import { Type } from './Type'
 
 export class AnnotationWriter extends AnnotationVisitor {

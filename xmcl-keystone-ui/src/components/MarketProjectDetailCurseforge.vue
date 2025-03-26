@@ -6,13 +6,13 @@ import { useCurseforgeChangelog } from '@/composables/curseforgeChangelog'
 import { getCurseforgeDependenciesModel, useCurseforgeTask } from '@/composables/curseforgeDependencies'
 import { kCurseforgeInstaller } from '@/composables/curseforgeInstaller'
 import { useDateString } from '@/composables/date'
-import { useI18nSearchFlights } from '@/composables/flights'
+import { kFlights, useI18nSearchFlights } from '@/composables/flights'
 import { useAutoI18nCommunityContent } from '@/composables/i18n'
 import { useProjectDetailEnable, useProjectDetailUpdate } from '@/composables/projectDetail'
 import { useService } from '@/composables/service'
 import { useLoading, useSWRVModel } from '@/composables/swrv'
 import { basename } from '@/util/basename'
-import { getCurseforgeFileGameVersions, getCurseforgeRelationType, getCursforgeFileModLoaders, getCursforgeModLoadersFromString, getModLoaderTypesForFile } from '@/util/curseforge'
+import { getCurseforgeFileGameVersions, getCurseforgeRelationType, getCursforgeFileModLoaders, getModLoaderTypesForFile } from '@/util/curseforge'
 import { injection } from '@/util/inject'
 import { ModFile } from '@/util/mod'
 import { ProjectFile } from '@/util/search'
@@ -24,7 +24,7 @@ const props = defineProps<{
   curseforgeId: number
   installed: ProjectFile[]
   gameVersion: string
-  loader?: string
+  loaders: string[]
   allFiles: ProjectFile[]
   category?: number
   updating?: boolean
@@ -49,9 +49,7 @@ const curseforgeProjectMapping = shallowRef(undefined as ProjectMapping | undefi
 
 watch(curseforgeModId, async (id) => {
   const result = await lookupByCurseforge(id).catch(() => undefined)
-  if (id === curseforgeModId.value) {
-    curseforgeProjectMapping.value = result
-  }
+  curseforgeProjectMapping.value = result
 }, { immediate: true })
 
 const { data: description, isValidating: isValidatingDescription } = useSWRVModel(getCurseforgeProjectDescriptionModel(curseforgeModId))
@@ -65,9 +63,7 @@ if (i18nSearch) {
   watch(curseforgeModId, async (id) => {
     localizedBody.value = ''
     const result = await getContent('curseforge', id)
-    if (id === curseforgeModId.value) {
-      localizedBody.value = result
-    }
+    localizedBody.value = result
   }, { immediate: true })
 }
 
@@ -198,7 +194,7 @@ const releaseTypes: Record<string, 'release' | 'beta' | 'alpha'> = {
 
 const { files, refreshing: loadingVersions, index, totalCount, pageSize } = useCurseforgeProjectFiles(curseforgeModId,
   computed(() => props.gameVersion),
-  computed(() => getCursforgeModLoadersFromString(props.loader)[0]))
+  computed(() => undefined))
 
 const modId = ref(0)
 const fileId = ref(undefined as number | undefined)
@@ -208,6 +204,12 @@ const modVersions = computed(() => {
   const versions: ProjectVersion[] = []
   const installed = [...props.installed]
   for (const file of files.value) {
+    const loaders = getCursforgeFileModLoaders(file)
+    if (props.loaders.length > 0 && loaders.length > 0) {
+      if (!loaders.some(l => props.loaders.indexOf(l as any) !== -1)) {
+        continue
+      }
+    }
     const installedFileIndex = installed.findIndex(f => f.curseforge?.fileId === file.id)
     const f = installedFileIndex === -1 ? undefined : installed.splice(installedFileIndex, 1)
 

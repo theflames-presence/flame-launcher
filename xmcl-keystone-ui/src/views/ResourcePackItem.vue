@@ -2,7 +2,6 @@
   <MarketItem
     :item="pack"
     :selection-mode="selectionMode"
-    :disabled="isVirtual"
     :selected="selected"
     :has-update="hasUpdate"
     :checked="checked"
@@ -12,7 +11,7 @@
     :get-context-menu-items="isBuiltIn ? undefined : getContextMenuItems"
     :install="install"
     @drop="emit('drop', $event)"
-    @click="isVirtual ? undefined : emit('click', $event)"
+    @click="emit('click', $event)"
     @checked="emit('check', $event)"
   >
     <template
@@ -100,16 +99,11 @@ const { t } = useI18n()
 const { uninstall } = useService(InstanceResourcePacksServiceKey)
 const { showItemInDirectory } = useService(BaseServiceKey)
 const { path } = injection(kInstance)
-const isVirtual = computed(() => props.pack.installed[0] && !props.pack.installed[0].path)
 
 const isBuiltIn = computed(() => props.pack.id === 'vanilla' || props.pack.id === 'fabric' || props.pack.id === 'file/mod_resources')
 const getContextMenuItems = () => {
   const all = [] as ContextMenuItem[]
   if (props.pack.installed.length > 0) {
-    if (isVirtual.value) {
-      // virtual pack
-      return all
-    }
     all.push({
       text: t('resourcepack.showFile', { file: props.pack.installed[0].path }),
       onClick: () => {

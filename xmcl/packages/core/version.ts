@@ -684,10 +684,6 @@ export namespace Version {
           path: info.path,
         }
       }
-      // if (info.classifier.startsWith('natives')) {
-      //   // new native format introduced by 1.19
-      //   return new ResolvedLibrary(info.name, info, lib.downloads.artifact, true)
-      // }
       return new ResolvedLibrary(lib.name, info, lib.downloads.artifact)
     }
     const maven = lib.url || 'https://libraries.minecraft.net/'

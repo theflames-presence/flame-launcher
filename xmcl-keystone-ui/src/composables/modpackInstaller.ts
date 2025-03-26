@@ -57,7 +57,7 @@ export function useModpackInstaller() {
     }
 
     const lock = getInstanceLock(instancePath)
-    lock.runExclusive(async () => {
+    lock.write(async () => {
       const resolved = version ? await resolveLocalVersion(version) : undefined
       const instruction = await getInstallInstruction(instancePath, runtime, '', resolved, all.value)
       await handleInstallInstruction(instruction)

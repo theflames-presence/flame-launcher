@@ -119,7 +119,6 @@ export const VarLong: Coder<bigint> = {
   encode: (buffer, inst) => { buffer.writeVarint64(inst) },
 }
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const String: Coder<string> = {
   decode: (buffer) => {
     const length = buffer.readVarint32()

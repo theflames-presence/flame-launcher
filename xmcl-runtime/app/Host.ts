@@ -94,5 +94,5 @@ export interface Host {
    */
   whenReady(): Promise<void>
 
-  relaunch(options?: { args?: string[] }): void
+  relaunch(): void
 }

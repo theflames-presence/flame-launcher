@@ -1,4 +1,5 @@
 import { BufferAttribute, Texture, Vector2 } from 'three'
+import { Geometry } from 'three/examples/jsm/deprecated/Geometry'
 import { DoubleSide, NearestFilter } from 'three/src/constants'
 import { Object3D } from 'three/src/core/Object3D'
 import { BoxGeometry } from 'three/src/geometries/BoxGeometry'

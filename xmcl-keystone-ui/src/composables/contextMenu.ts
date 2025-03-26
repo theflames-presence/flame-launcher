@@ -4,7 +4,6 @@ export interface ContextMenuItem {
   text: string
   icon: string
   color?: string
-  children?: ContextMenuItem[]
   onClick: () => void
 }
 

@@ -40,7 +40,6 @@ const headerData = computed(() => {
       return {
         text: te(`curseforgeCategory.${c?.name}`) ? t(`curseforgeCategory.${c?.name}`) : c.name || '',
         icon: c.iconUrl || '',
-        id: c.id.toString(),
       }
     }),
     type: 'curseforge',
@@ -100,7 +99,7 @@ const items = computed(() => {
     if (!result[date]) {
       result[date] = []
     }
-    result[date].push(markRaw({
+    result[date].push(reactive({
       id: d.id.toString(),
       name: d.displayName,
       versionType: d?.releaseType === 1 ? 'release' : d?.releaseType === 2 ? 'beta' : 'alpha',
@@ -142,11 +141,6 @@ async function onUpdate(v: ProjectVersionProps) {
       type: 'upstream',
       modpack,
       instancePath,
-      upstream: {
-        type: 'curseforge-modpack',
-        modId: Number(props.id),
-        fileId: Number(v.id),
-      }
     })
   } finally {
     updating.value = false
@@ -184,7 +178,6 @@ const loadChangelog = async (v: ProjectVersionProps) => {
     :header="headerData"
     :duplicating="duplicating"
     :only-current-version.sync="onlyCurrentVersion"
-    :updating="updating"
     @duplicate="onDuplicate"
     @update="onUpdate"
     @changelog="loadChangelog"

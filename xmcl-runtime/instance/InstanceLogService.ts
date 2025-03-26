@@ -5,10 +5,10 @@ import { LauncherApp } from '../app/LauncherApp'
 import { LauncherAppKey, Inject } from '~/app'
 import { EncodingWorker, kEncodingWorker } from '~/encoding'
 import { UTF8 } from '../util/encoding'
-import { ENOENT_ERROR, readdirIfPresent } from '../util/fs'
+import { readdirIfPresent } from '../util/fs'
 import { gunzip } from '../util/zip'
 import { AbstractService, ExposeServiceKey, Singleton } from '~/service'
-import { AnyError, isSystemError } from '../util/error'
+import { AnyError } from '../util/error'
 
 /**
  * Provide the ability to list/read/remove log and crash reports of a instance.
@@ -57,6 +57,7 @@ export class InstanceLogService extends AbstractService implements IInstanceLogS
       const result = await this.encoder.decode(buf, encoding || UTF8)
       return result
     } catch (e) {
+      this.error(new AnyError('GetLogContentError', `Fail to get log content "${name}"`, { cause: e }))
       return ''
     }
   }
@@ -78,14 +79,7 @@ export class InstanceLogService extends AbstractService implements IInstanceLogS
   async removeCrashReport(instancePath: string, name: string) {
     const filePath = join(instancePath, 'crash-reports', name)
     this.log(`Remove crash report ${filePath}`)
-    try {
-      await unlink(filePath)
-    } catch (e) {
-      if (isSystemError(e) && e.code === ENOENT_ERROR) {
-        return
-      }
-      throw e
-    }
+    await unlink(filePath)
   }
 
   /**
@@ -109,10 +103,6 @@ export class InstanceLogService extends AbstractService implements IInstanceLogS
       const result = await this.encoder.decode(buf, encoding || UTF8)
       return result
     } catch (e) {
-      if (isSystemError(e) && e.code === ENOENT_ERROR) {
-        // expected
-        return ''
-      }
       this.error(new AnyError('GetCrashContentError', `Fail to get log content "${name}"`, { cause: e }))
       return ''
     }

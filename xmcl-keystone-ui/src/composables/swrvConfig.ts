@@ -10,8 +10,6 @@ export function useSWRVConfig() {
     shouldRetryOnError: true,
     revalidateOnFocus: false,
     revalidateDebounce: 1500,
-    errorRetryInterval: 5000,
-    errorRetryCount: 5,
     dedupingInterval: 1000 * 60 * 10,
     ttl: 1000 * 60 * 60 * 24,
   }

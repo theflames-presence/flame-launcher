@@ -21,7 +21,7 @@
     <span class="flex flex-wrap justify-center gap-2">
       <CategoryChip
         v-for="v of value.categories"
-        :key="v.id"
+        :key="v.text"
         :item="v"
         outlined
       />

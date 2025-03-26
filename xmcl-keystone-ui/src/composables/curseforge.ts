@@ -84,7 +84,7 @@ export enum CurseforgeBuiltinClassId {
 export function useCurseforgeSearchFunc(
   classId: MaybeRef<number>,
   keyword: Ref<string>,
-  loaders: Ref<FileModLoaderType[]>,
+  modLoaderFilters: Ref<FileModLoaderType[]>,
   curseforgeCategory: Ref<number | undefined>,
   sort: Ref<ModsSearchSortField | undefined>,
   gameVersion: Ref<string>,
@@ -101,7 +101,7 @@ export function useCurseforgeSearchFunc(
   async function search(index: number) {
     let modLoaderType = undefined as FileModLoaderType | undefined
     let modLoaderTypes = undefined as string[] | undefined
-    const types = get(loaders)
+    const types = get(modLoaderFilters)
     if (types.length === 1) {
       modLoaderType = types[0]
     } else {

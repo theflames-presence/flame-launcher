@@ -33,7 +33,7 @@
         <div class="secondary-text mt-1 flex gap-3 align-baseline">
           <span
             v-for="label of value.labels"
-            :key="label.id"
+            :key="label.text + label.icon"
             class="text-sm"
           >
             <v-icon small>
@@ -48,7 +48,7 @@
         >
           <CategoryChip
             v-for="tag of value.tags"
-            :key="tag.id"
+            :key="tag.text + tag.icon"
             small
             :item="tag"
             @click="emit('filter', tag.text)"

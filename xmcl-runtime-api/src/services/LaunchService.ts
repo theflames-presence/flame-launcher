@@ -1,8 +1,9 @@
+import { AUTHORITY_DEV } from '../util/authority'
 import { Exception } from '../entities/exception'
 import { UserProfile } from '../entities/user.schema'
 import { GenericEventEmitter } from '../events'
-import { AUTHORITY_DEV } from '../util/authority'
 import { ServiceKey } from './Service'
+import { UserExceptions } from './UserService'
 
 interface LaunchServiceEventMap {
   'minecraft-window-ready': { pid: number }
@@ -18,7 +19,7 @@ interface LaunchServiceEventMap {
   'minecraft-stderr': { pid: number; stdout: string }
   'launch-performance-pre': { id: string; name: string }
   'launch-performance': { id: string; name: string; duration: number }
-  'error': LaunchException | Error
+  'error': LaunchException
 }
 
 export interface LaunchOptions {
@@ -112,10 +113,6 @@ export interface LaunchOptions {
    * Prepend command before launch
    */
   prependCommand?: string
-  /**
-   * The environment variables
-   */
-  env?: Record<string, string>
 
   disableElyByAuthlib?: boolean
 
@@ -178,6 +175,12 @@ export type LaunchExceptions = {
   options?: LaunchOptions
 } | {
   /**
+   * Unknown error
+   */
+  type: 'launchGeneralException'
+  error: unknown
+} | {
+  /**
    * Spawn process failed
    */
   type: 'launchSpawnProcessFailed'
@@ -199,6 +202,12 @@ export type LaunchExceptions = {
    */
   type: 'launchJavaNoPermission'
   javaPath: string
+} | {
+  /**
+   * Refresh user status failed
+   */
+  type: 'launchUserStatusRefreshFailed'
+  userException: UserExceptions
 } | {
   type: 'launchBadVersion'
   version: string

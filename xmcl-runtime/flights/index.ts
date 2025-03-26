@@ -30,7 +30,7 @@ export const pluginFlights: LauncherAppPlugin = async (app) => {
       await writeFile(cachedPath, JSON.stringify(output))
     } catch (e) {
       const err = e as any
-      if (err.code === 'ENOTFOUND' && err.syscall === 'getaddrinfo' && err.message === 'net::ERR_INTERNET_DISCONNECTED') {
+      if (err.code === 'ENOTFOUND' && err.syscall === 'getaddrinfo') {
         logger.warn('Failed to fetch flights: Network error. Please check your network connection.')
       } else {
         logger.error(e as Error)

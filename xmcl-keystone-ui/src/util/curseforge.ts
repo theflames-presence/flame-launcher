@@ -39,15 +39,13 @@ export function getModLoaderTypesForFile(file: File) {
   return modLoaderTypes
 }
 
-export function getCursforgeModLoadersFromString(loaderTypes: string | string[] | undefined) {
+export function getCursforgeModLoadersFromString(loaderTypes: string[]) {
   const mapping = {
     [ModLoaderFilter.fabric]: FileModLoaderType.Fabric,
     [ModLoaderFilter.forge]: FileModLoaderType.Forge,
     [ModLoaderFilter.quilt]: FileModLoaderType.Quilt,
     [ModLoaderFilter.neoforge]: FileModLoaderType.NeoForge,
   } as Record<string, FileModLoaderType>
-  if (!loaderTypes) return [FileModLoaderType.Any]
-  if (typeof loaderTypes === 'string') return [mapping[loaderTypes]]
   return loaderTypes.map(loaderType => mapping[loaderType])
 }
 

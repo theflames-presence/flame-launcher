@@ -22,9 +22,8 @@ export class InstanceResourcePackService extends AbstractInstanceDomainService i
 
   domain = ResourceDomain.ResourcePacks
 
-  override async link(instancePath: string, force?: boolean): Promise<boolean> {
-    const lock = this.mutex.of(LockKey.instance(instancePath))
-    await lock.waitForUnlock()
-    return await super.link(instancePath, force)
+  override link(instancePath: string, force?: boolean): Promise<boolean> {
+    const lock = this.semaphoreManager.getLock(LockKey.instance(instancePath))
+    return lock.read(() => super.link(instancePath, force))
   }
 }

@@ -1,10 +1,10 @@
 {
   "name": "@xmcl/game-data",
-  "version": "1.2.5",
+  "version": "1.2.4",
   "main": "./index.ts",
   "description": "Parse minecraft game related data like level.dat, server.dat",
   "engines": {
-    "node": ">=20"
+    "node": ">=16"
   },
   "scripts": {
     "build:type": "tsc",
@@ -41,10 +41,10 @@
   "homepage": "https://github.com/Voxelum/minecraft-launcher-core-node#readme",
   "devDependencies": {
     "@types/node": "~18.15.11",
-    "@xmcl/oxlint-config": "workspace:^*",
+    "@xmcl/eslint-config": "workspace:^*",
     "tslib": "^2.5.0",
     "esbuild": "^0.17.16",
-    "oxlint": "^0.15.5",
+    "eslint": "^8.37.0",
     "typescript": "^5.3.3"
   }
 }

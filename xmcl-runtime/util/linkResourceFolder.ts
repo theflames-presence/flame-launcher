@@ -1,36 +1,23 @@
-import { ensureDir, lstat, readdir, readlink, rename, unlink } from 'fs-extra'
+import { ensureDir, lstat, readlink, rename, unlink } from 'fs-extra'
 import { Logger } from '~/logger'
 import { isSystemError } from './error'
 import { ENOENT_ERROR, linkDirectory } from './fs'
 import { sep } from 'path'
 
-export function readlinkSafe(path: string) {
-  return readlink(path).catch(e => {
-    if (isSystemError(e) && (e.code === ENOENT_ERROR || e.code === 'EINVAL' || e.code === 'EISDIR')) {
-      return undefined
-    }
-    if (!e.stack) {
-      e.stack = new Error().stack
-    }
-    throw e
-  })
-}
-
-export async function readdirSafe(path: string) {
-  return await readdir(path).catch(e => {
-    if (isSystemError(e) && e.code === ENOENT_ERROR) {
-      return []
-    }
-    if (!e.stack) {
-      e.stack = new Error().stack
-    }
-    throw e
-  })
-}
-
 export async function isLinked(srcPath: string, destPath: string) {
-  const linkedPath = await readlinkSafe(destPath)
-  return linkedPath === srcPath || linkedPath === srcPath + sep
+  const stat = await lstat(destPath).catch((e) => {
+    if (isSystemError(e) && e.code === ENOENT_ERROR) {
+      return
+    }
+    throw e
+  })
+  if (stat) {
+    if (stat.isSymbolicLink()) {
+      const linkedPath = await readlink(destPath)
+      return linkedPath === srcPath || linkedPath === srcPath + sep
+    }
+  }
+  return undefined
 }
 /**
  * Try to link folder as symbolic link to the resource folder.

@@ -100,9 +100,6 @@ export function usePeerState(gameProfile: Ref<GameProfileAndTexture>) {
 
   const group = computed(() => state.value?.group)
   const groupState = computed(() => state.value?.groupState || 'closed')
-  const icePings = computed(() => state.value?.icsServersPings || {})
-  const groupPing = computed(() => state.value?.ping || NaN)
-  const groupLastTimestamp = computed(() => state.value?.timestamp || NaN)
   const error = computed(() => state.value?.groupError)
   const turnservers = computed(() => state.value?.turnservers || {})
 
@@ -149,9 +146,6 @@ export function usePeerState(gameProfile: Ref<GameProfileAndTexture>) {
     setRemoteDescription: _setRemoteDescription,
     initiate,
     group,
-    icePings,
-    groupPing,
-    groupLastTimestamp,
     groupState,
     connections,
     drop,

@@ -2,7 +2,7 @@ import { checksum } from '@xmcl/core'
 import { isFileNoFound } from '@xmcl/runtime-api'
 import { AbortableTask, CancelledError } from '@xmcl/task'
 import { createHash } from 'crypto'
-import { constants, existsSync } from 'fs'
+import { constants } from 'fs'
 import { access, copyFile, ensureDir, ensureFile, link, readdir, stat, symlink, unlink } from 'fs-extra'
 import { platform } from 'os'
 import { basename, extname, join, resolve } from 'path'
@@ -21,10 +21,6 @@ export function isPathDiskRootPath(path: string): boolean {
   } else {
     return path === '/'
   }
-}
-
-export function isNotFoundError(e: any) {
-  return isSystemError(e) && e.code === 'ENOENT'
 }
 
 export async function checksumFromStream(s: Readable, alg: string) {
@@ -170,12 +166,9 @@ export async function linkDirectory(srcPath: string, destPath: string, logger: L
     await symlink(srcPath, destPath, 'dir')
     return true
   } catch (e) {
-    if ((e as any).code === EPERM_ERROR && process.platform === 'win32') {
-      await symlink(srcPath, destPath, 'junction').catch(e => {
-        e.junction = true
-        e.srcExists = existsSync(srcPath)
-        throw e
-      })
+    logger.warn(`Cannot create symbolic link ${srcPath} -> ${destPath} by dir, try junction: ${e}`)
+    if ((e as any).code === EPERM_ERROR && platform() === 'win32') {
+      await symlink(srcPath, destPath, 'junction')
       return false
     }
     throw e
@@ -193,10 +186,6 @@ export function swapExt(path: string, ext: string) {
 export function linkOrCopyFile(from: string, to: string) {
   const onLinkFileError = async (e: unknown, copied: boolean) => {
     if (isSystemError(e) && e.code === 'EEXIST') {
-      const isInoMatched = await isHardLinked(from, to)
-      if (isInoMatched) {
-        return to
-      }
       const extName = extname(to)
       const fileName = basename(to, extName)
       to = join(to, fileName + `-${Date.now()}` + extName)
@@ -234,9 +223,7 @@ export async function linkWithTimeoutOrCopy(from: string, to: string, timeout = 
   try {
     await linkWithTimeout(from, to, timeout)
   } catch (e) {
-    if (e instanceof Error && e.name === 'TimeoutError') {
-      await copyFile(from, to)
-    }
+    await copyFile(from, to)
     return e
   }
 }
@@ -259,8 +246,8 @@ export const ENOENT_ERROR = 'ENOENT'
  */
 export const EPERM_ERROR = 'EPERM'
 
-export function handleOnlyNotFound(e: unknown) {
-  if (isSystemError(e) && e.code === ENOENT_ERROR) {
+function handleOnlyNotFound(e: unknown) {
+  if (isSystemError(e) && e.code === 'ENOENT') {
     return undefined
   }
   throw e

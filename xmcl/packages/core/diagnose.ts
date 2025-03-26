@@ -128,16 +128,11 @@ export async function diagnoseFile<T extends string>({ file, expectedChecksum, r
   if (!fileExisted) {
     issue = true
   } else if (expectedChecksum !== '') {
-    receivedChecksum = await checksumFunc(file, algorithm).catch(e => {
-      if (e.code === 'ENOENT') {
-        return ''
-      }
-      throw e
-    })
+    receivedChecksum = await checksumFunc(file, algorithm)
     if (signal?.aborted) return
     issue = receivedChecksum !== expectedChecksum
   } else {
-    const fstat = await stat(file).catch(() => ({ size: 0 }))
+    const fstat = await stat(file)
     if (fstat.size === 0) {
       issue = true
     }

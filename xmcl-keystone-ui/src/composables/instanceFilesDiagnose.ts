@@ -3,17 +3,18 @@ import { kInstanceFiles } from './instanceFiles'
 
 export function useInstanceFilesDiagnose() {
   const { t } = useI18n()
-  const { instanceInstallStatus, resumeInstall } = injection(kInstanceFiles)
+  const { instanceFiles, installFiles, mutate } = injection(kInstanceFiles)
 
-  const issue = computed(() => (instanceInstallStatus.value?.pendingFileCount || 0) > 0
+  const issue = computed(() => (instanceFiles.value?.files.length || 0) > 0
     ? {
       title: t('diagnosis.instanceFiles.title'),
-      description: t('diagnosis.instanceFiles.description', { counts: instanceInstallStatus.value?.pendingFileCount }),
+      description: t('diagnosis.instanceFiles.description', { counts: instanceFiles.value?.files.length }),
     }
     : undefined)
   const fix = async () => {
-    if (instanceInstallStatus.value && instanceInstallStatus.value.pendingFileCount > 0) {
-      await resumeInstall(instanceInstallStatus.value.instance)
+    await mutate()
+    if (instanceFiles.value) {
+      return installFiles(instanceFiles.value.instance, instanceFiles.value.files)
     }
   }
 

@@ -104,7 +104,6 @@ import { ResourceSnapshotTable } from './schema'
 
 export function pickMetadata(metadata: ResourceMetadata): ResourceMetadata {
   return {
-    neoforge: metadata.neoforge,
     [ResourceType.Forge]: metadata[ResourceType.Forge],
     [ResourceType.Fabric]: metadata[ResourceType.Fabric],
     [ResourceType.Liteloader]: metadata[ResourceType.Liteloader],

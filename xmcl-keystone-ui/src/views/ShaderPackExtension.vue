@@ -15,7 +15,8 @@
         :enable-modrinth.sync="isModrinthActive"
         :game-version.sync="gameVersion"
         :sort.sync="sort"
-        :local-only.sync="localOnly"
+        :modloader="modloader"
+        :mod-loaders="[ShaderLoaderFilter.optifine, ShaderLoaderFilter.iris]"
       />
     </div>
     <MarketExtensions
@@ -62,7 +63,14 @@ const extensionItems = computed(() => {
   return items
 })
 
-const { keyword, localOnly, gameVersion, modrinthCategories, sort, isModrinthActive } = injection(kShaderPackSearch)
+const modloader = computed({
+  get: () => shaderLoaderFilters.value[0],
+  set: (value: string) => {
+    shaderLoaderFilters.value = [value as ShaderLoaderFilter]
+  },
+})
+
+const { keyword, gameVersion, shaderLoaderFilters, modrinthCategories, sort, isModrinthActive } = injection(kShaderPackSearch)
 const { shaderMod } = injection(kInstanceShaderPacks)
 const { t } = useI18n()
 </script>

@@ -2,14 +2,10 @@
 import { InstanceFile } from './instanceManifest.schema'
 import _InstanceSchema from './InstanceSchema.json'
 import _InstancesSchema from './InstancesSchema.json'
-import _InstanceLockSchema from './InstanceLockSchema.json'
-import _InstanceInstallLockSchema from './InstanceInstallLockSchema.json'
 import { Schema } from './schema'
 
 export const InstanceSchema: Schema<InstanceSchema> = _InstanceSchema
 export const InstancesSchema: Schema<InstancesSchema> = _InstancesSchema
-export const InstanceLockSchema: Schema<InstanceLockSchema> = _InstanceLockSchema
-export const InstanceInstallLockSchema: Schema<InstanceInstallLockSchema> = _InstanceInstallLockSchema
 
 export interface RuntimeVersions {
   /**
@@ -80,11 +76,6 @@ export interface FTBUpstream {
   versionId: number
 }
 
-export interface PeerUpstream {
-  type: 'peer'
-  id: string
-}
-
 export interface InstanceData {
   /**
    * The display name of the profile. It will also be the modpack display name
@@ -153,10 +144,6 @@ export interface InstanceData {
    *
    */
   mcOptions?: string[]
-  /**
-   * The launch environment variables
-   */
-  env?: Record<string, string>
 
   prependCommand?: string
   /**
@@ -190,9 +177,11 @@ export interface InstanceData {
    */
   tags: string[]
   /**
+   * @default false
    */
   disableElybyAuthlib?: boolean
   /**
+   * @default false
    */
   disableAuthlibInjector?: boolean
 
@@ -201,51 +190,37 @@ export interface InstanceData {
   playTime?: number
   lastPlayedDate?: number
 
-  upstream?: InstanceUpstream
+  upstream?: CurseforgeUpstream | ModrinthUpstream | FTBUpstream
 }
 
-export type InstanceUpstream = CurseforgeUpstream | ModrinthUpstream | FTBUpstream | PeerUpstream
-
-/**
- * The instance lock schema. Represent the intermediate state of the instance files.
- */
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export interface InstanceLockSchema {
   /**
-   * The instance lock
+   * The instance lock version
    * @default 1
    */
   version: number
   /**
    * The upstream data for this locked instance file state
    */
-  upstream: InstanceUpstream
+  upstream?: {
+    type: 'curseforge-modpack'
+    modId: number
+    fileId: number
+    sha1: string
+  } | {
+    type: 'modrinth-modpack'
+    projectId: string
+    versionId: string
+    sha1: string
+  } | {
+    type: 'ftb-modpack'
+    id: number
+  }
   /**
-   * All the files accociated with current upstream
+   * All the files
    */
   files: InstanceFile[]
-  /**
-   * The files max mtime of the last install
-   */
-  mtime: number
-}
-
-/**
- * Represent a intermediate state of the instance files.
- */
-export interface InstanceInstallLockSchema extends InstanceLockSchema {
-  /**
-   * The finished files path
-   */
-  finishedPath: string[]
-  /**
-   * The backup files path
-   */
-  backup: string
-  /**
-   * The install workspace path
-   */
-  workspace: string
 }
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare

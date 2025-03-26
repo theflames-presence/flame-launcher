@@ -1,7 +1,7 @@
 import { Exception, InstanceNotFoundException } from '../entities/exception'
 import { InstallMarketOptionWithInstance } from '../entities/market'
 import { InstanceSave, InstanceSaveHeader, Saves } from '../entities/save'
-import { SharedState } from '../util/SharedState'
+import { MutableState } from '../util/MutableState'
 import { ServiceKey } from './Service'
 
 export interface ExportSaveOptions {
@@ -115,7 +115,7 @@ export interface InstanceSavesService {
    * Watch instances saves
    * @param path
    */
-  watch(path: string): Promise<SharedState<Saves>>
+  watch(path: string): Promise<MutableState<Saves>>
   /**
    * Clone a save under an instance to one or multiple instances.
    *
@@ -175,9 +175,22 @@ export interface InstanceSavesService {
 
 export const InstanceSavesServiceKey: ServiceKey<InstanceSavesService> = 'InstanceSavesService'
 
-export type ImportSaveExceptions = {
+export type InstanceSaveExceptions = {
+  /**
+   * - instanceDeleteNoSave -> no save match name provided
+   */
+  type: 'instanceDeleteNoSave'
+  /**
+    * The save name
+    */
+  name: string
+} | {
   type: 'instanceImportIllegalSave'
   path: string
-}
+} | {
+  type: 'instanceCopySaveNotFound' | 'instanceCopySaveUnexpected'
+  src: string
+  dest: string[]
+} | InstanceNotFoundException
 
-export class ImportSaveException extends Exception<ImportSaveExceptions> { }
+export class InstanceSaveException extends Exception<InstanceSaveExceptions> { }

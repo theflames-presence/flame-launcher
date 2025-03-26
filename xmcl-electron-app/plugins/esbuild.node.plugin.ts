@@ -17,23 +17,10 @@ export default function createNodePlugin(): Plugin {
           path: args.path,
           namespace: 'node-file',
           pluginData: {
-            ...args.pluginData,
+            ...(args.pluginData || {}),
             resolveDir: args.resolveDir,
           },
         }),
-      )
-
-      build.onLoad(
-        {
-          filter: /^.+crypto\.node$/g,
-          namespace: 'node-file',
-        },
-        async ({ path }) => {
-          return {
-            contents: 'module.exports = false;',
-            loader: 'file',
-          }
-        },
       )
 
       // build.onResolve(
