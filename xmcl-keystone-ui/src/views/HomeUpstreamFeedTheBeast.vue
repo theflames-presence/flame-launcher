@@ -38,6 +38,7 @@ const headerData = computed(() => {
     categories: project.value.tags.map((c) => {
       return {
         text: c.name,
+        id: c.id.toString(),
       }
     }),
     type: 'ftb',
@@ -106,7 +107,7 @@ const items = computed(() => {
     if (!result[date]) {
       result[date] = []
     }
-    result[date].push(shallowReactive({
+    result[date].push(markRaw({
       id: d.id.toString(),
       name: d.name,
       versionType: 'release',
@@ -156,6 +157,11 @@ async function onUpdate(v: ProjectVersionProps) {
         projectName: project.value?.name || '',
         authors: project.value?.authors || [],
       }),
+      upstream: {
+        type: 'ftb-modpack',
+        id: Number(props.id),
+        versionId: Number(v.id),
+      }
     })
   } finally {
     updating.value = false

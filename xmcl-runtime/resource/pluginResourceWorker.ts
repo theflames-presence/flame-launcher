@@ -16,14 +16,15 @@ import createResourceWorker from './resource.worker?worker'
 import { kResourceContext } from './ResourceManager'
 import { kResourceWorker, ResourceWorker } from './worker'
 import { ServiceStateManager } from '~/service'
-import { InstanceServiceKey, InstanceState, MutableState } from '@xmcl/runtime-api'
+import { InstanceServiceKey, InstanceState, SharedState } from '@xmcl/runtime-api'
 import { getDomainedPath } from './core/snapshot'
 
 export const pluginResourceWorker: LauncherAppPlugin = async (app) => {
   const workerLogger = app.getLogger('ResourceWorker')
-  const resourceWorker: ResourceWorker = createLazyWorker(createResourceWorker, {
+  const [resourceWorker, dispose] = createLazyWorker<ResourceWorker>(createResourceWorker, {
     methods: ['checksum', 'hash', 'hashAndFileType', 'parse', 'fingerprint'],
   }, workerLogger, { name: 'CPUWorker' })
+  app.registryDisposer(dispose)
   app.registry.register(kResourceWorker, resourceWorker)
 
   const flights = await app.registry.get(kFlights)
@@ -39,10 +40,11 @@ export const pluginResourceWorker: LauncherAppPlugin = async (app) => {
 
   if (flights.enableResourceDatabaseWorker) {
     const dbLogger = app.getLogger('ResourceDbWorker')
-    const dbWorker: DatabaseWorker = createLazyWorker(createDbWorker, {
+    const [dbWorker, dispose]: [DatabaseWorker, () => void] = createLazyWorker(createDbWorker, {
       methods: ['executeQuery', 'streamQuery', 'init', 'destroy'],
       asyncGenerators: ['streamQuery'],
     }, dbLogger, { workerData: { fileName: dbPath }, name: 'ResourceDBWorker' })
+    app.registryDisposer(dispose)
     config = {
       worker: dbWorker,
     }
@@ -70,7 +72,7 @@ export const pluginResourceWorker: LauncherAppPlugin = async (app) => {
 
   app.registry.get(ServiceStateManager).then((manager) => manager.get(InstanceServiceKey.toString()))
     .then((state) => {
-      (state as unknown as MutableState<InstanceState>)?.subscribe('instanceRemove', (path) => {
+      (state as unknown as SharedState<InstanceState>)?.subscribe('instanceRemove', (path) => {
         context.db.deleteFrom('snapshots')
           .where('domainedPath', 'like', `${getDomainedPath(path, context.root)}%`)
           .execute()

@@ -296,6 +296,10 @@ errors:
 
     Sie können versuchen, den Datenstamm auf der Einstellungsseite
     zurückzusetzen.
+  DiskIsFull: |-
+    Ihre Festplatte ist voll! 
+    Kann nichts auf die Festplatte schreiben! 
+    Alle Funktionen sind möglicherweise nicht funktional!
   DownloadAggregateError: Datei kann nicht hochgeladen werden.
   DownloadFileSystemError: >-
     Fehler beim Zugriff auf den Pfad zur Download-Datei.  Stellen Sie sicher,
@@ -351,6 +355,7 @@ fileDetail:
   fileSize: Größe der Datei
   hash: Hash
 filter: Filter.
+filterLocalOnly: Nur installiert anzeigen
 finish: Oberfläche
 forgeConfig:
   hint: >-
@@ -483,6 +488,8 @@ instance:
   versionHint: Minecraft Version für dieses Spiel
   vmOptions: JVM-Parameter
   vmOptionsHint: Zusätzliche Argumente, die an die JVM übergeben werden
+  vmVar: Umgebungsvariablen
+  vmVarHint: Klicken Sie auf die Schaltfläche, um Umgebungsvariablen hinzuzufügen
 instanceAge:
   older: Alte
   threeDay: Innerhalb von drei Tagen
@@ -496,6 +503,20 @@ instanceFileOperation:
   backup-remove: Löschen (Reserve)
   keep: Hier ist es
   remove: Löschen
+instanceInstallSkip:
+  ignore: Ignorieren
+  skip: Überspringen
+  title: Möglicherweise beschädigte Dateiquelle
+  warning: >-
+    Einige Dateien werden mehrmals heruntergeladen, wobei die Prüfsumme nicht
+    übereinstimmt. 
+
+    Dies kann daran liegen, dass die ursprüngliche Prüfsumme falsch ist. 
+
+    Überprüfen Sie bitte. 
+
+    Wenn Sie bestätigen, dass die aktuellen Dateien gültig sind, können Sie die
+    Validierungsprüfung überspringen.
 instanceSetting:
   disableAuthlibInjector: Deaktivieren Sie den Authlib-Injektor
   disableAuthlibInjectorDescription: |-
@@ -530,6 +551,10 @@ instanceUpdate:
 
     Der alte Modloader ist {modloader} und der neue Modloader ist
     {newModloader}.
+  summary: |-
+    Fügen Sie {add} Dateien hinzu. 
+    {remove} Dateien entfernen. 
+    Halten Sie {keep} Dateien.
   title: Aktualisieren Sie Ihre Instanz
   update: Aktualisierung beginnen
 instances:
@@ -580,7 +605,7 @@ java:
   modifyInstance: Ändern Sie den Pfad zu Java
   noMemory: Speichernutzung nicht einschränken
   refresh: Lokales Java aktualisieren
-  systemMemory: Aktueller Systemspeicher
+  systemMemory: 'Freier Systemspeicher: {free} / {total}'
 labyMod:
   disable: LabyMod ausschalten
   empty: LabyMod unterstützt nicht das aktuelle Minecraft
@@ -768,6 +793,7 @@ mod:
     Bitte wählen Sie die Datei aus, die Sie behalten möchten.
   enabled: 'Inklusive Mods: {count}'
   filter: Mod-Filter
+  group: Gruppe
   groupInstalled: Gruppensatz Mods
   hideIncompatible: Inkompatible Änderungen ausblenden
   incompatible: Inkompatible Mods.
@@ -794,6 +820,7 @@ mod:
   showInModrinth: anzeigen {name} auf Modrinth
   switchDefaultSource: Quelle der Standardänderung
   toUpdate: '{count} zu aktualisieren'
+  ungroup: Ungruppierung
 modInstall:
   archived: >-
     {name} wurde archiviert. 
@@ -818,9 +845,6 @@ modInstall:
   source: Quelle.
   switch: Version ändern
   upgrade: Aktualisierung der Änderungen
-modSearchType:
-  all: Alle
-  local: Cache auf dem Datenträger
 modUpgradePolicy:
   curseforge: Zuerst Curseforge
   curseforgeOnly: Nur Curseforge
@@ -1262,9 +1286,26 @@ server:
   delete: {}
   error: {}
   expectedVersions: Unterstützte Versionen
+  export: Server exportieren
+  exportNoFilesHint: >-
+    Keine Serverdateien gefunden. 
+
+    Sie können den Server einmal auf lokalem Ausführen ausführen, um einige
+    Dateien zu generieren.
+  exportOption: Serverexportoptionen
+  exportSSHAuthenticationFailed: >-
+    Alle Authentifizierungsmethoden sind fehlgeschlagen. 
+
+    Bitte überprüfen Sie den Benutzernamen/Passwort oder einen privaten
+    Schlüssel.
+  exportSSHOptions: SSH -Optionen
+  exportSSHPrivateKeyPath: SSH Private Key Path
+  exportSSHRemotePath: Remote -Serverpfad
+  exportToFolder: In Ordner exportieren
   filterVersion: Filter-Server reagiert auf Minecraft-Version
   host: Gastgeber
   hostHint: Server-Host (mit Port)
+  hostRequired: Bitte geben Sie die Server -IP -Adresse ein
   ipAddress: IP-Adressen
   maxPlayers: Maximale Spieleranzahl
   motd: Beschreibung des Servers
@@ -1279,6 +1320,7 @@ server:
   status: Server-Status
   unknown: Unbekannter Server
   unknownDescription: Unbekannter Server. Aktualisieren
+  upload: Server hochladen
   version: Der Server benötigt eine Version von
   versionHint: Die Ping-Version von Minecraft
 serverStatus:
@@ -1489,7 +1531,7 @@ setup:
     language: Sprache.
     name: Sprache einstellen
   path: Aktueller Pfad
-  title: Willkommen beim Flame Launcher. Bevor wir beginnen, brauchen wir Sie
+  title: Willkommen beim X Minecraft Launcher. Bevor wir beginnen, brauchen wir Sie
 shaderPack:
   deletion: Shader löschen
   deletionHint: >-
@@ -1538,7 +1580,7 @@ theme:
   selectImage: Bild auswählen
   selectMusic: Wählen Sie Musik
   selectVideo: Wählen Sie Video
-title: Flame Launcher
+title: X Minecraft Launcher
 transportType:
   host: Gastgeber-Kandidat
   prflx: Gastgeber-Peer Reflexive

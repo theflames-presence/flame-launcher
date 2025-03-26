@@ -1,19 +1,19 @@
 import { File, FileUpdateAction, FileUpdateOperation, ResourceDomain, ResourceMetadata, ResourceState, UpdateResourcePayload } from '@xmcl/runtime-api'
+import { FSWatcher } from 'chokidar'
 import { randomBytes } from 'crypto'
-import { FSWatcher, existsSync } from 'fs'
-import { copy, watch } from 'fs-extra'
-import debounce from 'lodash.debounce'
-import { basename, dirname, isAbsolute, join } from 'path'
+import { existsSync } from 'fs'
+import { copy } from 'fs-extra'
+import { basename, dirname, join, resolve, sep } from 'path'
 import { Logger } from '~/logger'
+import { jsonArrayFrom } from '~/sql/sqlHelper'
 import { AggregateExecutor, WorkerQueue } from '~/util/aggregator'
 import { AnyError, isSystemError } from '~/util/error'
-import { linkOrCopyFile } from '~/util/fs'
+import { isHardLinked, linkOrCopyFile } from '~/util/fs'
 import { toRecord } from '~/util/object'
 import { ResourceContext } from './ResourceContext'
 import { ResourceWorkerQueuePayload } from './ResourceWorkerQueuePayload'
 import { getFile, getFiles } from './files'
 import { generateResourceV3, pickMetadata } from './generateResource'
-import { jsonArrayFrom } from './helper'
 import { getOrParseMetadata } from './parseMetadata'
 import { shouldIgnoreFile } from './pathUtils'
 import { ResourceSnapshotTable } from './schema'
@@ -28,7 +28,14 @@ function createRevalidateFunction(
   onResourcePostRevalidate: (files: File[]) => void,
 ) {
   async function getUpserts() {
-    const entries = await getFiles(dir)
+    const entries = await getFiles(dir).catch((e) => {
+      if (isSystemError(e)) {
+        if (e.code === 'ENOENT') {
+          return []
+        }
+      }
+      throw e
+    })
     const inos = entries.map(e => e.ino)
     const records: Record<string, ResourceSnapshotTable> = await context.db.selectFrom('snapshots')
       .selectAll()
@@ -142,7 +149,7 @@ function createWorkerQueue(context: ResourceContext, domain: ResourceDomain,
     merge: (a, b) => {
       a.icons = [...new Set([...a.icons || [], ...b.icons || []])]
       a.uris = [...new Set([...a.uris || [], ...b.uris || []])]
-      a.metadata = { ...(a.metadata || {}), ...(b.metadata || {}) }
+      a.metadata = { ...a.metadata, ...b.metadata }
       a.record = b.record || a.record
       a.file = b.file || a.file
       return a
@@ -158,37 +165,44 @@ function createWatcher(
   onResourceRemove: (file: string) => void,
   revalidate: () => void,
 ) {
-  const debounced = new Set<string>()
-  const flush = debounce(() => {
-    if (debounced.size > 16) {
-      revalidate()
-    } else {
-      for (const file of debounced) {
-        if (file === '.DS_Store') continue
-        if (file.endsWith('.pending')) continue
-        if (file === '.gitignore') continue
-        getFile(file).then((f) => {
-          if (!f) return
-          onResourceUpdate(f)
-        }, (e) => {
-          logger.error(e)
-        })
-      }
-    }
-    debounced.clear()
-  }, 200)
-  const watcher = watch(path, (event, file) => {
+  const watcher = new FSWatcher({
+    cwd: path,
+    depth: 1,
+    followSymlinks: true,
+    alwaysStat: true,
+    ignorePermissionErrors: true,
+    ignoreInitial: true,
+    ignored: (filePath) => {
+      if (resolve(filePath) === path) return false
+      return shouldIgnoreFile(filePath)
+    },
+  }).on('all', async (event, file, stat) => {
     if (!file) return
-    if (!isAbsolute(file)) file = join(path, file)
     if (shouldIgnoreFile(file)) return
-    const existed = existsSync(file)
-    if (!existed) {
+    if (file.endsWith('.txt')) return
+    if (event === 'unlink') {
       onResourceRemove(file)
-    } else {
-      debounced.add(file)
-      flush()
+    } else if (event === 'add' || event === 'change') {
+      if (!stat) {
+        return
+      }
+      const fileObj: File = {
+        path: join(path, file),
+        fileName: basename(file),
+        size: stat.size,
+        mtime: stat.mtimeMs,
+        atime: stat.atimeMs,
+        ctime: stat.ctimeMs,
+        ino: stat.ino,
+        isDirectory: stat.isDirectory(),
+      }
+      onResourceUpdate(fileObj)
+    } else if (event === 'unlinkDir' && file === path) {
+      revalidate()
     }
   })
+
+  watcher.add(path)
 
   return watcher
 }
@@ -262,7 +276,13 @@ export function watchResourcesDirectory(
   }, onRemove, revalidate)
 
   workerQueue.onerror = ({ filePath }, e) => {
-    if (e.message === 'end of central directory record signature not found') return
+    if ((e as any)?.code && ['EBUSY', 'ENOENT'].includes((e as any).code)) {
+      // ignore the busy file
+      return
+    }
+    if (!(e instanceof Error)) {
+      e = Object.assign(new Error(), e)
+    }
     context.logger.error(e)
   }
 
@@ -320,15 +340,12 @@ export function watchResourceSecondaryDirectory(
 
     record = await context.db.selectFrom('snapshots')
       .selectAll()
+      .where('domainedPath', 'like', `${getDomainedPath(primaryDirectory, context.root)}%`)
       .where('sha1', '=', snapshot.sha1)
       .executeTakeFirst()
 
     if (record) {
-      const domain = basename(dirname(record.domainedPath))
-      const actualDomain = basename(primaryDirectory)
-      if (domain === actualDomain) {
-        return true
-      }
+      return true
     }
 
     return false
@@ -356,31 +373,52 @@ export function watchResourceSecondaryDirectory(
     }
   }, () => { /* ignore */ }, () => { /* ignore */ })
 
-  let watcher: FSWatcher | undefined
+  const watcher = new FSWatcher({
+    cwd: directory,
+    depth: 1,
+    followSymlinks: true,
+    ignorePermissionErrors: true,
+    ignored: (path) => {
+      if (resolve(path) === directory) return false
+      return shouldIgnoreFile(path)
+    },
+  }).on('all', async (event, file) => {
+    if (event === 'addDir' && file === '') return
 
-  function initWatcher() {
-    watcher = createWatcher(directory, context.logger, async (file) => {
-      if (await isFileCached(file)) return
-      persist(file)
-    }, async (filePath: string) => {
+    const depth = file.split(sep).length
+    if (depth > 1) return
+
+    const filePath = resolve(directory, file)
+    if (event === 'unlink') {
       await context.db.deleteFrom('snapshots')
         .where('domainedPath', '=', getDomainedPath(filePath, context.root))
         .execute()
-    }, revalidateDir)
+    } else if (event === 'change' || event === 'add' || event === 'addDir') {
+      const file = await getFile(filePath)
+      if (!file) return
+      const isCached = await isFileCached(file).catch((e) => {
+        context.logger.error(e)
+        return false
+      })
+      if (isCached) return
+      persist(file)
+    }
+  }).on('error', (e) => {
+    context.logger.warn(new AnyError('ResourceWatchError', 'Error in resource watch', { cause: e }))
+  }).on('ready', () => {
+    context.logger.log('Resource watch ready')
+  })
 
-    watcher.on('error', (e) => {
-      watcher = undefined
-      context.logger.warn(new AnyError('ResourceWatchError', 'Error in resource watch', { cause: e }))
-    })
-  }
-
-  initWatcher()
+  watcher.add(directory)
 
   async function persist(file: File) {
     let target = join(primaryDirectory, file.fileName)
-    const onCopyDirectoryError = (e: unknown) => {
+    const onCopyDirectoryError = async (e: unknown) => {
       if (isSystemError(e)) {
         if (e.code === 'EEXIST') {
+          if (await isHardLinked(file.path, target)) {
+            return
+          }
           target = join(primaryDirectory, `${file.fileName}.${randomBytes(4).toString('hex')}`)
           copy(file.path, target).catch(onCopyDirectoryError)
           return
@@ -396,6 +434,10 @@ export function watchResourceSecondaryDirectory(
       return
     }
     if (!file.isDirectory) {
+      const isInoMatched = await isHardLinked(file.path, target)
+      if (isInoMatched) {
+        return
+      }
       linkOrCopyFile(file.path, target).catch((e) => {
         context.logger.error(new AnyError('ResourceCopyError', `Fail to copy resource ${file.path} to ${target}`, { cause: e }))
       })
@@ -410,10 +452,6 @@ export function watchResourceSecondaryDirectory(
   }
 
   function revalidate() {
-    if (!watcher) {
-      initWatcher()
-    }
-
     return revalidateDir()
   }
 

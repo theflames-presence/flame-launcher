@@ -1,6 +1,11 @@
 import { SettingSchema } from './setting.schema'
 import { ReleaseInfo } from './update'
 
+/**
+ * The basic setting of the launcher.
+ * 
+ * It also contains the some state properties of the launcher.
+ */
 export class Settings implements SettingSchema {
   globalDisableAuthlibInjector = false
   globalDisableElyByAuthlib = false
@@ -13,6 +18,7 @@ export class Settings implements SettingSchema {
   globalFastLaunch = false
   globalHideLauncher = false
   globalShowLog = false
+  globalEnv: Record<string, string> = {}
   discordPresence = false
   developerMode = false
   disableTelemetry = false
@@ -58,6 +64,8 @@ export class Settings implements SettingSchema {
 
   maxAPISockets = 0
 
+  diskFullError = false
+
   config(config: SettingSchema) {
     this.locale = config.locale
     this.autoDownload = config.autoDownload || false
@@ -81,6 +89,7 @@ export class Settings implements SettingSchema {
     this.globalShowLog = config.globalShowLog
     this.globalDisableElyByAuthlib = config.globalDisableElyByAuthlib
     this.globalDisableAuthlibInjector = config.globalDisableAuthlibInjector
+    this.globalEnv = config.globalEnv
     this.discordPresence = config.discordPresence
     this.developerMode = config.developerMode
     this.disableTelemetry = config.disableTelemetry
@@ -186,6 +195,10 @@ export class Settings implements SettingSchema {
     this.replaceNatives = replace
   }
 
+  diskFullErrorSet(diskFullError: boolean) {
+    this.diskFullError = diskFullError
+  }
+
   globalInstanceSetting(settings: {
     globalMinMemory: number
     globalMaxMemory: number
@@ -198,6 +211,7 @@ export class Settings implements SettingSchema {
     globalDisableAuthlibInjector: boolean
     globalDisableElyByAuthlib: boolean
     globalPrependCommand: string
+    globalEnv: Record<string, string>
   }) {
     this.globalMinMemory = settings.globalMinMemory
     this.globalMaxMemory = settings.globalMaxMemory
@@ -210,5 +224,6 @@ export class Settings implements SettingSchema {
     this.globalDisableAuthlibInjector = settings.globalDisableAuthlibInjector
     this.globalDisableElyByAuthlib = settings.globalDisableElyByAuthlib
     this.globalPrependCommand = settings.globalPrependCommand
+    this.globalEnv = settings.globalEnv
   }
 }

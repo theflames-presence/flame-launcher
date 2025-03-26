@@ -212,11 +212,11 @@ Unless the code under `xmcl-keystone-ui` changed, you don't need to build this a
 Then, you can build Electron bundling with frontend you just build:
 
 ```bash
-pnpm build:all
+pnpm build:renderer
 ```
 
 If you want a debug build, you can use 
 ```bash
-pnpm build:dir 
+pnpm build:all
 ```  
 which only build the directory result, and won't pack them up to different release format.

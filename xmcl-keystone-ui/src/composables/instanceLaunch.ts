@@ -18,7 +18,7 @@ export function useInstanceLaunch(
 ) {
   const { refreshUser } = useService(UserServiceKey)
   const { launch, kill, on, getGameProcesses, reportOperation } = useService(LaunchServiceKey)
-  const { globalAssignMemory, globalMaxMemory, globalMinMemory, globalPrependCommand, globalMcOptions, globalVmOptions, globalFastLaunch, globalHideLauncher, globalShowLog, globalDisableAuthlibInjector, globalDisableElyByAuthlib } = useGlobalSettings(globalState)
+  const { globalAssignMemory, globalMaxMemory, globalMinMemory, globalPrependCommand, globalMcOptions, globalVmOptions, globalFastLaunch, globalEnv, globalHideLauncher, globalShowLog, globalDisableAuthlibInjector, globalDisableElyByAuthlib } = useGlobalSettings(globalState)
   const { getOrInstallAuthlibInjector } = useService(AuthlibInjectorServiceKey)
 
   type LaunchStatus = '' | 'spawning-process' | 'refreshing-user' | 'preparing-authlib' | 'assigning-memory' | 'checking-permission' | 'launching'
@@ -96,7 +96,9 @@ export function useInstanceLaunch(
     }
     try {
       const controller = new AbortController()
-      assignStatus(token, name, controller)
+      if (id) {
+        assignStatus(token, name, controller)
+      }
       const v = await Promise.race([p, new Promise<T>((resolve, reject) => {
         controller.signal.onabort = () => {
           reject(new Error('Aborted'))
@@ -156,6 +158,10 @@ export function useInstanceLaunch(
 
     const assignMemory = inst.assignMemory ?? globalAssignMemory.value
     const hideLauncher = inst.hideLauncher ?? globalHideLauncher.value
+    const env = {
+      ...globalEnv.value,
+      ...inst.env,
+    }
     const showLog = inst.showLog ?? globalShowLog.value
     const fastLaunch = inst.fastLaunch ?? globalFastLaunch.value
     const disableElyByAuthlib = inst.disableElybyAuthlib ?? globalDisableElyByAuthlib.value
@@ -194,6 +200,7 @@ export function useInstanceLaunch(
       user: userProfile.value,
       java: javaPath,
       hideLauncher,
+      env,
       showLog,
       minMemory,
       maxMemory,
@@ -205,7 +212,7 @@ export function useInstanceLaunch(
       prependCommand,
       side,
       server: inst.server ?? undefined,
-      ...(overrides || {}),
+      ...overrides,
     }
     return options
   }
@@ -223,7 +230,7 @@ export function useInstanceLaunch(
       error.value = undefined
       const options = await generateLaunchOptions(instancePath, operationId, side, overrides)
 
-      if (!options.skipAssetsCheck) {
+      if (!options.skipAssetsCheck && side === 'client') {
         console.log('refreshing user')
         try {
           await track(instancePath, refreshUser(userProfile.value.id, { validate: true }), 'refreshing-user', operationId)
@@ -232,7 +239,7 @@ export function useInstanceLaunch(
         }
       }
 
-      if (shouldEnableVoiceChat()) {
+      if (shouldEnableVoiceChat() && side === 'client') {
         try {
           await track(instancePath, windowController.queryAudioPermission(), 'checking-permission', operationId)
         } catch (e) {
