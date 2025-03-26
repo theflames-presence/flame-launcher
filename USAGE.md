@@ -24,7 +24,7 @@ This is usually customized and provided by a server. It should contain the full 
 
 ### From Offline Bundle
 
-The `.xmcl` file is the file extension for offline bundle of the launcher.
+The `.fmcl` file is the file extension for offline bundle of the launcher.
 
 This is a zip file contains all the content (html, js, images) of the new launcher UI.
 

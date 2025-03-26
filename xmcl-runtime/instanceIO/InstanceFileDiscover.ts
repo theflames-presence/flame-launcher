@@ -4,51 +4,42 @@ import { stat } from 'fs-extra'
 import { join, relative } from 'path'
 import { Logger } from '~/logger'
 import { ResourceManager, ResourceWorker } from '~/resource'
-import { readdirIfPresent } from '../util/fs'
+import { ENOENT_ERROR, readdirIfPresent } from '../util/fs'
 import { isNonnull } from '~/util/object'
+import { isSystemError } from '~/util/error'
 
 /**
  * @returns The instance file with file stats array. The InstanceFile does not have hashes and downloads.
  */
-export async function discover(instancePath: string, logger: Logger, filter?: (relativePath: string) => boolean) {
+export async function discover(instancePath: string, logger: Logger, filter?: (relativePath: string, stats: Stats) => boolean) {
   const files = [] as Array<[InstanceFile, Stats]>
 
-  const scan = async (p: string) => {
-    const status = await stat(p)
-    const isDirectory = status.isDirectory()
-    const relativePath = relative(instancePath, p).replace(/\\/g, '/')
-    if (filter && filter(relativePath)) {
-      return
-    }
-    if (relativePath.startsWith('resourcepacks') || relativePath.startsWith('shaderpacks')) {
-      if (relativePath.endsWith('.json') || relativePath.endsWith('.png')) {
+  const scan = async (dirOrFile: string) => {
+    const s = await stat(dirOrFile).catch(e => {
+      if (isSystemError(e) && e.code === ENOENT_ERROR) {
         return
       }
-    }
-    if (relativePath === 'instance.json') {
-      return
-    }
-    // no lib or exe
-    if (relativePath.endsWith('.dll') || relativePath.endsWith('.so') || relativePath.endsWith('.exe')) {
-      return
-    }
-    // do not share versions/libs/assets
-    if (relativePath.startsWith('versions') || relativePath.startsWith('assets') || relativePath.startsWith('libraries')) {
+      throw e
+    })
+    if (!s) return
+    const isDirectory = s.isDirectory()
+    const relativePath = relative(instancePath, dirOrFile).replace(/\\/g, '/')
+    if (filter && filter(relativePath, s)) {
       return
     }
 
     if (isDirectory) {
-      const children = await readdirIfPresent(p)
-      await Promise.all(children.map(child => scan(join(p, child)).catch((e) => {
-        logger.error(new Error('Fail to get manifest data for instance file', { cause: e }))
+      const children = await readdirIfPresent(dirOrFile)
+      await Promise.all(children.map(child => scan(join(dirOrFile, child)).catch((e) => {
+        logger.warn(new Error('Fail to get manifest data for instance file', { cause: e }))
       })))
     } else {
       const localFile: InstanceFile = {
         path: relativePath,
-        size: status.size,
+        size: s.size,
         hashes: {},
       }
-      files.push([localFile, status])
+      files.push([localFile, s])
     }
   }
 
@@ -98,15 +89,17 @@ export async function decorateInstanceFiles(files: [InstanceFile, Stats][],
     const filePath = join(instancePath, relativePath)
     const ino = stat.ino
     if (isSpecialFile(relativePath)) {
-      const sha1 = sha1Lookup[ino] ?? await worker.checksum(filePath, 'sha1')
-      sha1Lookup[ino] = sha1
+      const sha1 = sha1Lookup[ino] || await worker.checksum(filePath, 'sha1')
+      localFile.hashes.sha1 = sha1
     }
   }
 
-  const metadataLookup = await resourceManager.getMetadataByHashes(Object.values(sha1Lookup)).then(v => {
+  const exsitedSha1 = files.map(f => f[0].hashes.sha1).filter(isNonnull)
+
+  const metadataLookup = await resourceManager.getMetadataByHashes(exsitedSha1).then(v => {
     return Object.fromEntries(v.filter(isNonnull).map(m => [m.sha1, m]))
   })
-  const urisLookup = await resourceManager.getUrisByHash(Object.values(sha1Lookup)).then(v => {
+  const urisLookup = await resourceManager.getUrisByHash(exsitedSha1).then(v => {
     return v.reduce((acc, cur) => {
       if (!acc[cur.sha1]) {
         acc[cur.sha1] = []
@@ -119,9 +112,8 @@ export async function decorateInstanceFiles(files: [InstanceFile, Stats][],
   for (const [localFile, stat] of files) {
     const relativePath = localFile.path
     const filePath = join(instancePath, relativePath)
-    const ino = stat.ino
     if (isSpecialFile(relativePath)) {
-      const sha1 = sha1Lookup[ino]
+      const sha1 = localFile.hashes.sha1
       const metadata = metadataLookup[sha1]
       if (metadata?.modrinth) {
         localFile.modrinth = {
@@ -138,14 +130,20 @@ export async function decorateInstanceFiles(files: [InstanceFile, Stats][],
 
       const uris = urisLookup[sha1]
       localFile.downloads = uris && uris.some(u => u.startsWith('http')) ? uris.filter(u => u.startsWith('http')) : undefined
-      localFile.hashes = await resolveHashes(filePath, worker, hashes, sha1)
+      localFile.hashes = {
+        ...localFile.hashes,
+        ...await resolveHashes(filePath, worker, hashes, sha1),
+      }
 
       // No download url...
       if ((!localFile.downloads || localFile.downloads.length === 0) && metadata) {
         undecoratedResources.add(localFile)
       }
     } else {
-      localFile.hashes = await resolveHashes(filePath, worker)
+      localFile.hashes = {
+        ...localFile.hashes,
+        ...await resolveHashes(filePath, worker, hashes),
+      }
     }
   }
 }

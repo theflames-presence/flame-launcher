@@ -1,33 +1,32 @@
+import { TaskItem } from '@/entities/task'
 import { clientCurseforgeV1, clientModrinthV2 } from '@/util/clients'
-import { getCurseforgeModLoaderTypeFromRuntime, getCursforgeFileModLoaders, getInstanceFileFromCurseforgeFile } from '@/util/curseforge'
+import { getCurseforgeModLoaderTypeFromRuntime, getInstanceFileFromCurseforgeFile } from '@/util/curseforge'
+import { injection } from '@/util/inject'
 import { ModFile } from '@/util/mod'
 import { getInstanceFileFromModrinthVersion, getModrinthModLoaders } from '@/util/modrinth'
+import { getSWRV } from '@/util/swrvGet'
 import { notNullish } from '@vueuse/core'
 import { FileRelationType } from '@xmcl/curseforge'
-import { InstanceFileUpdate, RuntimeVersions, TaskState } from '@xmcl/runtime-api'
+import { InstanceFile, RuntimeVersions, TaskState } from '@xmcl/runtime-api'
 import { Ref } from 'vue'
 import { useDialog } from './dialog'
-import { InstanceInstallDialog } from './instanceUpdate'
-import { useRefreshable } from './refreshable'
-import { useTask } from './task'
 import { kInstanceModsContext } from './instanceMods'
-import { injection } from '@/util/inject'
-import { getSWRV } from '@/util/swrvGet'
+import { InstanceInstallDialog } from './instanceUpdate'
 import { getModrinthVersionModel } from './modrinthVersions'
+import { useRefreshable } from './refreshable'
 import { kSWRVConfig } from './swrvConfig'
-import { TaskItem } from '@/entities/task'
-import { filter as fuzzy } from 'fuzzy'
+import { useTask } from './task'
 
 export function useModDependenciesCheck(path: Ref<string>, runtime: Ref<RuntimeVersions>) {
   const { mods: instanceMods, updateMetadata } = injection(kInstanceModsContext)
-  const updates = ref([] as InstanceFileUpdate[])
+  const updates = ref([] as InstanceFile[])
   const checked = ref(false)
   const config = inject(kSWRVConfig)
   let operationId = ''
   let operationPath = ''
   const { show } = useDialog(InstanceInstallDialog)
 
-  async function checkModrinthDependencies(mods: ModFile[], runtimes: RuntimeVersions, result: InstanceFileUpdate[]) {
+  async function checkModrinthDependencies(mods: ModFile[], runtimes: RuntimeVersions, result: InstanceFile[]) {
     const modrinthTarget = mods.filter(m => m.modrinth)
     const hashes = modrinthTarget.map(m => m.hash)
 
@@ -63,27 +62,21 @@ export function useModDependenciesCheck(path: Ref<string>, runtime: Ref<RuntimeV
 
       for (const v of toInstall) {
         delete deps[v.project_id]
-        result.push({
-          operation: 'add',
-          file: getInstanceFileFromModrinthVersion(v),
-        })
+        result.push(getInstanceFileFromModrinthVersion(v))
       }
     }
 
     const loaders = getModrinthModLoaders(runtimes, false)
     const depProjects = Object.keys(deps)
     await Promise.allSettled(depProjects.map(async (p) => {
-      const v = await getSWRV(getModrinthVersionModel(p, false, loaders, [runtimes.minecraft]), config)
+      const v = await getSWRV(getModrinthVersionModel(p, false, loaders[0], [runtimes.minecraft]), config)
       if (v[0]) {
-        result.push({
-          operation: 'add',
-          file: getInstanceFileFromModrinthVersion(v[0]),
-        })
+        result.push(getInstanceFileFromModrinthVersion(v[0]))
       }
     }))
   }
 
-  async function checkCurseforgeDependencies(mods: ModFile[], runtimes: RuntimeVersions, result: InstanceFileUpdate[]) {
+  async function checkCurseforgeDependencies(mods: ModFile[], runtimes: RuntimeVersions, result: InstanceFile[]) {
     const fileIds = mods.map(m => !m.modrinth ? m.curseforge?.fileId : undefined).filter(notNullish)
     if (fileIds.length === 0) {
       console.log('Skip curseforge dependencies check due to no curseforge mods')
@@ -113,10 +106,7 @@ export function useModDependenciesCheck(path: Ref<string>, runtime: Ref<RuntimeV
           pageSize: 1,
         })
         if (data[0]) {
-          result.push({
-            operation: 'add',
-            file: getInstanceFileFromCurseforgeFile(data[0]),
-          })
+          result.push(getInstanceFileFromCurseforgeFile(data[0]))
         }
       }))
     }
@@ -126,7 +116,7 @@ export function useModDependenciesCheck(path: Ref<string>, runtime: Ref<RuntimeV
     await updateMetadata()
     await new Promise((resolve) => setTimeout(resolve, 500))
 
-    const result: InstanceFileUpdate[] = []
+    const result: InstanceFile[] = []
     const mods = instanceMods.value
     const _path = path.value
     const runtimes = runtime.value
@@ -136,28 +126,28 @@ export function useModDependenciesCheck(path: Ref<string>, runtime: Ref<RuntimeV
       checkCurseforgeDependencies(mods, runtimes, result),
     ])
 
-    const similarAppend: InstanceFileUpdate[] = []
-    for (const f of result) {
-      similarAppend.push(f)
-      if (f.file.path.startsWith('/mods')) {
-        const fileName = f.file.path.substring(6)
-        const filtered = fuzzy(fileName, mods, {
-          extract: (m) => m.path.substring(6),
-        })
-        const bestMatched = filtered[0]
-        if (bestMatched) {
-          similarAppend.push({
-            operation: 'remove',
-            file: {
-              path: bestMatched.original.path,
-              hashes: {
-                sha1: bestMatched.original.hash,
-              },
-            },
-          })
-        }
-      }
-    }
+    // const similarAppend: InstanceFileUpdate[] = []
+    // for (const f of result) {
+    //   similarAppend.push(f)
+    //   if (f.path.startsWith('/mods')) {
+    //     const fileName = f.path.substring(6)
+    //     const filtered = fuzzy(fileName, mods, {
+    //       extract: (m) => m.path.substring(6),
+    //     })
+    //     const bestMatched = filtered[0]
+    //     if (bestMatched) {
+    //       similarAppend.push({
+    //         operation: 'remove',
+    //         file: {
+    //           path: bestMatched.original.path,
+    //           hashes: {
+    //             sha1: bestMatched.original.hash,
+    //           },
+    //         },
+    //       })
+    //     }
+    //   }
+    // }
 
     updates.value = result
     checked.value = true
@@ -175,9 +165,9 @@ export function useModDependenciesCheck(path: Ref<string>, runtime: Ref<RuntimeV
   function apply() {
     show({
       type: 'updates',
-      updates: updates.value,
+      oldFiles: [],
+      files: updates.value,
       id: operationId,
-      selectOnlyAdd: true,
     })
   }
 

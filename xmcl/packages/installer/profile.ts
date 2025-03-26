@@ -3,11 +3,11 @@ import { AbortableTask, CancelledError, task } from '@xmcl/task'
 import { filterEntries, open, readEntry, walkEntriesGenerator } from '@xmcl/unzip'
 import { spawn } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
-import { basename, delimiter, dirname, join, relative, sep } from 'path'
+import { delimiter, dirname, join, relative, sep } from 'path'
 import { ZipFile } from 'yauzl'
-import { InstallLibraryTask, InstallSideOption, LibraryOptions } from './minecraft'
-import { checksum, errorToString, missing, SpawnJavaOptions, waitProcess } from './utils'
 import { convertClasspathToMaven, parseManifest } from './manifest'
+import { InstallLibraryTask, InstallSideOption, LibraryOptions } from './minecraft'
+import { checksum, missing, SpawnJavaOptions, waitProcess } from './utils'
 
 export interface PostProcessor {
   /**
@@ -194,24 +194,20 @@ export function installByProfileTask(installProfile: InstallProfile, minecraft: 
   return task('installByProfile', async function () {
     const minecraftFolder = MinecraftFolder.from(minecraft)
 
-    const processor = resolveProcessors(options.side || 'client', installProfile, minecraftFolder)
+    const side = options.side === 'server' ? 'server' : 'client'
+
+    const processor = resolveProcessors(side, installProfile, minecraftFolder)
 
     const installRequiredLibs = VersionJson.resolveLibraries(installProfile.libraries)
 
-    await this.all(installRequiredLibs.map((lib) => new InstallLibraryTask(lib, minecraftFolder, options)), {
-      throwErrorImmediately: options.throwErrorImmediately ?? false,
-      getErrorMessage: (errs) => `Errors during install libraries at ${minecraftFolder.root}: ${errs.map(errorToString).join('\n')}`,
-    })
+    await this.yield(new InstallLibraryTask(installRequiredLibs, minecraftFolder, options))
 
     await this.yield(new PostProcessingTask(processor, minecraftFolder, options))
 
-    if (options.side === 'client') {
+    if (side === 'client') {
       const versionJson: VersionJson = await readFile(minecraftFolder.getVersionJson(installProfile.version)).then((b) => b.toString()).then(JSON.parse)
       const libraries = VersionJson.resolveLibraries(versionJson.libraries)
-      await this.all(libraries.map((lib) => new InstallLibraryTask(lib, minecraftFolder, options)), {
-        throwErrorImmediately: options.throwErrorImmediately ?? false,
-        getErrorMessage: (errs) => `Errors during install libraries at ${minecraftFolder.root}: ${errs.map(errorToString).join('\n')}`,
-      })
+      await this.yield(new InstallLibraryTask(libraries, minecraftFolder, options))
     } else {
       const argsText = process.platform === 'win32' ? 'win_args.txt' : 'unix_args.txt'
 
@@ -306,10 +302,7 @@ export function installByProfileTask(installProfile: InstallProfile, minecraft: 
       await writeFile(join(minecraftFolder.getVersionRoot(serverProfile.id), 'server.json'), JSON.stringify(serverProfile, null, 4))
 
       const resolvedLibraries = VersionJson.resolveLibraries(serverProfile.libraries)
-      await this.all(resolvedLibraries.map((lib) => new InstallLibraryTask(lib, minecraftFolder, options)), {
-        throwErrorImmediately: options.throwErrorImmediately ?? false,
-        getErrorMessage: (errs) => `Errors during install libraries at ${minecraftFolder.root}: ${errs.map(errorToString).join('\n')}`,
-      })
+      await this.yield(new InstallLibraryTask(resolvedLibraries, minecraftFolder, options))
     }
   })
 }
@@ -336,6 +329,14 @@ export class PostProcessFailedError extends Error {
   }
 
   name = 'PostProcessFailedError'
+}
+
+export class PostProcessValidationFailedError extends PostProcessFailedError {
+  constructor(jarPath: string, commands: string[], message: string, readonly file: string, readonly expect: string, readonly actual: string) {
+    super(jarPath, commands, message)
+  }
+
+  name = 'PostProcessValidationFailedError'
 }
 
 const PAUSEED = Symbol('PAUSED')
@@ -390,12 +391,12 @@ export class PostProcessingTask extends AbortableTask<void> {
       if (!expect) {
         return false
       }
-      const sha1 = await checksum(file, 'sha1').catch((e) => '')
-      if (!sha1) return true // if file not exist, the file is not generated
-      if (!expect) return false // if expect is empty, we just need file exists
+      const sha1 = await checksum(file, 'sha1').catch((e) => '') as string
       const expected = expect.replace(/'/g, '')
+      if (!sha1) return [file, expected, sha1] as const // if file not exist, the file is not generated
+      if (!expect) return false // if expect is empty, we just need file exists
       if (expected !== sha1) {
-        return true
+        return [file, expected, sha1] as const
       }
     }
     return false
@@ -420,13 +421,17 @@ export class PostProcessingTask extends AbortableTask<void> {
         }
       })
     } catch (e) {
-      if (typeof e === 'string') {
-        throw new PostProcessFailedError(proc.jar, [options.java ?? 'java', ...cmd], e)
+      if (e instanceof Error && e.name === 'Error') {
+        throw new PostProcessFailedError(proc.jar, [options.java ?? 'java', ...cmd], e.message)
       }
       throw e
     }
-    if (proc.outputs && await this.isInvalid(proc.outputs)) {
-      throw new PostProcessFailedError(proc.jar, [options.java ?? 'java', ...cmd], 'Validate the output of process failed!')
+    if (proc.outputs) {
+      const invalidation = await this.isInvalid(proc.outputs)
+      if (invalidation) {
+        const [file, expect, actual] = invalidation
+        throw new PostProcessValidationFailedError(proc.jar, [options.java ?? 'java', ...cmd], 'Validate the output of process failed!', file, expect, actual)
+      }
     }
   }
 
@@ -452,7 +457,6 @@ export class PostProcessingTask extends AbortableTask<void> {
   }
 
   protected async abort(isCancelled: boolean): Promise<void> {
-    // this.activeProcess?.kill()
     this._abort()
   }
 
