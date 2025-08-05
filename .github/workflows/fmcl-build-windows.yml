@@ -48,8 +48,9 @@ jobs:
         python -m pip install --upgrade pip setuptools wheel packaging
 
     - name: Install dependencies
-      run: pnpm install
-
+      run: pnpm instal
+    - name: Ensure terser is installed
+      run: pnpm add -D terser
     - name: Build all
       run: |
         pnpm run --prefix xmcl-keystone-ui build
