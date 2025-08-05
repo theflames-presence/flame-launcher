@@ -113,6 +113,11 @@ export interface LaunchOptions {
    */
   prependCommand?: string
   /**
+   * Command to execute before launching Minecraft
+   * This will be executed before the launch process starts
+   */
+  preExecuteCommand?: string
+  /**
    * The environment variables
    */
   env?: Record<string, string>
@@ -120,6 +125,11 @@ export interface LaunchOptions {
   disableElyByAuthlib?: boolean
 
   nogui?: boolean
+  
+  /**
+   * Resolution settings for Minecraft
+   */
+  resolution?: { width?: number; height?: number; fullscreen?: boolean }
 }
 
 export interface GameProcess {
@@ -141,6 +151,13 @@ export interface ReportOperationPayload {
   duration?: number
 
   success?: boolean
+}
+
+export interface CreateLaunchShortcutOptions {
+  instancePath: string
+  userId: string
+  destination: string
+  icon?: string
 }
 
 export interface LaunchService extends GenericEventEmitter<LaunchServiceEventMap> {
@@ -171,6 +188,10 @@ export interface LaunchService extends GenericEventEmitter<LaunchServiceEventMap
    * Only used for telemetry
    */
   reportOperation(options: ReportOperationPayload): Promise<void>
+  /**
+   * Create a launch shortcut
+   */
+  createLaunchShortcut(options: CreateLaunchShortcutOptions): Promise<void>
 }
 
 export type LaunchExceptions = {
@@ -202,6 +223,13 @@ export type LaunchExceptions = {
 } | {
   type: 'launchBadVersion'
   version: string
+} | {
+  /**
+   * Pre-execute command failed
+   */
+  type: 'launchPreExecuteCommandFailed'
+  command: string
+  error?: string
 }
 
 export class LaunchException extends Exception<LaunchExceptions> { }

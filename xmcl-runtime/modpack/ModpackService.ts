@@ -100,21 +100,7 @@ export class ModpackService extends AbstractService implements IModpackService {
     const versionService = await this.app.registry.get(VersionService)
     const files = await this.#processFiles(handler, modpackFile, manifest, cached.sha1, entries)
 
-    let name = instance.name
-    let idx = 1
-
-    while (true) {
-      try {
-        await mkdir(this.getPath('instances', name))
-        break
-      } catch (e) {
-        if (isSystemError(e) && e.code === 'EEXIST') {
-          name = `${name}-${idx++}`
-          continue
-        }
-        throw e
-      }
-    }
+    const name = instance.name
 
     const matchedVersion = findMatchedVersion(versionService.state.local,
       '',
@@ -134,7 +120,6 @@ export class ModpackService extends AbstractService implements IModpackService {
     const options: CreateInstanceOption = {
       ...instance,
       name,
-      path: this.getPath('instances', name),
       version: matchedVersion?.id || instance.version,
       shaderpacks: hasShaderpacks,
       resourcepacks: hasResourcepacks,
@@ -185,6 +170,7 @@ export class ModpackService extends AbstractService implements IModpackService {
     let curseforgeConfig: CurseforgeModpackManifest | undefined
     let mcbbsManifest: McbbsModpackManifest | undefined
     let modrinthManifest: ModrinthModpackManifest | undefined
+    let xmclManifestExtension: Pick<InstanceData, 'disableElybyAuthlib' | 'disableAuthlibInjector' | 'upstream' | 'server'> | undefined
 
     if (emitCurseforge) {
       curseforgeConfig = getCurseforgeModpackFromInstance(instance)
@@ -224,7 +210,7 @@ export class ModpackService extends AbstractService implements IModpackService {
           let handled = false
           if (metadata.curseforge && (curseforgeConfig || mcbbsManifest)) {
             // curseforge
-            curseforgeConfig?.files.push({ projectID: metadata.curseforge.projectId, fileID: metadata.curseforge.fileId, required: true })
+            curseforgeConfig?.files?.push({ projectID: metadata.curseforge.projectId, fileID: metadata.curseforge.fileId, required: true })
             mcbbsManifest?.files!.push({ projectID: metadata.curseforge.projectId, fileID: metadata.curseforge.fileId, type: 'curse', force: false })
             handled = true
           }
@@ -421,8 +407,13 @@ export class ModpackService extends AbstractService implements IModpackService {
       const hash = cached.sha1
 
       const entries = Object.values(zip.entries)
-      const [manifest, handler] = await this.getManifestAndHandler(zip.file, entries)
-      if (!manifest || !handler) throw new ModpackException({ type: 'invalidModpack', path: modpackFile })
+      const [manifest, handler, errors] = await this.getManifestAndHandler(zip.file, entries)
+      if (!manifest || !handler) {
+        for (const e of errors) {
+          this.error(Object.assign(e, { name: e.name || 'ModpackParseError', cause: 'ModpackParsing' }))
+        }
+        throw new ModpackException({ type: 'invalidModpack', path: modpackFile })
+      }
 
       this.log(`Parse modpack profile ${modpackFile} with handler ${handler.constructor.name}`)
       const instance = handler.resolveInstanceOptions(manifest)
@@ -463,6 +454,9 @@ export class ModpackService extends AbstractService implements IModpackService {
             },
           },
         }])
+      }).catch(e => {
+        this.error(new AnyError('ModpackInstallProfileError', 'Fail to update resource', { cause: e }))
+        state.modpackError(e)
       })
 
       return [state, zip.dispose]
@@ -470,13 +464,17 @@ export class ModpackService extends AbstractService implements IModpackService {
   }
 
   private async getManifestAndHandler(zip: ZipFile, entries: Entry[]) {
+    const errors = [] as any[]
     for (const handler of Object.values(this.handlers)) {
-      const manifest = await handler.readManifest(zip, entries).catch(e => undefined)
+      const manifest = await handler.readManifest(zip, entries).catch((e) => {
+        errors.push(e)
+        return undefined
+      })
       if (manifest) {
-        return [manifest, handler] as const
+        return [manifest, handler, []] as const
       }
     }
-    return [undefined, undefined]
+    return [undefined, undefined, errors] as const
   }
 
   async showModpacksFolder(): Promise<void> {

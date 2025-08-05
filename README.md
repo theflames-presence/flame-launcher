@@ -1,7 +1,7 @@
 # Flame-Launcher
 This Launcher is made by Aislx FlamEs
 
-It is a fork of X Minecraft Launcher
+It is a fork of Flame Launcher
 Optimized and better ui
 
 **You can install this by with simple command**

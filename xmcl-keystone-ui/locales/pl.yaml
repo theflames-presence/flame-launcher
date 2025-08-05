@@ -108,6 +108,7 @@ browseApp:
   default: DEFAULT
   delete: Usuń
   launch: Uruchom i ustaw jako domyślne
+browseApps: Wyświetlanie interfejsu użytkownika programu uruchamiającego
 cancel: Anuluj
 checkUpdate:
   name: Sprawdź aktualizację
@@ -138,11 +139,21 @@ curseforge:
   totalDownloads: Łączna liczba pobrań
 curseforgeCard: {}
 curseforgeCategory:
+  API and Library: Interfejsy API i biblioteki
+  Addons: Suplementy
+  Adventure: Przygoda
+  Adventure and RPG: Przygodowe i RPG
+  Animated: Animacja
+  Armor, Tools, and Weapons: Pancerz, narzędzia i broń
+  Combat / PvP: Konkursy/PVP
   Fabric: Fabric
   FancyMenu: FancyMenu
+  Hardcore: Hardcore
   MCreator: MCreator
+  Magic: Magic
   QoL: QoL
   Skyblock: SkyBlock
+  Steampunk: Steampunk
   Vanilla+: Vanilla+
 dataMigration:
   apply: Zastosuj ustawienia
@@ -233,6 +244,9 @@ diagnosis:
   missingVersionJar:
     message: Kliknij, aby zainstalować tę wersję
     name: Brakująca wersja słoika dla Minecrafta %{version}
+  unzipFileNotFound:
+    description: Nie można znaleźć {file}
+    title: Nie znaleziono pliku modpack
 disable: Wyłącz
 disk:
   available: Dostępne
@@ -244,7 +258,10 @@ duration:
   day: '{duration} dzień | {duration} dni'
   hour: '{duration} godzina | {duration} godziny'
   minute: '{duration} minuta | {duration} minuty'
+  name: Usuń {name}
+  'no': Ni
   second: '{duration} drugi | {duration} sekundy'
+  'yes': Tak jest.
 edit: Edytuj
 enable: Włącz
 env:
@@ -268,6 +285,10 @@ errors:
     Baza danych nie jest otwarta! Program uruchamiający nie będzie działał
     prawidłowo! Wybierz katalog do którego program uruchamiający ma dostęp.
     Możesz spróbować zresetować katalog główny danych na stronie ustawień.
+  DiskIsFull: |-
+    Twój dysk jest pełny! 
+    Nie mogę nic napisać na dysku! 
+    Wszystkie funkcje mogą nie być funkcjonalne!
   DownloadAggregateError: Nie można pobrać pliku.
   DownloadFileSystemError: >-
     Błąd podczas uzyskiwania dostępu do ścieżki pobierania pliku. Upewnij się,
@@ -318,8 +339,10 @@ feedback:
   qqEnterGroup: Dołącz
 fileDetail:
   fileSize: Rozmiar pliku
+  filesize: Rozmiar pliku
   hash: Hash
 filter: Filtr
+filterLocalOnly: Pokaż tylko zainstalowane
 finish: Zakończenie
 forgeConfig:
   hint: >-
@@ -416,11 +439,14 @@ instance:
   fileApiHint: >-
     Adres URL do synchronizacji plików instancji ze zdalnego serwera
     konfiguracji.
+  fullscreen: Pełny ekran
   gameVersion: Wersja gry
+  height: Wysokość
   icon: Ikona profilu
   iconHint: Ikoną może być plik lub łącze internetowe.
   iconUrl: Ikona Adres URL
   includeVersion: Dołącz wersję | Dołącz wersje
+  installModpack: Zaktualizuj instancję z modpack
   lastPlayed: Ostatnio grane
   launchArguments: Podgląd uruchamiania argumentów
   launchServer: Uruchom serwer localhost
@@ -432,15 +458,21 @@ instance:
   mcOptionsHint: Dodatkowe poprawki dotyczące uruchomienia gry Minecraft
   name: Nazwa profilu
   nameHint: Nazwa używana do identyfikacji gry
+  nameNoCyrillic: Nazwa (bez znaków cyrylicy)
   neverPlayed: Nigdy nie grał
   openCrashReportFolder: Otwórz folder raportów o wypadkach
   openLogFolder: Otwórz folder dziennika
   playtime: Czas zabawy
+  preExecCommand: Polecenie przedstartowe
+  preExecCommandHint: Polecenie do wykonania przed uruchomieniem Minecrafta
   prependCommand: Dołącz polecenie
   prependCommandHint: >-
     Spowoduje to dodanie tego polecenia przed wszystkimi poleceniami
     uruchamiania
   requireName: Nazwa jest wymagana
+  resolution: Rozdzielczość okna
+  resolutionEnabled: Włącz własną rozdzielczość
+  resolutionPreset: Postarowani rezolucji
   showInstance: Pokaż folder gry
   useSharedOptions: Użyj udostępnionych ustawień gry
   useSharedOptionsDesc: >-
@@ -453,6 +485,9 @@ instance:
   versionHint: Minecraftowa wersja tej gry
   vmOptions: Opcje JVM
   vmOptionsHint: Dodatkowe argumenty przekazywane do JVM
+  vmVar: Zmienne środowiskowe
+  vmVarHint: Kliknij przycisk, aby dodać zmienne środowiskowe
+  width: Szerokość
 instanceAge:
   older: Starszy
   threeDay: W trzy dni
@@ -466,6 +501,19 @@ instanceFileOperation:
   backup-remove: Usunąć (Backup)
   keep: Zachowaj
   remove: Usunąć
+instanceInstallSkip:
+  ignore: Ignorować
+  skip: Pominąć
+  title: Potencjalne uszkodzone źródło pliku
+  warning: >-
+    Niektóre pliki są pobierane wielokrotnie z niezgodną sumą kontrolną. 
+
+    Może to wynikać z tego, że pierwotna suma kontrolna jest niepoprawna. 
+
+    Proszę sprawdzić. 
+
+    Jeśli potwierdzisz, że bieżące pliki są prawidłowe, możesz pominąć
+    sprawdzanie poprawności.
 instanceSetting:
   disableAuthlibInjector: Wyłącz wtryskiwacz authlib
   disableAuthlibInjectorDescription: >-
@@ -500,6 +548,10 @@ instanceUpdate:
 
     Stary moduł ładujący to {modloader}, a nowy moduł ładujący to
     {newModloader}.
+  summary: |-
+    Dodaj pliki {add}. 
+    Usuń pliki {remove}. 
+    Zachowaj pliki {keep}.
   title: Aktualizacja instancji
   update: Rozpoczęcie aktualizacji
 instances:
@@ -549,12 +601,13 @@ java:
   modifyInstance: Modyfikacja ścieżki Java
   noMemory: Nie ograniczaj użycia pamięci
   refresh: Odśwież lokalną Javę
-  systemMemory: Bieżąca pamięć systemowa
+  systemMemory: 'Wolna pamięć systemowa: {free} / {total}'
 labyMod:
   disable: Wyłącz LabyMod
   empty: LabyMod nie obsługuje aktualnej wersji Minecrafta
 launch:
   cancel: Anuluj
+  createShortcut: Utwórz skrót
   kill: Stop
   killServer: Zabij serwer Localhost
   launch: Uruchomienie
@@ -619,6 +672,11 @@ launchFailed:
   failedToLaunch: Uruchomienie nie powiodło się
   latestLog: Najnowszy dziennik
   title: Gra zakończyła się z nieprawidłowym kodem
+launchPreExecuteCommandFailed:
+  description: >-
+    Polecenie wstępnego wykonania nie powiodło się z błędem: {error}. Sprawdź
+    polecenie i spróbuj ponownie.
+  title: Nie powiodło się polecenie przed wykonaniem
 launchStatus:
   assigningMemory: Przypisywanie pamięci
   exit: Wyjście z gry?
@@ -680,6 +738,11 @@ loginError:
   loginXboxFailed: >-
     Nie można zalogować się do Xbox za pomocą tokena Microsoft. Upewnij się, że
     masz niezależne konto Xbox od konta Microsoft. Spróbuj ponownie.
+  noProfileForNewUser: >-
+    Nie znaleziono profilu gry! 
+
+    Jeśli jesteś nowym użytkownikiem Minecraft, zaloguj się przynajmniej raz w
+    oficjalnym wyrzutni Minecraft.
   requestFailed: >-
     Logowanie nie powiodło się, nie znamy dokładnej przyczyny. Prosimy o
     ponowienie próby.
@@ -706,6 +769,7 @@ minecraftVersion:
   snapshot: Migawka
 mod:
   acceptVersion: Akceptuj {version}
+  applyGroupRules: Zastosuj zapisane zasady grupowania
   compatible: Kompatybilny mod.
   currentVersion: Aktualny {current}
   deletion: Usuń mod
@@ -722,6 +786,7 @@ mod:
     Wybierz plik, który chcesz zachować.
   enabled: '{count} Modyfikacje włączone'
   filter: Modyfikacje filtra
+  group: Grupa
   groupInstalled: Modyfikacje instalowane grupowo
   hasUpdate: Mod ma nową wersję!
   hideIncompatible: Ukryj niekompatybilne mody
@@ -748,7 +813,16 @@ mod:
   showInCurseforge: Pokaż mod w curseforge
   showInModrinth: Pokaż  {name} w Modrinth
   switchDefaultSource: Domyślne źródło modów
+  syncGroupRules: Zapisz reguły grupowania
   toUpdate: '{count} aktualizować'
+  ungroup: Ungrouping
+modFilter:
+  clear: Przezroczysty filtr
+  dependenciesInstallOnly: Pokaż tylko pominięte mody
+  disabledOnly: Pokaż tylko niepełnosprawne mody
+  hasUpdateOnly: Tylko show ma mody aktualizacji
+  incompatibleOnly: Pokaż tylko niezgodne mody
+  unusedOnly: Pokaż tylko niewykorzystane mody bibliotek
 modInstall:
   archived: >-
     {name} zostało zarchiwizowane. 
@@ -761,28 +835,26 @@ modInstall:
   checkedUpgrade: Aktualizacja sprawdzona
   currentVersion: Wybrana wersja
   dependencyHint: Zainstalowana inna wersja {version}
+  display: Wyświetlacz modów
   install: Instalacja
   installDependencies: Zainstaluj brakujące zależności
   installHint: Zainstaluje się {file} plik z {dependencies} zależności
   installed: Zainstalowany
   noVersionSupported: Mod obsługuje tylko Minecrafta {supported}.
   recommendation: Odkryj {first} lub {second} mod w {modrinth} i {curseforge}!
+  removeUnusedLibraries: Usuń mody nieużywanych bibliotek
   search: Wynik wyszukiwania
   searchHint: SWyszukaj i wybierz projekt
   skipVersion: Pomiń mody z inną wersją Minecrafta
   source: Mod Source
   switch: Wersja Swtich
   upgrade: Ulepszenia modów
-modSearchType:
-  all: All
-  explore: Poznaj rynek
-  installed: Zainstalowany
-  local: Pamięć podręczna dysku
 modUpgradePolicy:
   curseforge: Najpierw Curseforge
   curseforgeOnly: Tylko Curseforge
   modrinth: Najpierw Modrinth
   modrinthOnly: Tylko Modrinth
+  name: Polityka aktualizacji
 modified:
   reset: Reset
   save: Zapisz
@@ -819,6 +891,11 @@ modpack:
   showInModrinth: Pokaż  {name} w Modrinth
   url: URL
   urlHint: Adres URL strony głównej modpacka
+modpackImportConfirm:
+  description: |-
+    Wykryjesz upuszczenie pliku do uruchamiającego. 
+    Czy próbujesz zaimportować modpack?
+  title: Czy próbujesz zaimportować modpack?
 modrinth:
   browseUrl: Otwórz w przeglądarce {url}
   categories:
@@ -918,6 +995,7 @@ modrinth:
   clientSide: Strona klienta
   copyTitle: Kopiuj tekst {titel} do schowka
   createAt: Utworzony
+  createCollection: Utwórz kolekcję
   description: Opis
   downloads: Pliki do pobrania
   environments:
@@ -930,6 +1008,7 @@ modrinth:
     unsupported: Nieobsługiwane
   externalResources: Zasoby zewnętrzne
   featuredVersions: Polecane wersje
+  followedProjects: Następujące projekty
   followers: Obserwujący
   gallery: Galeria
   gameVersions:
@@ -942,6 +1021,9 @@ modrinth:
   license: Licencja
   licenses:
     name: Licencje
+  loginHint: |-
+    Operacja wymaga wykonania Modrinth. 
+    Launcher otworzy okno przeglądarki do logowania Modrinth.
   modLoaders:
     name: Mod Loadery
   perPage: Na stronę
@@ -953,6 +1035,7 @@ modrinth:
     name: Typ projektu
     resourcePack: Pakiet zasobów
     shader: Shader
+  projects: '{Count} Projekty'
   quickSearch: Wyszukiwanie {title}
   searchText: Wyszukiwanie
   serverSide: Strona serwera
@@ -1148,6 +1231,7 @@ resourcepack:
   selectSearchHint: Wyszukaj i wybierz pakiet zasobów
   selected: Wybrane pakiety zasobów
   shared: Wystąpienie używa folderu współdzielonego pakietu zasobów
+  showDirectory: Otwórz folder z pakietami zasobów
   showFile: Pokaż pakiet zasobów w folderze {file}
   showInCurseforge: Pokaż {name} w curseforge
   unselected: Niewybrane pakiety zasobów
@@ -1201,15 +1285,32 @@ screenshots:
   name: Zrzuty ekranu
   playRandom: Graj losowo
   playSequence: Graj w kolejności
+search:
+  favorate: Kolekcja
+  local: Zainstalowany
+  market: Rynek modów
 server:
   acceptingMinecraftVersion: Akceptowanie wersji Minecraft
   creationHint: Wypełnij adres serwera i wykonaj ping do serwera
   delete: {}
   error: {}
   expectedVersions: Obsługiwane wersje
+  export: Serwer eksportowy
+  exportNoFilesHint: |-
+    Nie znaleziono plików serwerów. 
+    Możesz uruchomić serwer na lokalnym raz, aby wygenerować niektóre pliki.
+  exportOption: Opcje eksportu serwera
+  exportSSHAuthenticationFailed: |-
+    Wszystkie metody uwierzytelniania nie powiodły się. 
+    Sprawdź nazwę użytkownika/hasło lub klucz prywatny.
+  exportSSHOptions: Opcje SSH
+  exportSSHPrivateKeyPath: SSH Prywatna ścieżka kluczowa
+  exportSSHRemotePath: Ścieżka zdalnego serwera
+  exportToFolder: Eksportuj do folderu
   filterVersion: Serwer filtrujący odpowiedział na wersję Minecraft
   host: Host
   hostHint: Host (z portem) serwera
+  hostRequired: Wprowadź adres IP serwera
   ipAddress: Adres IP
   maxPlayers: Maksimum graczy
   motd: MOTD serwera
@@ -1224,6 +1325,7 @@ server:
   status: Status serwera
   unknown: Nieznany serwer
   unknownDescription: Nieznany serwer. Odśwież
+  upload: Przesyłaj serwer
   version: Serwer wymaga wersji
   versionHint: Wersja Minecraft do pingowania
 serverStatus:
@@ -1232,6 +1334,7 @@ serverStatus:
   refuse: §4Serwer odmówił!
   timeout: §4Limit czasu połączenia z serwerem!
 setting:
+  about: O
   allowPrerelease: Pobierz wersję wstępną
   allowPrereleaseDescription: Wersja przedpremierowa może być niestabilna
   apiSets:
@@ -1245,6 +1348,7 @@ setting:
   autoDownloadDescription: Automatyczne pobieranie aktualizacji, jeśli jest dostępna
   autoInstallOnAppQuit: Autoinstalacja
   autoInstallOnAppQuitDescription: Automatyczna instalacja aktualizacji po zamknięciu aplikacji
+  backdropBlur: Tło rozmyte
   backgroundColorAbove: Pokaż kolor tła jako nakładkę
   backgroundColorAboveDescription: Spowoduje to wyświetlenie koloru tła nad obrazem tła lub wideo.
   backgroundImage: Obraz tła
@@ -1283,7 +1387,7 @@ setting:
     cardColor: Kolor karty
     description: Zmiana kolorów w motywie
     errorColor: Kolor błędu
-    name: Kolor motywu
+    name: Kolor motywu i rozmycie
     primaryColor: Kolor podstawowy
     secondaryColor: Kolor dodatkowy
     sideBarColor: Pasek boczny
@@ -1313,9 +1417,14 @@ setting:
     Układ programu uruchamiającego reprezentujący inną logikę interfejsu
     użytkownika
   layoutTitle: Układ
+  linuxEnableDedicatedGPUOptimization: Przypisanie dedykowanego procesora graficznego
+  linuxEnableDedicatedGPUOptimizationDescription: Ta opcja przypisuje dedykowany procesor graficzny do procesu Minecraft.
   linuxTitlebar: Natywny pasek tytułu
   linuxTitlebarDescription: Użyj natywnego linuksowego paska tytułu dla programu uruchamiającego
   location: Lokalizacja sklepu
+  manualUpdateHint: >-
+    Wersja nie może zostać zaktualizowana automatycznie. Prosimy o ponowne
+    pobranie launchera z oficjalnej strony!
   maunalUpdateHint: >-
     Wersja nie może być automatycznie aktualizowana. Prosimy o ponowne pobranie
     programu uruchamiającego ze strony strony internetowej!
@@ -1401,6 +1510,10 @@ setup:
     exists: >-
       Wybrany katalog nie jest pusty. W porządku, ale upewnij się, że wykonałeś
       kopię zapasową danych.
+    invalidChar: |-
+      Ścieżka zawiera nieprawidłowe znaki! 
+      Może to spowodować, że Minecraft nie zaczął się! 
+      Plaese używają tylko angielskich postaci i symbolu!
     noPermission: Launcher nie ma uprawnień dostępu do wybranego katalogu! Spróbuj inny.
     nonDictionary: Selected path is a file! Please select a directory!
   focusLayoutDescription: >-
@@ -1444,6 +1557,11 @@ shared:
   accept: Akceptuj
   keepSelected: Zachowaj wybrane
   skipForNow: Pomiń na razie
+sortBy:
+  alphabetAsc: Sortuj według alfabetu (rosnące)
+  alphabetDesc: Sortuj według alfabetu (zejście)
+  timeAsc: Sortuj według czasu modyfikacji (rosnący)
+  timeDesc: Sortuj według czasu modyfikacji (zstępowanie)
 store:
   explore: Eksploruj
   latestMinecraft: Najnowsza wersja Minecrafta
@@ -1456,6 +1574,7 @@ tag:
   createSelected: Utwórz znacznik dla wybranych
   newTag: Nowa etykieta
 task:
+  available: Dostępne
   cancelled: Anulowane
   clear: Wyczyść ukończone zadania
   connection:
@@ -1466,18 +1585,32 @@ task:
     running: Działające połączenie
     size: całkowita liczba
   connections: Połączenia sieciowe
+  delete:
+    content: >-
+      Spowoduje to usunięcie pliku texturepack z dysku i nie będziemy w stanie
+      go odzyskać.
+       Czy na pewno można go odzyskać?
+    title: Usuń texturepack
+  dropHint: Przeciągnij i upuść tutaj folder/zip z teksturami do zaimportowania.
   empty: Brak uruchomionych zadań
+  enable: 'Włączone pakiety tekstur: {count}'
   failed: Nie powiodło się
+  manage: Texturpak
   manager: Menedżer zadań
   nTaskRunning: '{count} zadania są uruchomione'
   name: Zadanie | Zadania
   pause: Pauza
+  searchOnCurseforge: Wyszukaj {name} na curseforge
   searchOnModrinth: '@:mod.searchOnModrinth'
+  selected: Ulubione paczki tekstur
+  showInCurseforge: Pokaż {name} na curseforge
+  unselected: Niewybrane pakiety tekstur
 theme:
   selectImage: Wybierz obraz
   selectMusic: Wybierz muzykę
   selectVideo: Wybierz wideo
   title: Flame Launcher
+title: Flame Launcher
 transportType:
   host: Kandydat na gospodarza
   prflx: Refleksyjny kandydat na rówieśnika
@@ -1485,6 +1618,7 @@ transportType:
   srflx: Kandydat refleksyjny serwera
 turnRegion:
   fr: Francja
+  hk: Hong Kong
   po: Polska
 tutorial:
   feedbackDescription: >-

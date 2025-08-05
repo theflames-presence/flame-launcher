@@ -89,9 +89,10 @@ export async function getVersionList(options: {
   /**
    * Request dispatcher
    */
-  fetch?: typeof fetch
+  fetch?: typeof fetch,
+  remote?: string
 } = {}): Promise<MinecraftVersionList> {
-  const response = await (options.fetch ?? fetch)(DEFAULT_VERSION_MANIFEST_URL)
+  const response = await (options.fetch ?? fetch)(options.remote ?? DEFAULT_VERSION_MANIFEST_URL);
   return await response.json() as any
 }
 
@@ -519,6 +520,8 @@ export class InstallLibraryTask extends DownloadMultipleTask {
 }
 
 export class InstallAssetTask extends DownloadMultipleTask {
+  #total = 0
+
   constructor(assets: AssetInfo[], folder: MinecraftFolder, options: AssetsOptions) {
     const assetsHosts = normalizeArray(options.assetsHost || [])
 
@@ -550,9 +553,13 @@ export class InstallAssetTask extends DownloadMultipleTask {
       }
     }))
 
-    this._total = assets.reduce((a, b) => a + b.size, 0)
+    this.#total = assets.reduce((a, b) => a + b.size, 0)
     this.name = 'asset'
     this.param = { count: assets.length }
+  }
+
+  get total(): number {
+    return this.#total
   }
 }
 

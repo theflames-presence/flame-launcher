@@ -7,7 +7,7 @@
     >
       <div class="flex justify-center">
         <UserSkin
-          class="z-5 min-w-50 relative flex items-center justify-center overflow-auto overflow-x-hidden"
+          class="z-2 min-w-50 relative flex items-center justify-center overflow-auto overflow-x-hidden"
           inspect
           :user="user"
           :profile="gameProfile"
@@ -140,7 +140,7 @@
 </template>
 <script lang="ts" setup>
 import { NameAvailability, OfficialUserServiceKey, UserProfile } from '@xmcl/runtime-api'
-import PlayerCape from '../components/PlayerCape.vue'
+import PlayerCape from './PlayerCape.vue'
 import { PlayerNameModel, usePlayerName, UserSkinModel, useUserSkin } from '../composables/userSkin'
 import UserSkin from './UserSkin.vue'
 import { useRefreshable, useService } from '@/composables'

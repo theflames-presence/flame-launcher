@@ -91,7 +91,7 @@
         color="primary"
         rounded
         large
-        class="z-10 text-white"
+        class="text-white"
         @click="onLogin"
       >
         <span v-if="!isLogining">
@@ -128,7 +128,6 @@
       <a
         v-if="signUpLink"
         target="browser"
-        style="z-index: 20"
         :href="signUpLink"
       >
         {{ t("login.signupDescription") }}
@@ -205,6 +204,14 @@ const signUpLink = computed(() => {
 const allowDeviceCode = computed(() => {
   return currentAccountSystem.value?.flow.includes('device-code')
 })
+const emailOnly = computed(() => {
+  if (!currentAccountSystem.value?.authlibInjector) {
+    if (authority.value === AUTHORITY_MICROSOFT) {
+      return true // Microsoft account always has email-only flow
+    }
+  }
+  return false
+})
 const isPasswordReadonly = computed(() => !currentAccountSystem.value?.flow.includes('password') || data.useDeviceCode)
 const isPasswordDisabled = computed(() => isPasswordReadonly.value && !data.useDeviceCode)
 const passwordType = computed(() => data.useDeviceCode ? 'text' : 'password')
@@ -233,7 +240,7 @@ on('device-code', (code) => {
 const {
   usernameRules,
   passwordRules,
-} = useLoginValidation(isOffline)
+} = useLoginValidation(emailOnly)
 
 // Login Error
 const errorMessage = computed(() => {
@@ -252,6 +259,9 @@ const errorMessage = computed(() => {
       return t('loginError.requestFailed')
     }
     if (e.exception.type === 'fetchMinecraftProfileFailed') {
+      if (e.exception.errorType === 'ProfileNotFoundError' && !e.exception.developerMessage) {
+        return t('loginError.noProfileForNewUser')
+      }
       return t('loginError.fetchMinecraftProfileFailed', { reason: `${e.exception.errorType}, ${e.exception.developerMessage}` })
     }
     if (e.exception.type === 'userCheckGameOwnershipFailed') {

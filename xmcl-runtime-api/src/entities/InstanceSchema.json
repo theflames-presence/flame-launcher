@@ -64,30 +64,18 @@
         },
         "resolution": {
             "description": "The resolution of the game",
-            "anyOf": [
-                {
-                    "type": "object",
-                    "properties": {
-                        "width": {
-                            "type": "number"
-                        },
-                        "height": {
-                            "type": "number"
-                        },
-                        "fullscreen": {
-                            "type": "boolean"
-                        }
-                    },
-                    "required": [
-                        "fullscreen",
-                        "height",
-                        "width"
-                    ]
+            "type": "object",
+            "properties": {
+                "width": {
+                    "type": "number"
                 },
-                {
-                    "type": "null"
+                "height": {
+                    "type": "number"
+                },
+                "fullscreen": {
+                    "type": "boolean"
                 }
-            ]
+            }
         },
         "minMemory": {
             "description": "Can be override by global setting",
@@ -122,6 +110,9 @@
             "$ref": "#/definitions/Record<string,string>"
         },
         "prependCommand": {
+            "type": "string"
+        },
+        "preExecuteCommand": {
             "type": "string"
         },
         "url": {

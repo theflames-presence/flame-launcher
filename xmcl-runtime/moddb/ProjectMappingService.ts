@@ -35,7 +35,14 @@ export class ProjectMappingService extends AbstractService implements IProjectMa
     @Inject(kSettings) private settings: Settings,
   ) {
     super(app, async () => {
-      await this.ensureDatabase(true)
+      try {
+        await this.ensureDatabase(true)
+      } catch (e) {
+        if (typeof e === 'object' && e) {
+          Object.assign(e, { Cause: 'ProjectMappingInitialize' })
+        }
+        throw e
+      }
     })
   }
 
@@ -125,13 +132,16 @@ export class ProjectMappingService extends AbstractService implements IProjectMa
         }
       } catch { }
     }
-    const sqlite = new SQLDatabase(filePath, {
-      readOnly: true,
-    })
 
     const db = new Kysely<Database>({
       dialect: new SqliteWASMDialect({
-        database: sqlite,
+        database: () => new SQLDatabase(filePath, {
+          readOnly: true,
+        }),
+        onError: (e) => {
+          // @ts-ignore
+          e.source = 'ProjectMappingDatabase'
+        }
       }),
       log: (e) => {
         if (e.level === 'error') {
@@ -146,7 +156,7 @@ export class ProjectMappingService extends AbstractService implements IProjectMa
     }
 
     this.app.registryDisposer(async () => {
-      sqlite.close()
+      db.destroy()
     })
 
     return db

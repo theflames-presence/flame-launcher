@@ -107,9 +107,14 @@ export interface LaunchOption {
    */
   server?: { ip: string; port?: number }
   /**
+   * Directly launch to a server using quickPlayMultiplayer option (for newer Minecraft versions)
+   * This will use --quickPlayMultiplayer instead of --server and --port
+   */
+  quickPlayMultiplayer?: string
+  /**
    * Resolution. This will add --height & --width or --fullscreen to the java arguments
    */
-  resolution?: { width?: number; height?: number; fullscreen?: true }
+  resolution?: { width?: number; height?: number; fullscreen?: boolean }
   /**
    * Extra jvm options. This will append after to generated options.
    * If this is empty, the `DEFAULT_EXTRA_JVM_ARGS` will be used.
@@ -130,7 +135,6 @@ export interface LaunchOption {
    * The `launch` function will do it for you, but if you want to spawn process by yourself, remember to do that.
    */
   extraExecOption?: SpawnOptions
-  isDemo?: boolean
 
   /**
    * Native directory. It's .minecraft/versions/<version>/<version>-natives by default.
@@ -186,7 +190,10 @@ export interface LaunchOption {
    * @see {@link generateArguments}
    */
   prechecks?: LaunchPrecheck[]
-
+  /**
+   * Demo mode.
+   */
+  demo?: boolean
   /**
    * The spawn process function. Used for spawn the java process at the end.
    *
@@ -657,7 +664,7 @@ export function generateArgumentsServer(options: ServerOptions, _delimiter: stri
  */
 export async function generateArguments(options: LaunchOption) {
   if (!options.version) { throw new TypeError('Version cannot be null!') }
-  if (!options.isDemo) { options.isDemo = false }
+  if (!options.demo) { options.demo = false }
 
   const currentPlatform = options.platform ?? getPlatform()
   const gamePath = !isAbsolute(options.gamePath) ? resolve(options.gamePath) : options.gamePath
@@ -803,6 +810,9 @@ export async function generateArguments(options: LaunchOption) {
   if (options.extraMCArgs) {
     cmd.push(...options.extraMCArgs)
   }
+  if (options.quickPlayMultiplayer) {
+    cmd.push('--quickPlayMultiplayer', options.quickPlayMultiplayer)
+  }
   if (options.server) {
     cmd.push('--server', options.server.ip)
     if (options.server.port) {
@@ -820,6 +830,10 @@ export async function generateArguments(options: LaunchOption) {
         cmd.push('--width', options.resolution.width.toString())
       }
     }
+  }
+
+  if (options.demo) {
+    cmd.push('--demo')
   }
 
   unshiftPrependCommand(cmd, options.prependCommand)
@@ -847,4 +861,14 @@ function normalizeArguments(args: Version.LaunchArgument[], platform: Platform, 
     }
     return result
   }, [])
+}
+
+/**
+ * Create a quickPlayMultiplayer string from server IP and optional port
+ * @param ip The server IP address
+ * @param port The server port (optional, defaults to 25565 if not specified)
+ * @returns A formatted string for quickPlayMultiplayer option
+ */
+export function createQuickPlayMultiplayer(ip: string, port?: number): string {
+  return port ? `${ip}:${port}` : ip
 }

@@ -38,12 +38,12 @@ export const config = {
     applicationId: 'fmcl',
     identityName: 'fmcl',
     backgroundColor: 'transparent',
-    publisher: 'CN=DAFB9390-F5BD-4F94-828C-242F8DAA6FDE',
-    publisherDisplayName: 'AISLX',
+    publisher: process.env.PUBLISHER,
+    publisherDisplayName: 'Aislx',
     setBuildNumber: true,
   },
   dmg: {
-    artifactName: 'fmcl-${version}.${ext}',
+    artifactName: 'fmcl-${version}-${arch}.${ext}',
     contents: [
       {
         x: 410,
@@ -91,7 +91,7 @@ export const config = {
   linux: {
     executableName: 'fmcl',
     desktop: {
-      MimeType: 'x-scheme-handler/xmcl',
+      MimeType: 'x-scheme-handler/fmcl',
       StartupWMClass: 'fmcl',
     },
     category: 'Game',
@@ -102,6 +102,7 @@ export const config = {
       { target: 'rpm', arch: ['x64', 'arm64'] },
       { target: 'AppImage', arch: ['x64', 'arm64'] },
       { target: 'tar.xz', arch: ['x64', 'arm64'] },
+      { target: 'pacman', arch: ['x64', 'arm64'] },
     ],
   },
   snap: {

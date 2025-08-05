@@ -6,7 +6,15 @@
     :icons="icons"
     :refreshing="false"
     :class="{ dragover }"
-    :button="t('save.manage')"
+    :button="saves.length > 0 ? {
+      text: t('mod.manage'),
+      icon: 'settings'
+     } : undefined"
+    :addition-button="{ 
+      icon: 'file_download',
+      text: t('install'),
+     }"
+    @navigate-addition="push('/save?source=remote')"
     @navigate="push('/save')"
     @drop="onDrop"
   />
@@ -37,6 +45,7 @@ function onDrop(e: DragEvent) {
   if (e.dataTransfer) {
     const filePaths = Array.from(e.dataTransfer.files).map(f => f.path)
     importSave({ instancePath: path.value, path: filePaths[0] })
+    e.preventDefault()
   }
 }
 </script>

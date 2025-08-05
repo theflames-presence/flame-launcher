@@ -64,7 +64,7 @@ export class PresenceService extends AbstractService implements IPresenceService
     // })
 
     this.discord = new Client({
-      clientId: '1337842405847863397',
+      clientId: '1075044884400054363',
     })
   }
 

@@ -11,7 +11,7 @@ on:
       - 'xmcl-electron-app/**'
       - 'package.json'
       - '.github/**'     
-      
+
 jobs:
 
   build:
@@ -22,12 +22,15 @@ jobs:
     - uses: actions/checkout@v3
       with:
         submodules: recursive
+
     - uses: pnpm/action-setup@v2.0.1
       with:
         version: 9.3.0
+
     - name: Fix node-gyp and Python
       run: python3 -m pip install packaging setuptools
-    - name: Use Node.js 16
+
+    - name: Use Node.js 20
       uses: actions/setup-node@v2
       with:
         node-version: 20
@@ -45,13 +48,13 @@ jobs:
         NODE_OPTIONS: --max-old-space-size=32768
         NODE_ENV: production
         CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_TOKEN }}
-        
+
     - name: FMCL-x64-Upload-Deb
       uses: actions/upload-artifact@v4
       with:
         name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Deb
         path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-amd64.deb
-      
+
     - name: FMCL-x32-Upload-Deb
       uses: actions/upload-artifact@v4
       with:
@@ -63,15 +66,74 @@ jobs:
       with:
         name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Appimage
         path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-x86_64.AppImage
-                  
+
     - name: FMCL-x64-Upload-Zip
       uses: actions/upload-artifact@v4
       with:
         name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Zip
         path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-x64.tar.xz
-      
+
     - name: FMCL-x32-Upload-Zip
       uses: actions/upload-artifact@v4
       with:
         name: FMCL-LINUX-x32-v${{ secrets.FMCL_VERSION }}-Zip
         path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.tar.xz
+
+    - name: Create Github Release
+      id: create-new-release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ secrets.FMCL_VERSION }}
+        release_name: v${{ secrets.FMCL_VERSION }}
+
+    - name: FMCL-x64-Upload Deb to Github
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create-new-release.outputs.upload_url }}
+        asset_path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-amd64.deb
+        asset_name: fmcl-${{ secrets.FMCL_VERSION }}-amd64.deb
+        asset_content_type: application/vnd.debian.binary-package
+
+    - name: FMCL-x32-Upload Deb to Github
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create-new-release.outputs.upload_url }}
+        asset_path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.deb
+        asset_name: fmcl-${{ secrets.FMCL_VERSION }}-arm64.deb
+        asset_content_type: application/vnd.debian.binary-package
+
+    - name: FMCL-x64-Upload AppImage to Github
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create-new-release.outputs.upload_url }}
+        asset_path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-x86_64.AppImage
+        asset_name: fmcl-${{ secrets.FMCL_VERSION }}-x86_64.AppImage
+        asset_content_type: application/octet-stream
+
+    - name: FMCL-x64-Upload Zip to Github
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create-new-release.outputs.upload_url }}
+        asset_path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-x64.tar.xz
+        asset_name: fmcl-${{ secrets.FMCL_VERSION }}-x64.tar.xz
+        asset_content_type: application/x-xz
+
+    - name: FMCL-x32-Upload Zip to Github
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create-new-release.outputs.upload_url }}
+        asset_path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.tar.xz
+        asset_name: fmcl-${{ secrets.FMCL_VERSION }}-arm64.tar.xz
+        asset_content_type: application/x-xz

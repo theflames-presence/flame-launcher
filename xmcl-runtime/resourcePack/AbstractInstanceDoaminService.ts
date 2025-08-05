@@ -77,19 +77,28 @@ export abstract class AbstractInstanceDomainService extends AbstractService {
         const isLinked = await this.isLinked(instancePath)
         if (!isLinked) {
           // Backup the old folder
-          const files = await readdirSafe(destPath)
-          if (files.length > 0) {
-            const backupDir = join(destPath, '.backup')
-            await ensureDir(backupDir)
-            for (const f of files) {
-              const s = await stat(join(destPath, f))
-              if (s.isDirectory()) {
-                // move to backup dir
-                await rename(join(destPath, f), join(backupDir, f))
+          try {
+            const files = await readdirSafe(destPath)
+            if (files.length > 0) {
+              const backupDir = join(destPath, '.backup')
+              await ensureDir(backupDir)
+              for (const f of files) {
+                const s = await stat(join(destPath, f))
+                if (s.isDirectory()) {
+                  // move to backup dir
+                  await rename(join(destPath, f), join(backupDir, f))
+                }
               }
             }
+            await remove(destPath)
+          } catch (e) {
+            if (e instanceof Error) {
+              if (e.name === 'Error') {
+                Object.assign(e, { name: 'UnlinkResourceFolderError' })
+              }
+            }
+            throw e
           }
-          await remove(destPath)
         }
       }
       const isLinked = await tryLink(srcPath, destPath, this, (path) => this.instanceService.isUnderManaged(path))
@@ -137,7 +146,7 @@ export abstract class AbstractInstanceDomainService extends AbstractService {
     const files = file instanceof Array ? file : [file]
     for (const f of files) {
       const dest = join(instancePath, this.domain, basename(f))
-      await unlink(dest)
+      await unlink(dest).catch(() => {})
     }
   }
 

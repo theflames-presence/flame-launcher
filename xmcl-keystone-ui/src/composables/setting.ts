@@ -3,14 +3,14 @@ import { injection } from '@/util/inject'
 import { BaseServiceKey, Environment, Settings } from '@xmcl/runtime-api'
 import { InjectionKey, Ref } from 'vue'
 import { useLocalStorageCacheBool } from './cache'
-import { useEnvironment } from './environment'
+import { kEnvironment } from './environment'
 import { useState } from './syncableState'
 
 export const kUpdateSettings: InjectionKey<ReturnType<typeof useUpdateSettings>> = Symbol('UpdateSettings')
 
 export function useUpdateSettings() {
   const { checkUpdate, downloadUpdate, quitAndInstall } = useService(BaseServiceKey)
-  const env: Ref<Environment | undefined> = useEnvironment()
+  const env: Ref<Environment | undefined> = injection(kEnvironment)
   const { state } = injection(kSettingsState)
   const updateStatus = computed(() => state.value?.updateStatus)
   const updateInfo = computed(() => state.value?.updateInfo)
@@ -76,7 +76,9 @@ export function useGlobalSettings({ state } = injection(kSettingsState)) {
   const globalDisableAuthlibInjector = computed(() => state.value?.globalDisableAuthlibInjector ?? true)
   const globalDisableElyByAuthlib = computed(() => state.value?.globalDisableElyByAuthlib ?? false)
   const globalPrependCommand = computed(() => state.value?.globalPrependCommand ?? '')
+  const globalPreExecuteCommand = computed(() => state.value?.globalPreExecuteCommand ?? '')
   const globalEnv = computed(() => state.value?.globalEnv ?? {})
+  const globalResolution = computed(() => state.value?.globalResolution)
   const setGlobalSettings = (setting: {
     globalMinMemory: number
     globalMaxMemory: number
@@ -89,7 +91,9 @@ export function useGlobalSettings({ state } = injection(kSettingsState)) {
     globalDisableAuthlibInjector: boolean
     globalDisableElyByAuthlib: boolean
     globalPrependCommand: string
+    globalPreExecuteCommand: string
     globalEnv: Record<string, string>
+    globalResolution: { width?: number; height?: number; fullscreen?: boolean }
   }) => {
     state.value?.globalInstanceSetting(setting)
   }
@@ -106,7 +110,9 @@ export function useGlobalSettings({ state } = injection(kSettingsState)) {
     globalDisableAuthlibInjector,
     globalDisableElyByAuthlib,
     globalPrependCommand,
+    globalPreExecuteCommand,
     globalEnv,
+    globalResolution,
     setGlobalSettings,
   }
 }

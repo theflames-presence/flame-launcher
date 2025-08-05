@@ -1,6 +1,6 @@
 import { parse } from '@/util/forgeWebParser'
 import { MaybeRef, get } from '@vueuse/core'
-import type { LabyModManifest } from '@xmcl/installer'
+import type { JavaRuntimeManifest, JavaRuntimeTarget, JavaRuntimes, LabyModManifest } from '@xmcl/installer'
 import { FabricArtifactVersion, ForgeVersion, MinecraftVersions, OptifineVersion, QuiltArtifactVersion, VersionMetadataServiceKey } from '@xmcl/runtime-api'
 import { Ref, computed } from 'vue'
 import { useSWRVModel } from './swrv'
@@ -15,6 +15,36 @@ async function getJson<T>(url: string) {
     return result as T
   }
   throw new Error('Failed to load ' + url)
+}
+
+export function getOfficialJavaRuntimesModel() {
+  return {
+    key: '/java-manifests',
+    fetcher: async () => {
+      const result = await Promise.any([
+        getJson<JavaRuntimes>('https://launchermeta.mojang.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json'),
+        getJson<JavaRuntimes>('https://bmclapi2.bangbang93.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json'),
+      ])
+      return markRaw(result)
+    },
+  }
+}
+
+export function getOfficalJavaRuntimeManifestModel(target: MaybeRef<JavaRuntimeTarget>) {
+  const targetValue = get(target)
+  return {
+    key: targetValue.manifest.url,
+    fetcher: async () => {
+      const result = await Promise.any([
+        getJson<JavaRuntimeManifest['files']>(targetValue.manifest.url),
+        getJson<JavaRuntimeManifest['files']>(targetValue.manifest.url.replace('https://piston-meta.mojang.com/', 'https://bmclapi2.bangbang93.com/')),
+      ])
+      return markRaw({
+        files: result,
+        version: targetValue.version,
+      })
+    }
+  }
 }
 
 export function getMinecraftVersionsModel() {
@@ -59,10 +89,10 @@ export function useMinecraftVersions() {
 }
 
 export function useFabricVersions(minecraftVersion: Ref<string>) {
-  const { data: allVersions, isValidating, mutate, error } = useSWRVModel(getFabricLoaderVersionsModel(),
+  const { data: allVersions, isValidating, mutate: mutateLoaders, error } = useSWRVModel(getFabricLoaderVersionsModel(),
     inject(kSWRVConfig))
 
-  const { data: int } = useSWRVModel(getFabricGameVersionsModel(), inject(kSWRVConfig))
+  const { data: int, mutate: mutateInt } = useSWRVModel(getFabricGameVersionsModel(), inject(kSWRVConfig))
 
   const versions = computed(() => {
     if (!int.value || !int.value.includes(minecraftVersion.value)) {
@@ -72,6 +102,10 @@ export function useFabricVersions(minecraftVersion: Ref<string>) {
     if (!all) return []
     return all
   })
+
+  function mutate() {
+    return Promise.all([mutateLoaders(), mutateInt()])
+  }
 
   return {
     error,
@@ -85,11 +119,17 @@ export function getFabricGameVersionsModel() {
   return {
     key: computed(() => '/fabric-game-versions'),
     fetcher: async () => {
-      const int = await Promise.any([
+      const int = await Promise.allSettled([
         getJson<{ version: string }[]>('https://meta.fabricmc.net/v2/versions/game'),
         getJson<{ version: string }[]>('https://bmclapi2.bangbang93.com/fabric-meta/v2/versions/game'),
       ])
-      return int.map(v => v.version)
+      if (int[0].status === 'fulfilled') {
+        return int[0].value.map(v => v.version)
+      }
+      if (int[1].status === 'fulfilled') {
+        return int[1].value.map(v => v.version)
+      }
+      throw int[0].reason || int[1].reason || new Error('Failed to fetch Fabric game versions')
     },
   }
 }
@@ -126,11 +166,17 @@ export function getQuiltGameVersionsModel() {
   return {
     key: computed(() => '/quilt-game-versions'),
     fetcher: async () => {
-      const int = await Promise.any([
+      const int = await Promise.allSettled([
         getJson<{ version: string }[]>('https://meta.quiltmc.org/v3/versions/game'),
         getJson<{ version: string }[]>('https://bmclapi2.bangbang93.com/quilt-meta/v3/versions/game'),
       ])
-      return int.map(v => v.version)
+      if (int[0].status === 'fulfilled') {
+        return int[0].value.map(v => v.version)
+      }
+      if (int[1].status === 'fulfilled') {
+        return int[1].value.map(v => v.version)
+      }
+      throw int[0].reason || int[1].reason || new Error('Failed to fetch Quilt game versions')
     },
   }
 }
@@ -150,10 +196,10 @@ export function getQuiltLoaderVersionsModel() {
 }
 
 export function useQuiltVersions(minecraftVersion: Ref<string>) {
-  const { data: allVersions, isValidating, mutate, error } = useSWRVModel(getQuiltLoaderVersionsModel(),
+  const { data: allVersions, isValidating, mutate: mutateLoaders, error } = useSWRVModel(getQuiltLoaderVersionsModel(),
     inject(kSWRVConfig))
 
-  const { data: int } = useSWRVModel(getQuiltGameVersionsModel(), inject(kSWRVConfig))
+  const { data: int, mutate: mutateInt } = useSWRVModel(getQuiltGameVersionsModel(), inject(kSWRVConfig))
 
   const versions = computed(() => {
     if (!int.value || !int.value.includes(minecraftVersion.value)) {
@@ -163,6 +209,10 @@ export function useQuiltVersions(minecraftVersion: Ref<string>) {
     if (!all) return []
     return all
   })
+
+  function mutate() {
+    return Promise.all([mutateLoaders(), mutateInt()])
+  }
 
   return {
     error,

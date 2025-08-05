@@ -101,6 +101,7 @@ browseApp:
   default: DEFAULT
   delete: Delete
   launch: Launch and set as Default
+browseApps: Viewing the launcher user interface
 cancel: Cancel
 checkUpdate:
   name: Check Update
@@ -131,8 +132,58 @@ curseforge:
   totalDownloads: Total Downloads
 curseforgeCard: {}
 curseforgeCategory:
+  API and Library: APIs and libraries
+  Addons: Supplements
+  Adventure: Adventure
+  Adventure and RPG: Adventure and RPG
+  Animated: Animation
+  Armor, Tools, and Weapons: Armor, tools and weapons
+  Armor， Tools， and Weapons: Armor, tools and weapons
+  Combat / PvP: Competitions/PVP
+  Cosmetic: Appearance/decoration
+  Creation: Creative mode
+  Data Packs: Data packet
+  Education: Education
+  Exploration: Reconnaissance
+  Extra Large: Large size
+  FTB Official Pack: The official FTB package
   Fabric: Fabric
+  FancyMenu: FancyMenu
+  Font Packs: Fonts
   Food: Food
+  Game Map: Game Cards
+  Hardcore: Hardcore
+  MCreator: MCreator
+  Magic: Magic
+  Map Based: Based on the map
+  Map and Information: Maps and information
+  Medieval: Middle Ages
+  Mini Game: Mini-games
+  Miscellaneous: Miscellaneous
+  Mod Support: Mod support
+  Modded World: A mod for worlds
+  Modern: Modern
+  Multiplayer: Multiplayer
+  Parkour: Parkour
+  Photo Realistic: Realistic photography
+  Puzzle: Puzzles
+  QoL: QoL
+  Quests: Quests
+  Redstone: Redstone
+  Sci-Fi: Sci-Fi
+  Server Utility: Server tool
+  Skyblock: SkyBlock
+  Small / Light: A little bit
+  Steampunk: Steampunk
+  Storage: Storage
+  Survival: Survival
+  Tech: Technology
+  Technology: Technology
+  Traditional: Traditional
+  Twitch Integration: Twitch integration
+  Utility & QoL: Utility and Qol
+  Vanilla+: Vanilla+
+  World Gen: Peace Generator
 dataMigration:
   apply: Apply Setting
   directoryCriteriaHint: Please make sure your new directory location is an EMPTY directory!
@@ -216,6 +267,9 @@ diagnosis:
   missingVersionJar:
     message: Click to install this version
     name: Missing version jar for Minecraft %{version}
+  unzipFileNotFound:
+    description: Cannot find {file}
+    title: Modpack file not found
 disable: Disable
 disk:
   available: Available
@@ -227,7 +281,10 @@ duration:
   day: '{duration} day | {duration} days'
   hour: '{duration} hour | {duration} hours'
   minute: '{duration} minute | {duration} minutes'
+  name: Delete {name}
+  'no': 'No'
   second: '{duration} second | {duration} seconds'
+  'yes': Yes, sir.
 edit: Edit
 enable: Enable
 env:
@@ -250,6 +307,9 @@ errors:
     Database is not opened! The launcher won't work properly! Please select a
     data directory the launcher can access. You can try to reset the data root
     in setting page.
+  DiskIsFull: >-
+    Your disk is full! Cannot write anything to disk! All features might not be
+    functional!
   DownloadAggregateError: Failed to download file.
   DownloadFileSystemError: >-
     Error during accessing the download file path. Please ensure the launcher
@@ -294,7 +354,7 @@ feedback:
   githubOpenIssue: Github
   hint: >-
     Click the button to create the report and contact the developer team. The
-    report will contains your device info including operating system type,
+    report will contain your device info including operating system type,
     version, user name (in your os), etc.
   kook: Youtube
   kookDescription: This is my youtube channel :)).
@@ -306,8 +366,10 @@ feedback:
   qqEnterGroup: Join
 fileDetail:
   fileSize: File Size
+  filesize: File size
   hash: Hash
 filter: Filter
+filterLocalOnly: Only show installed
 finish: Finish
 forgeConfig:
   hint: >-
@@ -400,11 +462,14 @@ instance:
   duplicatedName: Duplicated Name
   fileApi: The synchronize file server API url
   fileApiHint: The url to synchronize instance files from a remote config server.
+  fullscreen: Fullscreen
   gameVersion: Game Version
+  height: Height
   icon: Profile Icon
   iconHint: The icon could be a file or internet url link.
   iconUrl: Icon Url
   includeVersion: Include Version | Include Versions
+  installModpack: Update instance from modpack
   lastPlayed: Last Played
   launchArguments: Launch Arguments Preview
   launchServer: Launch localhost server
@@ -416,13 +481,19 @@ instance:
   mcOptionsHint: Additional Minecraft launch arguments
   name: Profile Name
   nameHint: The name of the modpack
+  nameNoCyrillic: The name cannot contain Cyrillic characters
   neverPlayed: Never Played
   openCrashReportFolder: Open Crash Report Folder
   openLogFolder: Open Log Folder
   playtime: Playtime
+  preExecCommand: Pre-Execute Command
+  preExecCommandHint: Command to execute before launching Minecraft
   prependCommand: Prepend Command
   prependCommandHint: This will prepend this command before all the launch commands
   requireName: The name is required
+  resolution: Resolution
+  resolutionEnabled: Enable custom resolution
+  resolutionPreset: Resolution Preset
   showInstance: Show game folder
   useSharedOptions: Use shared game settings
   useSharedOptionsDesc: This will link the options.txt to a shared file across instance
@@ -431,6 +502,9 @@ instance:
   versionHint: The Minecraft version of this game
   vmOptions: JVM Options
   vmOptionsHint: Extra arguments to pass to the JVM
+  vmVar: Environment Variables
+  vmVarHint: Click + button to add environemnt variables
+  width: Width
 instanceAge:
   older: Older
   threeDay: In Three Days
@@ -444,6 +518,14 @@ instanceFileOperation:
   backup-remove: Remove (Backup)
   keep: Keep
   remove: Remove
+instanceInstallSkip:
+  ignore: Ignore
+  skip: Skip
+  title: Potential corrupted file source
+  warning: >-
+    Some files are downloaded multiple times with checksum unmatching. This may
+    be due to the fact that the original checksum is incorrect. Please check. If
+    you confirm the current files are valid, you can skip the validation check.
 instanceSetting:
   disableAuthlibInjector: Disable authlib injector
   disableAuthlibInjectorDescription: >-
@@ -474,6 +556,7 @@ instanceUpdate:
   loaderChanged: >-
     The modloader of this instance has been changed. The old modloader is
     {modloader}, and the new modloader is {newModloader}.
+  summary: Add {add} files. Remove {remove} files. Keep {keep} files.
   title: Update Instance
   update: Start Update
 instances:
@@ -496,7 +579,7 @@ instances:
   addVanilla: Create from vanilla-like Minecraft
   addVanillaDescription: >-
     Import from common .minecraft folder. This will duplciate the original game
-    profile to XMCL.
+    profile to FMCL.
   choose: Select Game
   fix: Repair
   folderSetting: Folder Settings
@@ -523,12 +606,13 @@ java:
   modifyInstance: Modify Java Path
   noMemory: Do not limit memory usage
   refresh: Refresh Local Java
-  systemMemory: Current System Memory
+  systemMemory: 'System Free Memory: {free} / {total}'
 labyMod:
   disable: Disable LabyMod
   empty: LabyMod does not support current Minecraft
 launch:
   cancel: Cancel
+  createShortcut: Create shortcut
   kill: Stop
   killServer: Kill Localhost Server
   launch: Launch
@@ -587,6 +671,11 @@ launchFailed:
   failedToLaunch: Launch failed to launch
   latestLog: Latest Log
   title: Game Exited with Abnormal Code
+launchPreExecuteCommandFailed:
+  description: >-
+    The pre-execute command failed with an error: {error}. Please check the
+    command and try again.
+  title: Pre-Execute Command Failed
 launchStatus:
   assigningMemory: Assigning memory
   exit: Exit Game?
@@ -648,6 +737,9 @@ loginError:
   loginXboxFailed: >-
     Fail to login Xbox by Microsoft token. Please make sure you have an
     independent Xbox account to your Microsoft account. Please try again.
+  noProfileForNewUser: >-
+    No game profile found! If you are a new Minecraft user, please login at
+    least one time in Minecraft official launcher.
   requestFailed: Login failed, we do not know the exact reason. Please retry.
   requireEmail: E-mail is required
   requirePassword: Password is required
@@ -672,6 +764,7 @@ minecraftVersion:
   snapshot: Snapshot
 mod:
   acceptVersion: Accept {version}
+  applyGroupRules: Apply saved grouping rules
   compatible: Compatible Mod.
   currentVersion: Current {current}
   deletion: Delete Mod
@@ -688,6 +781,7 @@ mod:
     crash. Please select the file you want to keep.
   enabled: '{count} Mods enabled'
   filter: Filter Mods
+  group: Group up
   groupInstalled: Group Installed Mods
   hasUpdate: Mod has a new version!
   hideIncompatible: Hide Incompatible Mods
@@ -696,7 +790,7 @@ mod:
   incompatibleHintDescription: >-
     Some mods dependencies might be missing. Or some dependencies versions do
     not matched.
-  manage: Manage Mods
+  manage: Manage
   maybeCompatible: Maybe Compatible.
   modloaderSelectHint: The mod support following mod loaders. Please select one to install.
   modloaderSelectNotSupported: Not found {modloader} for Minecraft {minecraft}
@@ -706,13 +800,23 @@ mod:
   openLink: Open the mod url {url}
   search: Search Mods
   searchOnCurseforge: Search {name} in curseforge
+  searchOnMcWiki: Look up {name} in the MC encyclopedia.
   searchOnModrinth: Search {name} in Modrinth
   showDirectory: Show mods directory
   showFile: Show the mod path {file}
   showInCurseforge: Show the mod in curseforge
   showInModrinth: Show {name} in Modrinth
   switchDefaultSource: Default Mod Source
+  syncGroupRules: Save grouping rules
   toUpdate: '{count} updates'
+  ungroup: Ungrouping
+modFilter:
+  clear: Clear Filter
+  dependenciesInstallOnly: Only show missed dependencies mods
+  disabledOnly: Only show disabled mods
+  hasUpdateOnly: Only show mods with updates
+  incompatibleOnly: Only show incompatible or missing dependencies missing mods
+  unusedOnly: Only show unused libraries mods
 modInstall:
   archived: >-
     {name} has been archived. {name} will not receive any further updates unless
@@ -723,28 +827,26 @@ modInstall:
   checkedUpgrade: Upgrade checked
   currentVersion: Selected Version
   dependencyHint: Installed another version {version}
+  display: Mods Display
   install: Install
   installDependencies: Install Missing Dependencies
   installHint: Will install {file} file with {dependencies} dependencies
   installed: Installed
   noVersionSupported: Mod only supports Minecraft {supported}.
   recommendation: Explore the {first} or {second} mods in {modrinth} and {curseforge}!
+  removeUnusedLibraries: Remove unused libraries mods
   search: Search Result
   searchHint: Search and select project
   skipVersion: Skip the Mods with different Minecraft version
   source: Mod Source
-  switch: Swtich Version
+  switch: Switch Version
   upgrade: Upgrade Mods
-modSearchType:
-  all: All
-  explore: Explore Market
-  installed: Installed
-  local: Disk Cache
 modUpgradePolicy:
   curseforge: Curseforge First
   curseforgeOnly: Curseforge Only
   modrinth: Modrinth First
   modrinthOnly: Modrinth Only
+  name: Upgrade Policy
 modified:
   reset: Reset
   save: Save
@@ -779,6 +881,11 @@ modpack:
   showInModrinth: Show {name} in Modrinth
   url: URL
   urlHint: The home page url of your modpack
+modpackImportConfirm:
+  description: >-
+    Detect you drop a file into the launcher. Are you trying to import a
+    modpack?
+  title: Are you trying to import a modpack?
 modrinth:
   browseUrl: Open In Browser {url}
   categories:
@@ -841,6 +948,7 @@ modrinth:
     models: Models
     modloader: Mod Loader
     multiplayer: Multiplayer
+    name: Categories
     neoforge: NeoForge
     optifine: Optifine
     optimization: Optimizations
@@ -877,6 +985,7 @@ modrinth:
   clientSide: Client Side
   copyTitle: Copy Text {title} to clipboard
   createAt: Created
+  createCollection: Create Collection
   description: Description
   downloads: Downloads
   environments:
@@ -889,6 +998,7 @@ modrinth:
     unsupported: Unsupported
   externalResources: External Resources
   featuredVersions: Featured Versions
+  followedProjects: Followed Projects
   followers: Followers
   gallery: Gallery
   gameVersions:
@@ -901,6 +1011,10 @@ modrinth:
   license: License
   licenses:
     name: Licenses
+  loginHint: >-
+    The operation requires modrinth to perform. The launcher will open a browser
+    window to login modrinth.
+  loginTitle: Login to Modrinth
   modLoaders:
     name: Mod Loaders
   perPage: Per Page
@@ -912,6 +1026,7 @@ modrinth:
     name: Project Type
     resourcePack: Resource Pack
     shader: Shader
+  projects: '{count} projects'
   quickSearch: Search {title}
   searchText: Search
   serverSide: Server Side
@@ -1058,7 +1173,7 @@ peerSignalingState:
 popular: Popularity
 presence:
   curseforge: Viewing CurseForge
-  curseforgeProject: Viewing {name} in Curseforge
+  curseforgeProject: Viewing {name} in curseforge
   instance: Idle in Instance {instance}
   instanceSetting: 'Edit Instance Setting: {instance}'
   mod: Viewing Mods in {instance}
@@ -1157,15 +1272,32 @@ screenshots:
   name: Screenshots
   playRandom: Shuffle
   playSequence: Play in order
+search:
+  favorate: Collection
+  local: Installed
+  market: Mod Market
 server:
   acceptingMinecraftVersion: Accepting Minecraft Version
   creationHint: Please Fill the server address and ping the server
   delete: {}
   error: {}
   expectedVersions: Supported Versions
+  export: Export Server
+  exportNoFilesHint: >-
+    No server files found. You can run server on local once to generate some
+    files.
+  exportOption: Server Export Options
+  exportSSHAuthenticationFailed: >-
+    All authentication methods failed. Please check username/password or private
+    key.
+  exportSSHOptions: SSH Options
+  exportSSHPrivateKeyPath: SSH Private Key Path
+  exportSSHRemotePath: Remote Server Path
+  exportToFolder: Export To Folder
   filterVersion: Filter server responded Minecraft version
   host: Host
   hostHint: The host (with port) of the server
+  hostRequired: Please enter the server ip address
   ipAddress: IP Address
   maxPlayers: Max Players
   motd: Server MOTD
@@ -1180,6 +1312,7 @@ server:
   status: Server Status
   unknown: Unknown Server
   unknownDescription: Unknown Server. Please Refresh
+  upload: Upload Server
   version: Server Requires Version
   versionHint: The Minecraft Version To Ping
 serverStatus:
@@ -1188,6 +1321,7 @@ serverStatus:
   refuse: §4Server refused!
   timeout: §4Connect server timeout!
 setting:
+  about: About
   allowPrerelease: Download Prerelease
   allowPrereleaseDescription: Prerelease might be unstable
   apiSets:
@@ -1201,6 +1335,7 @@ setting:
   autoDownloadDescription: Auto Download Update if it's Available
   autoInstallOnAppQuit: Autoinstall
   autoInstallOnAppQuitDescription: Autoinstall the Update on App Quit
+  backdropBlur: Backdrop Blur
   backgroundColorAbove: Show background color as overlay
   backgroundColorAboveDescription: This will make background color display above the background image or video.
   backgroundImage: Background image
@@ -1239,7 +1374,7 @@ setting:
     cardColor: Card Color
     description: Change the colors in the theme
     errorColor: Error Color
-    name: Theme Color
+    name: Theme Color and Blur
     primaryColor: Primary Color
     secondaryColor: Secondary Color
     sideBarColor: Side Bar
@@ -1253,7 +1388,7 @@ setting:
   enableDedicatedGPUOptimization: Assign Dedicated GPU
   enableDedicatedGPUOptimizationDescription: This option will assign dedicated GPU to Minecraft process.
   enableDiscord: Enable Discord Presence
-  enableDiscordDescription: This will keep update your launcher status to discord
+  enableDiscordDescription: This will update Discord status to the launcher
   general: General
   githubRelease: Github Release
   globalSetting: Global Instance Setting
@@ -1267,9 +1402,14 @@ setting:
     focus: Focus Layout
   layoutDescription: The layout of the launcher UI
   layoutTitle: Layout
+  linuxEnableDedicatedGPUOptimization: Assignment of a dedicated graphics processor
+  linuxEnableDedicatedGPUOptimizationDescription: This option assigns a dedicated GPU to the Minecraft process.
   linuxTitlebar: Native title bar
   linuxTitlebarDescription: Use native linux title bar for launcher
   location: Store Location
+  manualUpdateHint: >-
+    The version cannot be updated automatically. Please download the launcher
+    again from the official website!
   maunalUpdateHint: >-
     The version cannot be auto-updated. Please redownload the launcher from the
     website!
@@ -1333,7 +1473,7 @@ setup:
     name: '@:setting.appearance'
   dataRoot:
     description: >-
-      The data root is not a common .minecraft directory. Since XMCL data
+      The data root is not a common .minecraft directory. Since FMCL data
       directory structure is different from vanilla, we do not recommend to use
       the common .minecraft directory as a data root.
     drives: Recommend Locations
@@ -1348,6 +1488,9 @@ setup:
     exists: >-
       Selected directory is not empty. It's okay but please make sure you backup
       your data.
+    invalidChar: >-
+      Path contains invalid characters! It could cause Minecraft fail to start!
+      Plaese only use English characters and symbol!
     noPermission: >-
       Launcher does not have permission to access selected directory! Please try
       another one.
@@ -1390,6 +1533,11 @@ shared:
   accept: Accept
   keepSelected: Keep Selected
   skipForNow: Skip for now
+sortBy:
+  alphabetAsc: Sort by alphabet (ascending)
+  alphabetDesc: Sort by alphabet (descending)
+  timeAsc: Sort by modification time (ascending)
+  timeDesc: Sort by modification time (descending)
 store:
   explore: Explore
   latestMinecraft: Latest Minecraft Version
@@ -1402,8 +1550,10 @@ tag:
   createSelected: Create Tag for Selected
   newTag: New Tag
 task:
+  available: Available
   cancelled: Cancelled
   clear: Clear Finished Tasks
+  compatible: The {format} format is compatible with {version}
   connection:
     connected: Connected
     free: Free
@@ -1412,12 +1562,31 @@ task:
     running: Running connection
     size: total count
   connections: Network Connections
+  delete:
+    content: >-
+      This will delete the texturepack file from the disk, and we won't be able
+      to recover it.
+       Are you sure you can recover it?
+    title: Delete texturepack
+  dropHint: Drag and drop the folder/zip textures here to import.
   empty: No Running Tasks
+  enable: 'Texturepacks included: {count}'
   failed: Failed
+  import: Import texturepack
+  incompatible: >-
+    Incompatible textstack format ({format}). Matching {accept}. Current
+    {actual}.
+  manage: Texturepack
   manager: Task Manager
   nTaskRunning: '{count} tasks are running'
   name: Task | Tasks
   pause: Pause
+  searchOnCurseforge: Search {name} on curseforge
+  searchOnModrinth: '@:mod.searchOnModrinth'
+  selected: Favorite texturepacks
+  showFile: Open the texturepack {file} in the folder
+  showInCurseforge: Show {name} on curseforge
+  unselected: Unselected texturepacks
 theme:
   selectImage: Select Image
   selectMusic: Select Music

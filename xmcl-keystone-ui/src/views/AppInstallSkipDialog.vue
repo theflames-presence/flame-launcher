@@ -35,7 +35,7 @@ function onSkip() {
 
 </script>
 <template>
-  <v-dialog v-model="isShown" width="800">
+  <v-dialog v-model="isShown" width="600">
     <v-card>
       <v-card-title>
         {{ t('instanceInstallSkip.title') }}
@@ -45,7 +45,7 @@ function onSkip() {
           {{ t('instanceInstallSkip.warning') }}
         </v-alert>
         <v-list>
-          <v-list-item v-for="i of blockingFiles">
+          <v-list-item v-for="i of blockingFiles" :key="i.file.path">
             <v-list-item-content>
               <v-list-item-title class="whitespace-normal overflow-auto">{{ i.file.path }}</v-list-item-title>
               <v-list-item-subtitle class="whitespace-normal overflow-auto">

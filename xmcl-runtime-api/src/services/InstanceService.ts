@@ -1,8 +1,8 @@
-import { SharedState } from '../util/SharedState'
-import { Exception } from '../entities/exception'
 import { Instance } from '../entities/instance'
 import { InstanceSchema } from '../entities/instance.schema'
+import { SharedState } from '../util/SharedState'
 import { DeepPartial } from '../util/object'
+import { InvalidDirectoryErrorCode } from './BaseService'
 import { ServiceKey } from './Service'
 
 export type CreateInstanceOption = Partial<Omit<InstanceSchema, 'lastAccessDate' | 'creationDate'>> & {
@@ -165,6 +165,9 @@ export class InstanceState {
     if ('disableElybyAuthlib' in settings) {
       inst.disableElybyAuthlib = settings.disableElybyAuthlib
     }
+    if ('resolution' in settings) {
+      inst.resolution = settings.resolution
+    }
   }
 }
 
@@ -200,7 +203,7 @@ export interface InstanceService {
    */
   acquireInstanceById(id: string): Promise<string>
 
-  validateInstancePath(path: string): Promise<'bad' | 'nondictionary' | 'noperm' | 'exists' | undefined>
+  validateInstancePath(path: string): Promise<InvalidDirectoryErrorCode>
 }
 
 export const InstanceServiceKey: ServiceKey<InstanceService> = 'InstanceService'
