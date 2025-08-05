@@ -24,14 +24,25 @@ jobs:
       with:
         submodules: recursive
 
-    # ✅ Setup Node.js and pnpm with proper cache
-    - name: Setup Node.js 20 with pnpm cache
-      uses: actions/setup-node@v3
+    - name: Setup Node.js 20
+      uses: actions/setup-node@v4
       with:
         node-version: 20
-        cache: 'pnpm'
 
-    # ✅ Fix Python/node-gyp support
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v3
+      with:
+        version: 9.3.0
+        run_install: false
+
+    - name: Restore pnpm cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.local/share/pnpm/store/v3
+        key: pnpm-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          pnpm-${{ runner.os }}-
+
     - name: Fix node-gyp and Python
       run: |
         python -m pip install --upgrade pip setuptools wheel packaging
