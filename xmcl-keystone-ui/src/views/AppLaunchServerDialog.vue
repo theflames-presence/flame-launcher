@@ -164,7 +164,6 @@ const rawWorldExists = ref(false)
 const { getEULA, setEULA, getServerProperties, setServerProperties } = useService(InstanceOptionsServiceKey)
 const { linkSaveAsServerWorld, getLinkedSaveWorld } = useService(InstanceSavesServiceKey)
 
-let _serverProperties: any
 let _eula: boolean
 
 const { launch, gameProcesses } = injection(kInstanceLaunch)
@@ -185,11 +184,11 @@ const selectedSave = computed({
   },
 })
 
-let lastPath = ''
-const { isShown } = useDialog('launch-server', () => {
-  if (lastPath === path.value) return
-  lastPath = path.value
-  revalidate()
+function refresh() {
+  getLinkedSaveWorld(path.value).then((v) => {
+    rawWorldExists.value = v !== undefined && v !== ''
+    linkedWorld.value = v ?? ''
+  })
   getServerProperties(path.value).then((p) => {
     const parsedPort = parseInt(p.port, 10)
     port.value = isNaN(parsedPort) ? 25565 : parsedPort
@@ -197,16 +196,21 @@ const { isShown } = useDialog('launch-server', () => {
     const parsedMaxPlayers = parseInt(p.maxPlayers, 10)
     maxPlayers.value = isNaN(parsedMaxPlayers) ? 20 : parsedMaxPlayers
     onlineMode.value = Boolean(p.onlineMode)
-    _serverProperties = p
   })
   getEULA(path.value).then((v) => {
     isAcceptEula.value = v
     _eula = v
   })
-  getLinkedSaveWorld(path.value).then((v) => {
-    rawWorldExists.value = v !== undefined && v !== ''
-    linkedWorld.value = v ?? ''
-  })
+}
+
+let lastPath = ''
+const { isShown } = useDialog('launch-server', () => {
+  if (lastPath === path.value) {
+    return
+  }
+  lastPath = path.value
+  revalidate()
+  refresh()
   loadingSelectedMods.value = true
   selectNone()
   getServerInstanceMods(path.value).then((mods) => {
@@ -238,7 +242,12 @@ const computedSides = computed(() => {
   return result
 })
 
-const { data: requestedSides } = useSWRV(enabled, async () => {
+const requestedSides: Ref<Record<string, string>> = shallowRef({})
+watch([enabled, isShown], async () => {
+  if (!isShown.value) {
+    requestedSides.value = {}
+    return
+  }
   const [modrinths, others] = enabled.value.reduce((acc, v) => {
     if (v.modrinth) {
       acc[0].push(v)
@@ -272,7 +281,7 @@ const { data: requestedSides } = useSWRV(enabled, async () => {
         : ''
   ]))
 
-  return hashToSide
+  requestedSides.value = hashToSide
 })
 
 
@@ -347,7 +356,7 @@ const errorTitle = ref('')
 const errorDescription = ref('')
 const errorUnexpected = ref(false)
 const errorExtraText = ref('')
-const { onException } = useLaunchException(
+const { onError } = useLaunchException(
   errorTitle,
   errorDescription,
   errorUnexpected,
@@ -369,16 +378,13 @@ const { refresh: onPlay, refreshing: loading, error } = useRefreshable(async () 
     console.log('eula')
     await setEULA(instPath, true)
   }
-  if (_serverProperties) {
-    console.log('serverProperties')
-    await setServerProperties(instPath, {
-      ..._serverProperties,
-      port: _port ?? 25565,
-      motd: _motd || 'A Minecraft Server',
-      'max-players': _maxPlayers ?? 20,
-      'online-mode': _onlineMode ?? false,
-    })
-  }
+  console.log('serverProperties')
+  await setServerProperties(instPath, {
+    port: _port ?? 25565,
+    motd: _motd || 'A Minecraft Server',
+    'max-players': _maxPlayers ?? 20,
+    'online-mode': _onlineMode ?? false,
+  })
 
   version = await install()
 
@@ -403,7 +409,7 @@ const { refresh: onPlay, refreshing: loading, error } = useRefreshable(async () 
 
 watch(error, (e) => {
   if (e) {
-    onException(e)
+    onError(e)
   }
 })
 

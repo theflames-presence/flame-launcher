@@ -1,15 +1,19 @@
 <template>
-  <div class="base-setting px-10">
-    <BaseSettingGeneral />
-    <v-divider />
-    <BaseSettingJava />
-    <v-divider />
-    <BaseSettingSync />
-    <v-divider />
-    <BaseSettingLaunch />
-    <v-divider />
-    <BaseSettingModpack v-if="!isServer" />
-    <BaseSettingServer v-else />
+  <div class="base-setting px-10 overflow-auto" @wheel.stop>
+    <div>
+      <BaseSettingGeneral class="" />
+      <BaseSettingVersions :isExpanded="isExpanded" class=""  />
+      <v-divider v-if="!isExpanded" />
+    </div>
+    <div>
+      <BaseSettingJava class="" />
+      <BaseSettingSync class="" />
+      <BaseSettingLaunch class="" />
+      <BaseSettingResolution class="" />
+      <BaseSettingModpack class="" v-if="!isServer" />
+      <BaseSettingServer class="" v-else />
+    </div>
+
     <v-snackbar
       :color="snackbarColor"
       :class="{ 'shake-animation': hasAnimation }"
@@ -49,6 +53,7 @@ import { useBeforeLeave } from '@/composables/beforeLeave'
 import { kInstance } from '@/composables/instance'
 import { kInstances } from '@/composables/instances'
 import { usePresence } from '@/composables/presence'
+import { useTutorial } from '@/composables/tutorial'
 import { injection } from '@/util/inject'
 import { InstanceEditInjectionKey, useInstanceEdit } from '../composables/instanceEdit'
 import BaseSettingGeneral from './BaseSettingGeneral.vue'
@@ -57,7 +62,10 @@ import BaseSettingLaunch from './BaseSettingLaunch.vue'
 import BaseSettingModpack from './BaseSettingModpack.vue'
 import BaseSettingServer from './BaseSettingServer.vue'
 import BaseSettingSync from './BaseSettingSync.vue'
-import { useTutorial } from '@/composables/tutorial'
+import BaseSettingVersions from './BaseSettingVersions.vue'
+import BaseSettingResolution from './BaseSettingResolution.vue'
+import { useMediaQuery } from '@vueuse/core'
+import { kCompact } from '@/composables/scrollTop'
 
 const { isServer, name, instance } = injection(kInstance)
 const { edit: _edit } = injection(kInstances)
@@ -90,6 +98,14 @@ useBeforeLeave(() => {
   return true
 })
 
+// Page compact
+const compact = injection(kCompact)
+onMounted(() => {
+  compact.value = true
+})
+
+const isExpanded = useMediaQuery('(min-width: 1360px)')
+
 usePresence(computed(() => t('presence.instanceSetting', { instance: name.value })))
 
 useTutorial(computed(() => [{
@@ -115,8 +131,19 @@ useTutorial(computed(() => [{
 
 .base-setting {
   background: transparent !important;
-  width: 100%;
 }
+
+/* only if width > 1360px */
+@media (min-width: 1360px) {
+  .base-setting {
+    display: grid;
+    /* grid-template-columns: 1fr 1fr; */
+    grid-template-columns: calc(50% - 16px) calc(50% - 16px);
+
+    grid-gap: 32px;
+  }
+}
+
 
 .base-setting .v-list-item {
   @apply rounded-xl;

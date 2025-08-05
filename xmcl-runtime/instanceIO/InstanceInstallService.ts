@@ -3,8 +3,9 @@ import { ChecksumNotMatchError } from '@xmcl/file-transfer'
 import { ModrinthV2Client } from '@xmcl/modrinth'
 import { File, InstanceInstallService as IInstanceInstallService, InstallFileError, InstallInstanceOptions, InstanceFile, InstanceFileUpdate, InstanceInstallLockSchema, InstanceInstallServiceKey, InstanceInstallStatus, InstanceLockSchema, InstanceUpstream, LockKey, ResourceMetadata, SharedState, isUpstreamIsSameOrigin } from '@xmcl/runtime-api'
 import { task } from '@xmcl/task'
+import { FSWatcher } from 'chokidar'
 import filenamify from 'filenamify'
-import { readJSON, unlink, writeFile } from 'fs-extra'
+import { readFile, readJSON, unlink, writeFile } from 'fs-extra'
 import { basename, dirname, join, resolve } from 'path'
 import { Inject, LauncherApp, LauncherAppKey } from '~/app'
 import { InstanceService } from '~/instance/InstanceService'
@@ -17,7 +18,6 @@ import { AnyError, isSystemError } from '../util/error'
 import { InstanceFileOperationHandler } from './InstanceFileOperationHandler'
 import { ResolveInstanceFileTask } from './ResolveInstanceFileTask'
 import { computeFileUpdates } from './computeFileUpdate'
-import { FSWatcher } from 'chokidar'
 
 /**
  * Provide the abilities to import/export instance from/to modpack
@@ -247,7 +247,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
     }
 
     try {
-      return this.#install(instancePath, lockState, currentState)
+      return await this.#install(instancePath, lockState, currentState)
     } catch (e) {
       if (e instanceof AggregateError) {
         if (e.errors.every(e => e instanceof ChecksumNotMatchError)) {
@@ -268,6 +268,22 @@ export class InstanceInstallService extends AbstractService implements IInstance
             actual: e.actual,
           }]
         }
+      } else {
+        if (e instanceof Error && e.name === 'InstanceUpstreamError') {
+          // remove profile
+          unlink(join(instancePath, '.install-profile')).catch(() => { })
+        } else if (isSystemError(e) && e.code === 'ENOENT') {
+          const path = e.path
+          if (path) {
+            const zipFileIsMissing = currentState.files.find(f => f.downloads && f.downloads.some(d => d.startsWith('zip://') && d.includes(path)))
+            if (zipFileIsMissing) {
+              return [{
+                file: path,
+                name: 'UnpackZipFileNotFoundError',
+              }]
+            }
+          }
+        }
       }
       throw e
     }
@@ -286,7 +302,19 @@ export class InstanceInstallService extends AbstractService implements IInstance
           if (ev === 'add' || ev === 'change') {
             if (filePath === '.install-profile') {
               const currentStatePath = join(path, '.install-profile')
-              const lock = await readJSON(currentStatePath).catch((e) => {
+              const lock = await readFile(currentStatePath, 'utf-8').then((content) => {
+                try {
+                  if (content.trim().length === 0) {
+                    return undefined
+                  }
+                  return JSON.parse(content) as InstanceInstallLockSchema
+                } catch (e) {
+                  Object.assign((e as any), {
+                    content,
+                  })
+                  throw e
+                }
+              }, (e) => {
                 if (isSystemError(e) && e.code === 'ENOENT') {
                   return undefined
                 }
@@ -296,9 +324,9 @@ export class InstanceInstallService extends AbstractService implements IInstance
                 this.error(e)
               })
               let count = 0
-              if (lock.files instanceof Array && lock.finishedPath instanceof Array) {
+              if (lock?.files instanceof Array && lock.finishedPath instanceof Array) {
                 count = lock.files.length - lock.finishedPath.length
-              } else if (lock.files instanceof Array) {
+              } else if (lock?.files instanceof Array) {
                 count = lock.files.length
               }
               status.pendingFileCountSet(count || 0)
@@ -360,7 +388,13 @@ export class InstanceInstallService extends AbstractService implements IInstance
       await this.#installLockFile.write(pendingInstallPath, currentState)
 
       this.log('Install instance files with lock', !!lockState)
-      return this.#install(instancePath, lockState, currentState, id)
+      return this.#install(instancePath, lockState, currentState, id).catch((e) => {
+        if (e.name === 'InstanceUpstreamError') {
+          // remove profile
+          unlink(join(instancePath, '.install-profile')).catch(() => { })
+        }
+        throw e
+      })
     } else {
       const oldFiles = options.oldFiles
       const files = options.files

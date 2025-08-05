@@ -95,6 +95,7 @@ browseApp:
   default: DEFAULT
   delete: DELETE
   launch: LAUNCH AN SET AS DEFAULT
+browseApps: VIEWIN TEH LAUNCHR USR INTERFACE
 cancel: CANCEL
 checkUpdate:
   name: CHECK UPDATE
@@ -125,8 +126,19 @@ curseforge:
   totalDownloads: TOTAL DOWNLOADZ
 curseforgeCard: {}
 curseforgeCategory:
+  API and Library: API ANDS LIBRARIS
+  Animated: ANIMATIOZ
   Fabric: FABRIC
+  FancyMenu: FancyMenu
   Food: FUD
+  Hardcore: HARDICORE
+  MCreator: MCreator
+  Magic: MAGIK
+  QoL: QOL
+  Skyblock: SKYBLOKS
+  Steampunk: STEAMPANKS
+  Storage: STORAGEZ
+  Vanilla+: VANILLA+++
 dataMigration:
   apply: APPLY SETTIN
   directoryCriteriaHint: PLZ MAK SURE UR NEW DIRECTORY LOCASHUN IZ AN EMPTY DIRECTORY!
@@ -146,8 +158,8 @@ dataMigration:
   unknownError: UNKNOWN ERROR! PLZ RETRY OR CONTACT TEH DEVELOPR!
   waitReload: MIGRATIN DATA. PLZ DOAN CLOSE TEH LAUNCHR OR U WILL LOSE UR DATA.
 delete:
-  'NO': 'NO'
-  YEZ: DELETE
+  'no': 'NO'
+  yes: YEZ
   name: DELETE {name}
 dependencies:
   embedded: EMBEDDD
@@ -208,6 +220,9 @@ diagnosis:
   missingVersionJar:
     message: CLICK 2 INSTALL DIS VERSHUN
     name: MISIN VERSHUN JAR 4 MINECRAFT %{version}
+  unzipFileNotFound:
+    description: Cannot find {file}
+    title: Modpack file not found
 disable: DISABLE
 disk:
   available: AVAILABLE
@@ -219,7 +234,10 @@ duration:
   day: '{duration} DAY | {duration} DAYZ'
   hour: '{duration} HOUR | {duration} HOURZ'
   minute: '{duration} MINIT | {duration} MINITZ'
+  name: DELETE {name}
+  'no': NOOO
   second: '{duration} SECOND | {duration} SECONDZ'
+  'yes': YEZ, SIR.
 edit: EDIT
 enable: ENABLE
 env:
@@ -392,11 +410,14 @@ instance:
   duplicatedName: DUPLICATD NAYM
   fileApi: TEH SYNCHRONIZE FILE SERVR API URL
   fileApiHint: TEH URL 2 SYNCHRONIZE INSTANCE FILEZ FRUM REMOTE CONFIG SERVR.
+  fullscreen: Fullscreen
   gameVersion: GAME VERSHUN
+  height: Height
   icon: PROFILE ICON
   iconHint: TEH ICON CUD BE FILE OR INTERNET URL LINK.
   iconUrl: ICON URL
   includeVersion: INCLUDE VERSHUN | INCLUDE VERSHUNS
+  installModpack: Update instance from modpack
   lastPlayed: LAST PLAYD
   launchArguments: LAUNCH ARGUMENTS PREVIEW
   launchServer: LAUNCH LOCALHOST SERVR
@@ -408,6 +429,7 @@ instance:
   mcOptionsHint: ADDISHUNAL MINECRAFT LAUNCH ARGUMENTS
   name: PROFILE NAYM
   nameHint: TEH NAYM OV TEH MODPACK
+  nameNoCyrillic: NO CYRILLIC CHARACTERZ ALLOWD
   neverPlayed: NEVR PLAYD
   openCrashReportFolder: OPEN CRASH REPORT FOLDR
   openLogFolder: OPEN LOG FOLDR
@@ -415,6 +437,8 @@ instance:
   prependCommand: PREPEND COMMAND
   prependCommandHint: DIS WILL PREPEND DIS COMMAND BEFORE ALL TEH LAUNCH COMMANDZ
   requireName: TEH NAYM IZ REQUIRD
+  resolution: Window Resolution
+  resolutionPreset: Resolution Preset
   showInstance: SHOW GAME FOLDR
   useSharedOptions: USE SHARD GAME SETTINGS
   useSharedOptionsDesc: DIS WILL LINK TEH OPSHUNS.TXT 2 SHARD FILE ACROS INSTANCE
@@ -423,6 +447,7 @@ instance:
   versionHint: TEH MINECRAFT VERSHUN OV DIS GAME
   vmOptions: JVM OPSHUNS
   vmOptionsHint: EXTRA ARGUMENTS 2 PAS 2 TEH JVM
+  width: Width
 instanceAge:
   older: OLDR
   threeDay: IN 3 DAIS
@@ -528,6 +553,7 @@ labyMod:
   empty: LABYMOD DOEZ NOT SUPPORT CURRENT MINECRAFT
 launch:
   cancel: CANCEL
+  createShortcut: Create shortcut
   kill: STOP
   killServer: KILL LOCALHOST SERVR
   launch: LAUNCH
@@ -580,6 +606,11 @@ launchFailed:
   failedToLaunch: LAUNCH FAILD 2 LAUNCH
   latestLog: LATEST LOG
   title: GAME EXITD WIF ABNORMAL CODE
+launchPreExecuteCommandFailed:
+  description: >-
+    TEH PRE-EXECUTE COMMAND FAILD WIF AN ERROR: {error}. PLZ CHECK TEH COMMAND
+    AN TRY AGAIN.
+  title: PRE-EXECUTE COMMAND FAILD
 launchStatus:
   assigningMemory: ASSIGNIN MEMS
   exit: EXIT GAME?
@@ -639,6 +670,9 @@ loginError:
   loginXboxFailed: >-
     FAIL 2 LOGIN XBOX BY MICROSOFT TOKEN. PLZ MAK SURE U HAS AN INDEPENDENT XBOX
     AKOWNT 2 UR MICROSOFT AKOWNT. PLZ TRY AGAIN.
+  noProfileForNewUser: >-
+    No game profile found! If you are a new Minecraft user, please login at
+    least one time in Minecraft official launcher.
   requestFailed: LOGIN FAILD, WE DO NOT KNOE TEH EGSAKT REASON. PLZ RETRY.
   requireEmail: E-MAIL IZ REQUIRD
   requirePassword: PASWORD IZ REQUIRD
@@ -663,6 +697,7 @@ minecraftVersion:
   snapshot: SNAPSHOT
 mod:
   acceptVersion: ACCEPT {version}
+  applyGroupRules: Apply saved grouping rules
   compatible: COMPATIBLE MOD.
   currentVersion: CURRENT {current}
   deletion: DELETE MOD
@@ -703,8 +738,16 @@ mod:
   showInCurseforge: SHOW TEH MOD IN CURSEFORGE
   showInModrinth: Show {name} IN MODRINTH
   switchDefaultSource: DEFAULT MOD SOURCE
+  syncGroupRules: Save grouping rules
   toUpdate: '{count} UPDATEZ'
   ungroup: Ungrouping
+modFilter:
+  clear: Clear Filter
+  dependenciesInstallOnly: Only show missed dependencies mods
+  disabledOnly: Only show disabled mods
+  hasUpdateOnly: Only show has update mods
+  incompatibleOnly: Only show incompatible mods
+  unusedOnly: Only show unused libraries mods
 modInstall:
   archived: >-
     {name} HAS BEEN ARCHIVD. {name} WILL NOT RECEIV ANY FURTHR UPDATEZ UNLES TEH
@@ -715,28 +758,27 @@ modInstall:
   checkedUpgrade: UPGRADE CHECKD
   currentVersion: SELECTD VERSHUN
   dependencyHint: INSTALLD ANOTHR VERSHUN {version}
+  display: Mods Display
   install: INSTALL
   installDependencies: INSTALL MISIN DEPENDENCIEZ
   installHint: Will INSTALL {file} FILE WIF {dependencies} DEPENDENCIEZ
   installed: INSTALLD
   noVersionSupported: MOD ONLY SUPPORTS MINECRAFT {supported}.
   recommendation: EXPLORE TEH {first} OR {second} MODZ IN {modrinth} AN {curseforge}!
+  removeUnusedLibraries: Remove unused libraries mods
   search: SEARCH RESULT
   searchHint: SEARCH AN SELECT PROJECT
   skipVersion: SKIP TEH MODZ WIF DIFFERENT MINECRAFT VERSHUN
   source: MOD SOURCE
   switch: SWTICH VERSHUN
   upgrade: UPGRADE MODZ
-modSearchType:
-  all: ALL
-  explore: EXPLORE MARKIT
-  installed: INSTALLD
-  local: DISK CACHE
+modSearchType: {}
 modUpgradePolicy:
   curseforge: Curseforge FURST
   curseforgeOnly: Curseforge ONLY
   modrinth: Modrinth FURST
   modrinthOnly: Modrinth ONLY
+  name: Upgrade Policy
 modified:
   reset: RESET
   save: SAVE
@@ -771,6 +813,11 @@ modpack:
   showInModrinth: SHOW {name} IN MODRINTH
   url: URL
   urlHint: TEH HOME PAEG URL OV UR MODPACK
+modpackImportConfirm:
+  description: >-
+    Detect you drop a file into the launcher. Are you trying to import a
+    modpack?
+  title: Are you trying to import a modpack?
 modrinth:
   browseUrl: OPEN IN BROWSR {url}
   categories:
@@ -869,6 +916,7 @@ modrinth:
   clientSide: CLIENT SIDE
   copyTitle: COPY TEXT {title} 2 CLIPBORD
   createAt: CREATD
+  createCollection: Create Collection
   description: DESCRIPSHUN
   downloads: DOWNLOADZ
   environments:
@@ -881,6 +929,7 @@ modrinth:
     unsupported: UNSUPPORTD
   externalResources: EXTERNAL RESOURCEZ
   featuredVersions: FEATURD VERSHUNS
+  followedProjects: Followed Projects
   followers: FOLLOWERS
   gallery: GALLERY
   gameVersions:
@@ -893,6 +942,10 @@ modrinth:
   license: LICENSE
   licenses:
     name: LICENSEZ
+  loginHint: >-
+    The operation requires modrinth to perform. The launcher will open a browser
+    window to login modrinth.
+  loginTitle: Login to Modrinth
   modLoaders:
     name: MOD LOADERS
   perPage: PER PAEG
@@ -904,6 +957,7 @@ modrinth:
     name: PROJECT TYPE
     resourcePack: RESOURCE PACK
     shader: SHADR
+  projects: '{count} projects'
   quickSearch: SEARCH {title}
   searchText: SEARCH
   serverSide: SERVR SIDE
@@ -1146,6 +1200,10 @@ screenshots:
   name: SCREENSHOTS
   playRandom: SHUFFLE
   playSequence: PULAY IN ORDR
+search:
+  favorate: Collection
+  local: INSTALLD
+  market: MOD MARKIT
 server:
   acceptingMinecraftVersion: ACCEPTIN MINECRAFT VERSHUN
   creationHint: PLZ FILL TEH SERVR ADDRES AN PING TEH SERVR
@@ -1191,6 +1249,7 @@ serverStatus:
   refuse: §4SERVR REFUSD!
   timeout: §4CONNECT SERVR TIEMOUT!
 setting:
+  about: About
   allowPrerelease: DOWNLOAD PRERELEASE
   allowPrereleaseDescription: PRERELEASE MITE BE UNSTABLE
   apiSets:
@@ -1204,6 +1263,7 @@ setting:
   autoDownloadDescription: AUTO DOWNLOAD UPDATE IF IZ AVAILABLE
   autoInstallOnAppQuit: AUTOINSTALL
   autoInstallOnAppQuitDescription: AUTOINSTALL TEH UPDATE ON APP QUIT
+  backdropBlur: Backdrop Blur
   backgroundColorAbove: SHOW BAKGROUND COLOR AS OVERLAY
   backgroundColorAboveDescription: DIS WILL MAK BAKGROUND COLOR DISPLAY ABOOV TEH BAKGROUND IMAGE OR VIDEO.
   backgroundImage: BAKGROUND IMAGE
@@ -1242,7 +1302,7 @@ setting:
     cardColor: CARD COLOR
     description: CHANGE TEH COLORS IN DA THEME
     errorColor: ERROR COLOR
-    name: THEME COLOR
+    name: Theme Color and Blur
     primaryColor: PRIMARY COLOR
     secondaryColor: SECONDARY COLOR
     sideBarColor: SIDE BAR
@@ -1273,6 +1333,9 @@ setting:
   linuxTitlebar: NATIV TITLE BAR
   linuxTitlebarDescription: USE NATIV LINUX TITLE BAR 4 LAUNCHR
   location: STORE LOCASHUN
+  manualUpdateHint: >-
+    TEH VERSHUN CANT BE UPDATD AUTOMATICALLY. PLZ DOWNLOAD TEH LAUNCHR AGAIN
+    FRUM TEH OFFISHUL WEBSIET!
   maunalUpdateHint: >-
     TEH VERSHUN CANT BE AUTO-UPDATD. PLZ REDOWNLOAD TEH LAUNCHR FRUM TEH
     WEBSIET!
@@ -1327,6 +1390,7 @@ settingLabel:
   globalHint: DIS SETTIN WILL FOLLOW TEH GLOBAL SETTIN
   local: LOCAL
   localHint: DIS SETTIN IZ MODIFID BY CURRENT INSTANCE
+settings: {}
 setup:
   account:
     description: LOGIN UR GAME AKOWNT. IF U DOAN HAS WAN, U CAN SKIP IT 4 NAO.
@@ -1349,6 +1413,7 @@ setup:
   error:
     badDataRoot: INVALID DIRECTORY 4 LAUNCHR DATA! PLZ TRY ANOTHR DIRECTORY!
     exists: SELECTD DIRECTORY IZ NOT EMPTY. IZ K BUT PLZ MAK SURE U BAKUP UR DATA.
+    invalidChar: Path contains invalid characters! It could cause Minecraft fail to start!
     noPermission: >-
       LAUNCHR DOEZ NOT HAS PERMISHUN 2 ACCES SELECTD DIRECTORY! PLZ TRY ANOTHR
       WAN.
@@ -1390,6 +1455,11 @@ shared:
   accept: ACCEPT
   keepSelected: KEEP SELECTD
   skipForNow: SKIP 4 NAO
+sortBy:
+  alphabetAsc: Sort by alphabet (ascending)
+  alphabetDesc: Sort by alphabet (descending)
+  timeAsc: Sort by modification time (ascending)
+  timeDesc: Sort by modification time (descending)
 store:
   explore: EXPLORE
   latestMinecraft: LATEST MINECRAFT VERSHUN
@@ -1404,6 +1474,7 @@ tag:
 task:
   cancelled: CANCELLD
   clear: CLEAR FINISHD TASKZ
+  compatible: THE {format} FORMATS IS CAMPATIBLE WIZ {version}
   connection:
     connected: CONNECTD
     free: FREE
@@ -1412,16 +1483,19 @@ task:
     running: RUNNIN CONNECSHUN
     size: TOTAL COUNT
   connections: NETWORK CONNECSHUNS
+  dropHint: DRAG AND DROPIK THE FALDER/ZIP TEXTUREZ HERE TO IMPORT.
   empty: NO RUNNIN TASKZ
   failed: FAILD
   manager: TASK MANAGR
   nTaskRunning: '{count} TASKZ R RUNNIN'
   name: TASK | TASKZ
   pause: PAUSE
+  searchOnModrinth: '@:mod.searchOnModrinth'
 theme:
   selectImage: SELECT IMAGE
   selectMusic: SELECT MUSIC
   selectVideo: SELECT VIDEO
+  title: Flame Launcher
 title: X MINECRAFT LAUNCHR
 transportType:
   host: HOST CANDIDATE
@@ -1500,7 +1574,6 @@ universalDrop:
 update:
   goOfficialWebDownload: RE-DOWNLOAD ON OFFISHUL WEBSIET
 upstream:
-  ONLYShowCurrentVersion: ONLY SHOW CURRENT MINECRAFT VERSHUN
   downgrade: DOWNGRADE
   missingModpackMetadata: >-
     TEH OLD MODPACK METADATA NOT FINDZ.

@@ -1,7 +1,7 @@
 <template>
   <div
     ref="scroller" 
-    class="visible-scroll flex flex-col gap-1 rounded p-2 text-sm"
+    class="visible-scroll rounded p-2 text-sm"
     @wheel="onWheel"
   >
     <div
@@ -15,7 +15,7 @@
     >
       <div
         v-for="virtualRow in virtualRows"
-        :key="logs[virtualRow.index].raw"
+        :key="logs[virtualRow.index].raw + virtualRow.index"
         :ref="measureElement"
         :data-index="virtualRow.index"
         :style="{
@@ -58,14 +58,13 @@
     </div>
 
     <v-fab-transition>
-
       <v-btn
-      v-if="locked"
-      class="z-10 absolute right-6 bottom-4"
-      elevation="2"
-      color="primary"
-      fab
-      @click="scrollToBottom"
+        v-if="locked"
+        class="z-10 absolute right-6 bottom-4"
+        elevation="2"
+        color="primary"
+        fab
+        @click="scrollToBottom"
       >
       <v-icon>arrow_downward</v-icon>
     </v-btn>

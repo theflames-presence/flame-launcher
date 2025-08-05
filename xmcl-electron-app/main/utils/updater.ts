@@ -1,13 +1,12 @@
-import { AZURE_CDN, HAS_DEV_SERVER } from '@/constant'
+import { HAS_DEV_SERVER } from '@/constant'
 import { ElectronUpdateOperation, ReleaseInfo } from '@xmcl/runtime-api'
 import { LauncherAppUpdater } from '@xmcl/runtime/app'
-import { BaseService } from '@xmcl/runtime/base'
 import { Logger } from '@xmcl/runtime/logger'
 import { AbortableTask, BaseTask, Task, task } from '@xmcl/task'
 import { spawn } from 'child_process'
 import { shell } from 'electron'
-import { AppUpdater, CancellationToken, UpdaterSignal } from 'electron-updater'
 import * as updater from 'electron-updater'
+import { AppUpdater, CancellationToken, UpdaterSignal } from 'electron-updater'
 import { createWriteStream } from 'fs'
 import { readFile, writeFile } from 'fs-extra'
 import { closeSync, existsSync, open, rename, unlink } from 'original-fs'
@@ -18,6 +17,7 @@ import { pipeline } from 'stream/promises'
 import { promisify } from 'util'
 import { createGunzip } from 'zlib'
 import { kGFW } from '~/gfw'
+import { kSettings } from '~/settings'
 import { AnyError, isSystemError } from '~/util/error'
 import { checksum } from '~/util/fs'
 import ElectronLauncherApp from '../ElectronLauncherApp'
@@ -56,14 +56,11 @@ export class DownloadAsarUpdateTask extends AbortableTask<void> {
     const gfw = await this.app.registry.get(kGFW)
     const urls = gfw.inside
       ? [
-        `https://files.0x.halac.cn/Services/XMCL/releases/${this.file}`,
-        `https://files-0x.halac.cn/Services/XMCL/releases/${this.file}`,
-        `${AZURE_CDN}/releases/${this.file}`,
+        `https://files.0xc.cn/Soft_Mirrors/github-release/Voxelum/x-minecraft-launcher/LatestRelease/${this.file}`,
         `https://github.com/Voxelum/x-minecraft-launcher/releases/download/v${this.version}/${this.file}`,
       ]
       : [
         `https://github.com/Voxelum/x-minecraft-launcher/releases/download/v${this.version}/${this.file}`,
-        `${AZURE_CDN}/releases/${this.file}`,
       ]
     for (const url of urls) {
       try {
@@ -75,7 +72,7 @@ export class DownloadAsarUpdateTask extends AbortableTask<void> {
           return
         }
         const gzUrl = url + '.gz'
-        if (url.startsWith(AZURE_CDN)) {
+        if (url.startsWith('https://files.0x.cn')) {
           this.app.emit('download-cdn', 'asar', this.file)
         }
         const gzResponse = await this.app.fetch(gzUrl, { signal: this.abortController.signal })
@@ -180,10 +177,8 @@ export class DownloadFullUpdateTask extends AbortableTask<void> {
           [kPatched]: true,
           createRequest: (options: any, callback: any) => {
             if (gfw.inside) {
-              const url = new URL(AZURE_CDN)
-              options.hostname = url.hostname
-              options.pathname = `/releases/${basename(options.pathname)}`
-              options.path = options.pathname
+              options.hostname = 'files.0xc.cn'
+              options.pathname = `/Soft_Mirrors/github-release/Voxelum/x-minecraft-launcher/LatestRelease/${basename(options.pathname)}`
               this.app.emit('download-cdn', 'electron', basename(options.pathname))
             }
             return createRequest(options, callback)
@@ -230,14 +225,20 @@ export class ElectronUpdater implements LauncherAppUpdater {
   async #getUpdateFromSelfHost(): Promise<ReleaseInfo> {
     const app = this.app
     this.logger.log('Try get update from selfhost')
-    const baseService = await app.registry.get(BaseService)
-    const { allowPrerelease, locale } = await baseService.getSettings()
-    const url = `https://api.xmcl.app/latest?version=v${app.version}&prerelease=${allowPrerelease || false}`
-    const response = await this.app.fetch(url, {
+    const { allowPrerelease, locale } = await app.registry.get(kSettings)
+    const queryString = `version=v${app.version}&prerelease=${allowPrerelease || false}`
+    const response = await this.app.fetch(`https://api.xmcl.app/latest?${queryString}`, {
       headers: {
         'Accept-Language': locale,
       },
-    })
+    }).catch(() => this.app.fetch(`https://xmcl-core-api.azurewebsites.net/api/latest?${queryString}`, {
+      headers: {
+        'Accept-Language': locale,
+      },
+    }))
+    if (!response.ok)  {
+      throw new AnyError('UpdateError', `Fail to get update from selfhost: ${await response.text()}`, {}, { status: response.status })
+    }
     const result = await response.json() as any
     const files = result.assets.map((a: any) => ({ url: a.browser_download_url, name: a.name })) as Array<{ url: string; name: string }>
     const platformString = app.platform.os === 'windows' ? 'win' : app.platform.os === 'osx' ? 'mac' : 'linux'

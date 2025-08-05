@@ -121,6 +121,19 @@ export class ElectronController implements LauncherAppController {
       }
     })
 
+    this.app.on('second-instance', () => {
+      if (this.parking) {
+        if (this.mainWin) {
+          if (this.mainWin.isMinimized()) {
+            this.mainWin.restore()
+          } else if (!this.mainWin.isVisible()) {
+            this.mainWin.show()
+          }
+          this.mainWin.focus()
+        }
+      }
+    })
+
     this.logger = this.app.getLogger('Controller')
 
     protocol.registerSchemesAsPrivileged([{
@@ -165,15 +178,17 @@ export class ElectronController implements LauncherAppController {
   }
 
   private setupBrowserLogger(ref: BrowserWindow, name: string) {
-    const logger = this.app.getLogger('All', name)
-    const tagName = `renderer-${name}`
+    const logger = this.app.getLogger(name, name)
     ref.webContents.on('console-message', (e, level, message, line, id) => {
+      if (message.startsWith("Listener added for a synchronous 'DOMNodeRemoved' DOM Mutation Event. This event type is deprecated")) {
+        return
+      }
       if (level === 1) {
-        logger.log(tagName, message)
+        logger.log(message)
       } else if (level === 2) {
-        logger.warn(tagName, message)
+        logger.warn(message)
       } else if (level === 3) {
-        logger.warn(tagName, message)
+        logger.warn(message)
       }
     })
     ref.once('close', () => {
@@ -290,8 +305,8 @@ export class ElectronController implements LauncherAppController {
         trafficLightPosition: this.app.platform.os === 'osx' ? { x: 14, y: 10 } : undefined,
         minWidth: 400,
         minHeight: 600,
-        width: config.getWidth(400),
-        height: config.getHeight(600),
+        width: config.getWidth(400, 400),
+        height: config.getHeight(600, 600),
         x: config.x,
         y: config.y,
         show: false,
@@ -336,6 +351,8 @@ export class ElectronController implements LauncherAppController {
     const restoredSession = this.app.session.getSession(man.url)
     const minWidth = man.minWidth ?? 800
     const minHeight = man.minHeight ?? 600
+    const defaultWidth = man.defaultWidth ?? 800
+    const defaultHeight = man.defaultHeight ?? 600
 
     // Ensure the settings is loaded
     if (this.app.platform.os === 'linux' && !this.settings) {
@@ -344,8 +361,8 @@ export class ElectronController implements LauncherAppController {
 
     const browser = new BrowserWindow({
       title: man.name,
-      width: config.getWidth(minWidth),
-      height: config.getHeight(minHeight),
+      width: config.getWidth(defaultWidth, minWidth),
+      height: config.getHeight(defaultHeight, minHeight),
       x: config.x,
       y: config.y,
       minWidth: man.minWidth,
@@ -379,8 +396,10 @@ export class ElectronController implements LauncherAppController {
         browser.maximize()
       }
 
-      browser.show()
-      browser.focus()
+      if (!this.app.deferredWindowOpen) {
+        browser.show()
+        browser.focus()
+      }
     })
     browser.webContents.on('will-navigate', this.onWebContentWillNavigate)
     browser.webContents.on('did-create-window', this.onWebContentCreateWindow)
@@ -424,8 +443,8 @@ export class ElectronController implements LauncherAppController {
     const config = await tracker.getConfig()
     const browser = new BrowserWindow({
       title: 'KeyStone Monitor',
-      width: config.getWidth(600),
-      height: config.getHeight(400),
+      width: config.getWidth(600, 600),
+      height: config.getHeight(400, 400),
       x: config.x,
       y: config.y,
       minWidth: 600,
@@ -454,7 +473,11 @@ export class ElectronController implements LauncherAppController {
 
   requireFocus(): void {
     if (this.mainWin) {
-      this.mainWin.focus()
+      if (!this.mainWin.isVisible()) {
+        this.mainWin.show()
+      } else {
+        this.mainWin.focus()
+      }
     } else if (this.loggerWin) {
       this.loggerWin.focus()
     }
@@ -499,8 +522,12 @@ export class ElectronController implements LauncherAppController {
 
   openDevTools() {
     for (const win of BrowserWindow.getAllWindows()) {
-      win.webContents.closeDevTools()
-      win.webContents.openDevTools({ mode: 'detach' })
+      try {
+        win.webContents.closeDevTools()
+        win.webContents.openDevTools({ mode: 'detach' })
+      } catch {
+
+      }
     }
   }
 }

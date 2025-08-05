@@ -2,17 +2,17 @@
     "name": "@xmcl/keystone-ui",
     "private": true,
     "type": "module",
-    "productName": "xmcl",
-    "version": "0.47.3",
-    "author": "ci010 <cijhn@hotmail.com>",
-    "description": "X Minecraft Launcher - A modern Minecraft launcher",
+    "productName": "fmcl",
+    "version": "1.1.2",
+    "author": "aislx <aislxflames@gmail.com>",
+    "description": "Flame Launcher - A modern Minecraft launcher",
     "license": "MIT",
     "engines": {
         "node": ">=20"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/voxelum/x-minecraft-launcher"
+        "url": "https://github.com/aislxflames/flame-launher"
     },
     "scripts": {
         "build": "vite build --emptyOutDir",

@@ -30,6 +30,7 @@ export interface Environment extends Platform {
    * The current build number
    */
   build: number
+  gfw: boolean
 }
 
 export interface PoolStats {
@@ -41,12 +42,14 @@ export interface PoolStats {
   size: number
 }
 
+export type InvalidDirectoryErrorCode = 'bad' | 'invalidchar' | 'nondictionary' | 'noperm' | 'exists' | undefined
+
 export interface BaseService {
   getNetworkStatus(): Promise<Record<string, PoolStats>>
 
   destroyPool(origin: string): Promise<void>
 
-  validateDataDictionary(path: string): Promise<undefined | 'noperm' | 'bad' | 'nondictionary' | 'exists'>
+  validateDataDictionary(path: string): Promise<InvalidDirectoryErrorCode>
 
   getSessionId(): Promise<string>
 
@@ -99,34 +102,24 @@ export interface BaseService {
    */
   getGameDataDirectory(): Promise<string>
   /**
+   * Get the desktop directory folder.
+   */
+  getDesktopDirectory(): Promise<string>
+  /**
    * Migrate the launcher game data root to another directory
    * @param options The migration options
    */
   migrate(options: MigrateOptions): Promise<void>
 
   getMemoryStatus(): Promise<{ total: number; free: number }>
-
-  isResourceDatabaseOpened(): Promise<boolean>
 }
 
 export type MigrationExceptions = {
   /**
    * Throw when dest is a file
    */
-  type: 'migrationDestinationIsFile'
-  destination: string
-} | {
-  /**
-   * Throw when dest is a dir but not empty.
-   */
-  type: 'migrationDestinationIsNotEmptyDirectory'
-  destination: string
-} | {
-  /**
-   * Throw rename has no permission.
-   */
-  type: 'migrationNoPermission'
-  source: string
+  type: 'migrationInvalidDestiantion'
+  code: InvalidDirectoryErrorCode
   destination: string
 }
 

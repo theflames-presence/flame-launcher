@@ -2,13 +2,13 @@ import { File, FileUpdateAction, FileUpdateOperation, ResourceDomain, ResourceMe
 import { FSWatcher } from 'chokidar'
 import { randomBytes } from 'crypto'
 import { existsSync } from 'fs'
-import { copy } from 'fs-extra'
-import { basename, dirname, join, resolve, sep } from 'path'
+import { copy, ensureDir, link } from 'fs-extra'
+import { basename, dirname, extname, join, resolve, sep } from 'path'
 import { Logger } from '~/logger'
 import { jsonArrayFrom } from '~/sql/sqlHelper'
 import { AggregateExecutor, WorkerQueue } from '~/util/aggregator'
 import { AnyError, isSystemError } from '~/util/error'
-import { isHardLinked, linkOrCopyFile } from '~/util/fs'
+import { EEXIST_ERROR, isHardLinked, linkOrCopyFile } from '~/util/fs'
 import { toRecord } from '~/util/object'
 import { ResourceContext } from './ResourceContext'
 import { ResourceWorkerQueuePayload } from './ResourceWorkerQueuePayload'
@@ -98,7 +98,7 @@ function createRevalidateFunction(
         onResourceQueue({ filePath: file.path, file, record })
         continue
       }
-      if (basename(dir) === 'mods' && !resource.fabric && !resource.forge && !resource.quilt && !resource.neoforge) {
+      if (basename(dir) === 'mods' && !resource.fabric && !resource.forge && !resource.quilt && !resource.neoforge && !file.isDirectory) {
         onResourceQueue({ filePath: file.path, file, record, metadata: resource })
         continue
       }
@@ -136,7 +136,7 @@ function createWorkerQueue(context: ResourceContext, domain: ResourceDomain,
 
     const metadata = await getOrParseMetadata(job.file, job.record, domain, context, job, parse)
 
-    if (parse) {
+    if (parse && metadata) {
       context.eventBus.emit('resourceParsed', job.record.sha1, domain, metadata)
     }
 
@@ -178,10 +178,14 @@ function createWatcher(
     },
   }).on('all', async (event, file, stat) => {
     if (!file) return
+
+    const depth = file.split(sep).length
+    if (depth > 1) return
+
     if (shouldIgnoreFile(file)) return
     if (file.endsWith('.txt')) return
     if (event === 'unlink') {
-      onResourceRemove(file)
+      onResourceRemove(join(path, file))
     } else if (event === 'add' || event === 'change') {
       if (!stat) {
         return
@@ -397,6 +401,10 @@ export function watchResourceSecondaryDirectory(
       const file = await getFile(filePath)
       if (!file) return
       const isCached = await isFileCached(file).catch((e) => {
+        if (isSystemError(e) && (e.code === 'ENOENT' || e.code === 'EBUSY')) {
+          // ignore
+          return false
+        }
         context.logger.error(e)
         return false
       })
@@ -413,19 +421,20 @@ export function watchResourceSecondaryDirectory(
 
   async function persist(file: File) {
     let target = join(primaryDirectory, file.fileName)
-    const onCopyDirectoryError = async (e: unknown) => {
-      if (isSystemError(e)) {
-        if (e.code === 'EEXIST') {
-          if (await isHardLinked(file.path, target)) {
-            return
-          }
-          target = join(primaryDirectory, `${file.fileName}.${randomBytes(4).toString('hex')}`)
-          copy(file.path, target).catch(onCopyDirectoryError)
-          return
-        }
-      }
-      context.logger.error(new AnyError('ResourceCopyError', `Fail to copy resource ${file.path} to ${target}`, { cause: e }))
-    }
+    // const onCopyDirectoryError = async (e: unknown) => {
+    //   if (isSystemError(e)) {
+    //     if (e.code === 'EEXIST') {
+    //       if (await isHardLinked(file.path, target)) {
+    //         return
+    //       }
+    //       target = join(primaryDirectory, `${file.fileName}.${randomBytes(4).toString('hex')}`)
+    //       await ensureDir(target)
+    //       copy(file.path, target).catch(onCopyDirectoryError)
+    //       return
+    //     }
+    //   }
+    //   context.logger.error(new AnyError('ResourceCopyError', `Fail to copy folder resource ${file.path} to ${target}`, { cause: e }))
+    // }
     const inoMatched = await context.db.selectFrom('snapshots')
       .selectAll()
       .where('ino', '=', file.ino)
@@ -438,11 +447,20 @@ export function watchResourceSecondaryDirectory(
       if (isInoMatched) {
         return
       }
-      linkOrCopyFile(file.path, target).catch((e) => {
-        context.logger.error(new AnyError('ResourceCopyError', `Fail to copy resource ${file.path} to ${target}`, { cause: e }))
+      linkOrCopyFile(file.path, target).catch(async (e) => {
+        const extName = extname(target)
+        const fileName = basename(target, extName)
+        const to = join(dirname(target), fileName + `-${Date.now()}` + extName)
+        await link(file.path, to).catch((e) => {
+          if (isSystemError(e) && e.code === EEXIST_ERROR) {
+            return
+          }
+          context.logger.error(new AnyError('ResourceCopyError', `Fail to copy file resource ${file.path} to ${target}`, { cause: e }))
+        })
       })
     } else {
-      copy(file.path, target).catch(onCopyDirectoryError)
+      // await ensureDir(target)
+      // copy(file.path, target).catch(onCopyDirectoryError)
     }
   }
 

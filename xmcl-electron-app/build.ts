@@ -122,7 +122,7 @@ async function start() {
       const gzipDest = dest + '.gz'
       let src = join(context.appOutDir, 'resources/app.asar')
       if (!existsSync(src)) {
-        src = join(context.appOutDir, 'X Minecraft Launcher.app/Contents/Resources/app.asar')
+        src = join(context.appOutDir, 'Flame Launcher.app/Contents/Resources/app.asar')
       } else if (!existsSync(src)) {
         console.log(`  ${chalk.yellow('•')} fallback to ${chalk.yellow('Resources/app.asar')} for ${chalk.yellow('resources/app.asar')} not found`)
       }

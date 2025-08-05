@@ -17,6 +17,6 @@ task:
   continue: Посмотреть в лаунчере
   fail: Одна задача не выполнена
   success: Одна задача выполнена
-title: X Minecraft Launcher
+title: Flame Launcher
 urlFailed: Неизвестная ссылка {url}. Проверьте ссылку или обратитесь к разработчику.
 urlSuccess: Готово ! Можете закрыть это окно и вернуться к лаунчеру.

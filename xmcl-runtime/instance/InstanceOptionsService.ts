@@ -33,9 +33,11 @@ export class InstanceOptionsService extends AbstractService implements IInstance
     return properties
   }
 
-  async setServerProperties(instancePath: string, properties: Record<string, string>): Promise<void> {
+  async setServerProperties(instancePath: string, properties: Record<string, string | number | boolean>): Promise<void> {
     const path = join(instancePath, 'server', 'server.properties')
-    const content = Object.entries(properties).map(([k, v]) => `${k}=${v}`).join('\n') + '\n'
+    const original = await this.getServerProperties(instancePath)
+    const merged = Object.assign(original, properties)
+    const content = Object.entries(merged).map(([k, v]) => `${k}=${v}`).join('\n') + '\n'
     await ensureFile(path)
     await writeFile(path, content)
   }
@@ -259,6 +261,9 @@ export class InstanceOptionsService extends AbstractService implements IInstance
     }
     if (diff.lang) {
       diff.lang = diff.lang.toLowerCase().replace('-', '_')
+    }
+    if (options.resourcePacks && !current.resourcePacks) {
+      diff.resourcePacks = options.resourcePacks
     }
     if (Object.keys(diff).length > 0) {
       this.log(`Edit gamesetting: ${JSON.stringify(diff, null, 4)} to ${instancePath}`)

@@ -2,8 +2,9 @@ import { NetworkErrorCode, NetworkException } from '@xmcl/runtime-api'
 import { LauncherApp, Shell } from '@xmcl/runtime/app'
 import { LAUNCHER_NAME } from '@xmcl/runtime/constant'
 import { Menu, app, net, shell } from 'electron'
+import { fetch as ufetch } from 'undici'
 import { stat } from 'fs-extra'
-import { join } from 'path'
+import { isAbsolute, join } from 'path'
 import { AnyError } from '~/util/error'
 import { ElectronController } from './ElectronController'
 import { ElectronSecretStorage } from './ElectronSecretStorage'
@@ -92,6 +93,32 @@ const getEnv = () => {
   }
 }
 
+function getErrorCode(e: Error) {
+  let code: NetworkErrorCode | undefined
+  if (e.message === 'net::ERR_CONNECTION_CLOSED') {
+    code = NetworkErrorCode.CONNECTION_CLOSED
+  } else if (e.message === 'net::ERR_INTERNET_DISCONNECTED') {
+    code = NetworkErrorCode.INTERNET_DISCONNECTED
+  } else if (e.message === 'net::ERR_TIMED_OUT') {
+    code = NetworkErrorCode.TIMED_OUT
+  } else if (e.message === 'net::ERR_CONNECTION_RESET') {
+    code = NetworkErrorCode.CONNECTION_RESET
+  } else if (e.message === 'net::ERR_CONNECTION_TIMED_OUT') {
+    code = NetworkErrorCode.CONNECTION_TIMED_OUT
+  } else if (e.message === 'net::ERR_NAME_NOT_RESOLVED') {
+    code = NetworkErrorCode.DNS_NOTFOUND
+  } else if (e.message === 'net::NETWORK_CHANGED') {
+    code = NetworkErrorCode.NETWORK_CHANGED
+  } else if (e.message === 'net::PROXY_CONNECTION_FAILED') {
+    code = NetworkErrorCode.PROXY_CONNECTION_FAILED
+  } else if (e.message === 'net::ERR_UNEXPECTED') {
+    code = NetworkErrorCode.CONNECTION_RESET
+  } else if (e.message === 'net::ERR_CONNECTION_ABORTED') {
+    code = NetworkErrorCode.ERR_CONNECTION_ABORTED
+  }
+  return code
+}
+
 export default class ElectronLauncherApp extends LauncherApp {
   readonly session: ElectronSession
 
@@ -110,43 +137,45 @@ export default class ElectronLauncherApp extends LauncherApp {
   }
 
   fetch: typeof fetch = async (...args: any[]) => {
-    try {
-      return await net.fetch(args[0], args[1] ? { ...args[1], bypassCustomProtocolHandlers: true } : undefined) as any
-    } catch (e) {
-      if (e instanceof Error) {
-        let code: NetworkErrorCode | undefined
-        if (e.message === 'net::ERR_CONNECTION_CLOSED') {
-          code = NetworkErrorCode.CONNECTION_CLOSED
-        } else if (e.message === 'net::ERR_INTERNET_DISCONNECTED') {
-          code = NetworkErrorCode.INTERNET_DISCONNECTED
-        } else if (e.message === 'net::ERR_TIMED_OUT') {
-          code = NetworkErrorCode.TIMED_OUT
-        } else if (e.message === 'net::ERR_CONNECTION_RESET') {
-          code = NetworkErrorCode.CONNECTION_RESET
-        } else if (e.message === 'net::ERR_CONNECTION_TIMED_OUT') {
-          code = NetworkErrorCode.CONNECTION_TIMED_OUT
-        } else if (e.message === 'net::ERR_NAME_NOT_RESOLVED') {
-          code = NetworkErrorCode.DNS_NOTFOUND
-        } else if (e.message === 'net::NETWORK_CHANGED') {
-          code = NetworkErrorCode.NETWORK_CHANGED
-        } else if (e.message === 'net::PROXY_CONNECTION_FAILED') {
-          code = NetworkErrorCode.PROXY_CONNECTION_FAILED
-        } else if (e.message === 'net::ERR_UNEXPECTED') {
-          code = NetworkErrorCode.CONNECTION_RESET
-        }
-        if (code) {
-          // expected exceptions
-          throw new NetworkException({
-            type: 'networkException',
-            code,
-          })
-        }
-        // unexpected errors
-        if (e.message.startsWith('net::')) {
-          throw new AnyError('NetworkError', e.message)
-        }
+    const init = { ...args[1], bypassCustomProtocolHandlers: true }
+    function assertError(e: unknown): asserts e is Error {
+      if (e instanceof Error || (typeof e === 'object' && e !== null && 'message' in e && typeof (e as any).message === 'string')) {
+        return
       }
+      throw new TypeError(`Expected an Error, but got ${typeof e}: ${e}`)
+    }
+    async function handlError(e: Error, retry?: () => Promise<any>) {
+      const code = getErrorCode(e)
+
+      if (retry && (code === NetworkErrorCode.CONNECTION_CLOSED || code === NetworkErrorCode.CONNECTION_RESET || !code)) {
+        return await retry()
+      }
+
+      if (code) {
+        // expected exceptions
+        throw new NetworkException({
+          type: 'networkException',
+          code,
+        })
+      }
+      // unexpected errors
+      if (e.message.startsWith('net::')) {
+        throw new AnyError('NetworkError', e.message)
+      }
+
       throw e
+    }
+    try {
+      if (init.headers && typeof init.headers === 'object' && !(init.headers instanceof Headers)) {
+        delete init.headers['origin']
+        delete init.headers['sec-ch-ua']
+        delete init.headers['sec-ch-ua-mobile']
+        delete init.headers['sec-ch-ua-platform']
+      }
+      return await net.fetch(args[0], init) as any
+    } catch (e) {
+      assertError(e)
+      return await handlError(e, () => ufetch(args[0], init).catch(handlError))
     }
   }
 
@@ -184,6 +213,8 @@ export default class ElectronLauncherApp extends LauncherApp {
       const last = argv[argv.length - 1]
       if (last.startsWith('xmcl://')) {
         this.protocol.handle({ url: last })
+      } else {
+        this.emit('second-instance', argv)
       }
     })
 

@@ -3,6 +3,7 @@ import type { Database } from 'node-sqlite3-wasm'
 import { SQLite3Error } from 'node-sqlite3-wasm'
 import { SqliteWASMDialectDatabaseConfig, SqliteWASMDialectWorkerConfig } from './SqliteWASMDialectConfig'
 import { Exception } from '@xmcl/runtime-api'
+import { existsSync, rmSync } from 'fs-extra'
 
 declare module 'node-sqlite3-wasm' {
   interface Statement {
@@ -59,6 +60,7 @@ export class SqliteWASMDriver extends AbstractSqliteDriver {
 
   #db?: Database
   #connection?: SqliteConnection
+  #destroyed = false
 
   constructor(config: SqliteWASMDialectDatabaseConfig) {
     super()
@@ -66,8 +68,32 @@ export class SqliteWASMDriver extends AbstractSqliteDriver {
   }
 
   async init(): Promise<void> {
-    this.#db = this.#config.database
-    this.#connection = new SqliteConnection(this.#db)
+    this.#db = this.#config.database()
+    const onError = (e: Error) => {
+      if (!this.#destroyed) {
+        if (e.message === 'Database is locked') {
+          try {
+            if (this.#config.databasePath) {
+              const lockPath = this.#config.databasePath + '.lock'
+              if (existsSync(lockPath)) {
+                rmSync(lockPath, { recursive: true })
+              }
+            }
+          } catch { }
+        }
+        if (e.message === 'Database is locked' || e.message === 'Database already closed' || e.message === 'unable to open database file') {
+          // reopen the database
+          this.#db?.close()
+          this.#db = this.#config.database()
+          this.#connection = new SqliteConnection(this.#db, onError)
+        } else {
+          this.#config.onError?.(e)
+        }
+      } else {
+        this.#config.onError?.(e)
+      }
+    }
+    this.#connection = new SqliteConnection(this.#db, onError)
   }
 
   async acquireConnection(): Promise<DatabaseConnection> {
@@ -78,6 +104,10 @@ export class SqliteWASMDriver extends AbstractSqliteDriver {
   }
 
   async destroy(): Promise<void> {
+    if (this.#destroyed) {
+      return
+    }
+    this.#destroyed = true
     this.#connection?.dispose()
     this.#db?.close()
   }
@@ -87,7 +117,7 @@ class SqliteConnection implements DatabaseConnection {
   readonly #db: Database
   #disposed = false
 
-  constructor(db: Database) {
+  constructor(db: Database, private onError?: (error: Error) => void) {
     this.#db = db
   }
 
@@ -121,6 +151,9 @@ class SqliteConnection implements DatabaseConnection {
     } catch (e) {
       if (this.#disposed && e instanceof SQLite3Error) {
         return Promise.reject(new Exception({ type: 'sqlite3Exception' }, e.message, { cause: e }))
+      }
+      if (e instanceof SQLite3Error) {
+        this.onError?.(e)
       }
       return Promise.reject(e)
     } finally {

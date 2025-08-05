@@ -110,6 +110,7 @@ browseApps: Просмотр пользовательского интерфей
 cancel: Отмена
 checkUpdate:
   name: Проверить обновление
+color: Цвет
 confirm: Подтвердить
 copyClipboard:
   success: Скопировано в буфер обмена
@@ -165,7 +166,7 @@ curseforgeCategory:
   Miscellaneous: Разное
   Mod Support: Поддержка модов
   Modded World: Мод для миров
-  Modern: Современный
+  Modern: Modern
   Multiplayer: Мультиплеер
   Parkour: Паркур
   Photo Realistic: Реалистичная фотография
@@ -275,6 +276,9 @@ diagnosis:
   missingVersionJar:
     message: Нажмите, чтобы установить эту версию
     name: Отсутствует файл jar версии Minecraft {version}
+  unzipFileNotFound:
+    description: Не могу найти {file}
+    title: Файл Modpack не найден
 disable: Отключить
 disk:
   available: Доступно
@@ -289,6 +293,7 @@ duration:
   name: Удалить {name}
   'no': Нет
   second: '{duration} секунда | {duration} секунд'
+  'yes': Да, сэр.
 edit: Изменить
 enable: Включить
 env:
@@ -313,6 +318,10 @@ errors:
     Пожалуйста, выберите каталог данных, к которому лаунчер может получить
     доступ. Вы можете попробовать сбросить корневой каталог данных на странице
     настроек.
+  DiskIsFull: |-
+    Ваш диск полон! 
+    Не могу ничего написать на диск! 
+    Все функции могут быть не функциональными!
   DownloadAggregateError: Не удалось скачать файл.
   DownloadFileSystemError: >-
     Ошибка при доступе к пути сохранения скачанного файла. Убедитесь, что
@@ -368,8 +377,10 @@ feedback:
   qqEnterGroup: Присоединиться
 fileDetail:
   fileSize: Размер файла
+  filesize: Размер файла
   hash: Hash
 filter: Фильтр
+filterLocalOnly: Показывать только установленные
 finish: Завершить
 forgeConfig:
   hint: >-
@@ -463,11 +474,14 @@ instance:
   duplicatedName: Дублированное имя
   fileApi: URL API сервера синхронизации файлов
   fileApiHint: URL для синхронизации файлов экземпляра с удалённым сервером конфигурации.
+  fullscreen: Полноэкранный
   gameVersion: Версия игры экземпляра
+  height: Высота
   icon: Иконка профиля
   iconHint: Значок может представлять собой файл или ссылку на URL-адрес в Интернете.
   iconUrl: URL-адрес иконки
   includeVersion: Включить версию | Включить версии
+  installModpack: Обновление экземпляра от Modpack
   lastPlayed: Последняя игра
   launchArguments: Предпросмотр аргументов запуска
   launchServer: Запустить локальный сервер
@@ -479,13 +493,19 @@ instance:
   mcOptionsHint: Дополнительные аргументы запуска Minecraft
   name: Имя экземпляра
   nameHint: Имя, используемое для идентификации экземпляра.
+  nameNoCyrillic: Название не может содержать кириллические символы
   neverPlayed: Никогда не играли
   openCrashReportFolder: Открыть папку с отчётами об ошибках
   openLogFolder: Открыть папку с журналами
   playtime: Время игры
+  preExecCommand: Команда предварительного запуска
+  preExecCommandHint: Команда для выполнения перед запуском Minecraft
   prependCommand: Добавить команду в начало
   prependCommandHint: Это добавит эту команду перед всеми командами запуска.
   requireName: Требуется имя
+  resolution: Разрешение окна
+  resolutionEnabled: Включить пользовательское разрешение
+  resolutionPreset: Резолюция предустановлена
   showInstance: Открыть папку экземпляра
   useSharedOptions: Использовать общие настройки игры
   useSharedOptionsDesc: Это свяжет файл options.txt с общим файлом в экземпляре.
@@ -494,6 +514,9 @@ instance:
   versionHint: Minecraft-версия этой игры
   vmOptions: Опции JVM
   vmOptionsHint: Дополнительные аргументы, передаваемые JVM
+  vmVar: Переменные среды
+  vmVarHint: Нажмите кнопку, чтобы добавить переменные среды.
+  width: Ширина
 instanceAge:
   older: Старые
   threeDay: В течение трёх дней
@@ -507,6 +530,20 @@ instanceFileOperation:
   backup-remove: Удалить (создать резервную копию)
   keep: Оставить
   remove: Удалить
+instanceInstallSkip:
+  ignore: игнорировать
+  skip: Пропускать
+  title: Потенциальный поврежденный источник файла
+  warning: >-
+    Некоторые файлы загружаются несколько раз, и контрольная сумма не
+    совпадает. 
+
+    Это может быть связано с тем, что исходная контрольная сумма неверна. 
+
+    Пожалуйста, проверьте. 
+
+    Если вы подтвердите, что текущие файлы действительны, вы можете пропустить
+    проверку.
 instanceSetting:
   disableAuthlibInjector: Отключить authlib injector
   disableAuthlibInjectorDescription: >-
@@ -537,6 +574,10 @@ instanceUpdate:
   loaderChanged: |-
     Модлоадер этого экземпляра был изменен. 
     Старый модлоадер - это {modloader}, а новый - {newModloader}.
+  summary: |-
+    Добавить {add} файлы. 
+    Удалить {remove} файлы. 
+    Сохранить {keep} файлы.
   title: Обновление экземпляра
   update: Начать обновление
 instances:
@@ -586,12 +627,13 @@ java:
   modifyInstance: Изменить путь к Java
   noMemory: Не ограничивать использование памяти
   refresh: Обновить локальный Java
-  systemMemory: Текущая оперативная память
+  systemMemory: 'Свободная память системы: {free} / {total}'
 labyMod:
   disable: LabyMod не выбран
   empty: LabyMod не поддерживает текущую версию Minecraft
 launch:
   cancel: Отменить
+  createShortcut: Создать ярлык
   kill: Остановить
   killServer: Остановить локальный сервер
   launch: Запустить
@@ -657,6 +699,11 @@ launchFailed:
   failedToLaunch: Не удалось запустить запуск
   latestLog: 'Последние логи '
   title: Игра завершилась с аномальным кодом
+launchPreExecuteCommandFailed:
+  description: >-
+    Команда предварительного выполнения завершилась с ошибкой: {error}.
+    Пожалуйста, проверьте команду и повторите попытку.
+  title: Команда предварительного выполнения не выполнена
 launchStatus:
   assigningMemory: Распределение памяти
   exit: Выйти из игры?
@@ -721,6 +768,11 @@ loginError:
     Не удалось войти в Xbox с помощью токена Microsoft. Убедитесь, что у вас
     есть независимый аккаунт Xbox от вашего аккаунта Microsoft. Пожалуйста,
     попробуйте ещё раз.
+  noProfileForNewUser: >-
+    Профиль игры не найден! 
+
+    Если вы новый пользователь Minecraft, пожалуйста, войдите в систему как
+    минимум один раз в официальной установке Minecraft.
   requestFailed: Ошибка входа, причина неизвестна. Пожалуйста, попробуйте ещё раз.
   requireEmail: Требуется адрес электронной почты
   requirePassword: Требуется пароль
@@ -747,6 +799,7 @@ minecraftVersion:
   snapshot: Снапшот
 mod:
   acceptVersion: Принимает {version}
+  applyGroupRules: Применить сохраненные правила группировки
   compatible: Совместимый мод.
   currentVersion: Текущая {current}
   deletion: Удалить мод
@@ -764,6 +817,7 @@ mod:
     Пожалуйста, выберите файл, который вы хотите сохранить.
   enabled: 'Всего модов включено: {count}'
   filter: Фильтр модов
+  group: Группа вверх
   groupInstalled: Группировать установленные моды
   hasUpdate: У мода есть новая версия!
   hideIncompatible: Скрыть несовместимые моды
@@ -772,7 +826,7 @@ mod:
   incompatibleHintDescription: |-
     Некоторые зависимости модов могут отсутствовать. 
     Или некоторые версии зависимостей не совпадают.
-  manage: Моды
+  manage: Управление
   maybeCompatible: Возможно, совместим.
   modloaderSelectHint: |-
     Мод поддерживает следующие загрузчики модов. 
@@ -791,7 +845,18 @@ mod:
   showInCurseforge: Показать мод в curseforge
   showInModrinth: Показать {name} на Modrinth
   switchDefaultSource: Источник контента модов по умолчанию
+  syncGroupRules: Сохранить правила группировки
   toUpdate: '{count} для обновления'
+  ungroup: Негруппинг
+modFilter:
+  clear: Чистый фильтр
+  dependenciesInstallOnly: Только показывать пропущенные моды зависимости
+  disabledOnly: Только показывать отключенные моды
+  hasUpdateOnly: Только у шоу есть моды обновления
+  incompatibleOnly: >-
+    Показывать только несовместимые или отсутствующие зависимости отсутствующие
+    моды
+  unusedOnly: Показать только неиспользованные библиотечные моды
 modInstall:
   archived: >-
     {name} заархивировано. 
@@ -804,28 +869,26 @@ modInstall:
   checkedUpgrade: Обновления для модов проверены
   currentVersion: Выбранная версия
   dependencyHint: Установлена ​​другая версия {version}
+  display: Дисплей модов
   install: Установить
   installDependencies: Установить недостающие зависимости
   installHint: Будет установлен файл {file} с зависимостями {dependents}
   installed: Установлен
   noVersionSupported: Мод поддерживает только Minecraft {supported}.
   recommendation: Исследуйте {first} или {second} в {modrinth} и {curseforge}!
+  removeUnusedLibraries: Удалить неиспользованные моды библиотеков
   search: Результаты поиска
   searchHint: Поиск и выбор проекта
   skipVersion: Пропустите моды с другой версией Minecraft
   source: Источник контента мода
   switch: Переключить версию
   upgrade: Обновить моды
-modSearchType:
-  all: Все
-  explore: Исследуйте рынок
-  installed: Установлено
-  local: Дисковый кэш
 modUpgradePolicy:
   curseforge: Curseforge First
   curseforgeOnly: Только в Кёрсфордже
   modrinth: Modrinth Первый
   modrinthOnly: Только Модринт
+  name: Политика обновления
 modified:
   reset: Сбросить
   save: Сохранить
@@ -860,6 +923,11 @@ modpack:
   showInModrinth: Показать {name} в Modrinth
   url: URL-адрес
   urlHint: URL-адрес домашней страницы вашей сборки модов.
+modpackImportConfirm:
+  description: |-
+    Обнаружите, что вы бросите файл в пусковую установку. 
+    Вы пытаетесь импортировать Modpack?
+  title: Вы пытаетесь импортировать Modpack?
 modrinth:
   browseUrl: Открыть в браузере {url}
   categories:
@@ -959,6 +1027,7 @@ modrinth:
   clientSide: Клиентская сторона
   copyTitle: Скопировать текст {title} в буфер обмена
   createAt: Создано
+  createCollection: Создать коллекцию
   description: Описание
   downloads: Скачиваний
   environments:
@@ -971,6 +1040,7 @@ modrinth:
     unsupported: Не поддерживается
   externalResources: Внешние ресурсы
   featuredVersions: Рекомендуемые версии
+  followedProjects: Следовал проектам
   followers: Подписчики
   gallery: Галерея
   gameVersions:
@@ -983,6 +1053,10 @@ modrinth:
   license: Лицензия
   licenses:
     name: Лицензии
+  loginHint: |-
+    Операция требует от Modrinth для выполнения. 
+    Пусковая установка откроет окно браузера для входа в Modrinth.
+  loginTitle: Войдите в Modrinth
   modLoaders:
     name: Загрузчики модов
   perPage: На страницу
@@ -994,6 +1068,7 @@ modrinth:
     name: Тип проекта
     resourcePack: Комплект ресурсов
     shader: Шейдер
+  projects: '{count} проекты'
   quickSearch: Поиск {title}
   searchText: Поиск
   serverSide: Серверная часть
@@ -1037,7 +1112,6 @@ multiplayer:
     italic;"> Если вам необходимо подключить нескольких пользователей,
     необходимо создать <span style="font-weight: bold; color: rgba(245, 158,
     11)">несколько</span> соединений.</span>
-  creaLocalToken: Создать локальный токен
   createLocalToken: Создать локальный токен
   currentIpTitle: Обнаруженный общедоступный IP
   currentNatTitle: 'Текущая сеть (NAT):'
@@ -1187,7 +1261,7 @@ resourcepack:
     Несовместимый формат набора ресурсов ({format}). Подходящий {accept}.
     Текущий {actual}.
   independent: Экземпляр использует независимую папку для наборов ресурсов
-  manage: Пакеты ресурсов
+  manage: Управление
   name: Набор ресурсов | Наборы ресурсов
   searchHint: Поиск набора ресурсов
   searchOnCurseforge: Поиск {name} на CurseForge
@@ -1234,7 +1308,7 @@ save:
   importTitle: Импортировать мир
   independent: Экземпляр использует независимую папку сохранений
   levelName: Название уровня
-  manage: Управление мирами
+  manage: Управление
   name: Мир | Миры
   search: Поиск сохранений
   selected: местный архив
@@ -1248,13 +1322,32 @@ screenshots:
   name: Скриншоты
   playRandom: Показывать случайным образом
   playSequence: Показывать по порядку
+search:
+  favorate: Коллекция
+  local: Установлено
+  market: Мод маркет
 server:
   acceptingMinecraftVersion: Принятие версии Minecraft
   creationHint: Пожалуйста, заполните адрес сервера и протестируйте сервер
   expectedVersions: Поддерживаемые версии
+  export: Экспортный сервер
+  exportNoFilesHint: >-
+    Файлы сервера не найдены. 
+
+    Вы можете запустить сервер на локале один раз, чтобы генерировать некоторые
+    файлы.
+  exportOption: Параметры экспорта сервера
+  exportSSHAuthenticationFailed: |-
+    Все методы аутентификации не удались. 
+    Пожалуйста, проверьте имя пользователя/пароль или закрытый ключ.
+  exportSSHOptions: SSH параметры
+  exportSSHPrivateKeyPath: SSH Private Key Path
+  exportSSHRemotePath: Удаленный путь сервера
+  exportToFolder: Экспорт в папку
   filterVersion: Фильтр сервер ответил Minecraft версия
   host: Хост
   hostHint: Хост (с портом) сервера
+  hostRequired: Пожалуйста, введите IP -адрес сервера
   ipAddress: IP-адрес
   maxPlayers: Максимум игроковr
   motd: Сервер MOTD
@@ -1269,6 +1362,7 @@ server:
   status: Статус сервера
   unknown: Неизвестный сервер
   unknownDescription: Неизвестный сервер. Пожалуйста, обновите.
+  upload: Загрузить сервер
   version: Сервер требует версию
   versionHint: Версия Minecraft для пинга
 serverStatus:
@@ -1277,6 +1371,7 @@ serverStatus:
   refuse: §4Сервер отказал!
   timeout: §4Вышло время подключения к серверу!
 setting:
+  about: О
   allowPrerelease: Скачать предварительную версию
   allowPrereleaseDescription: Предварительная версия может быть нестабильной.
   apiSets:
@@ -1290,6 +1385,7 @@ setting:
   autoDownloadDescription: Автоматическая загрузка обновлений, если они доступны.
   autoInstallOnAppQuit: Автоустановка
   autoInstallOnAppQuitDescription: Автоматическая установка обновлений при выходе из приложения.
+  backdropBlur: Фон размытие
   backgroundColorAbove: Показать цвет фона как наложение
   backgroundColorAboveDescription: Это позволит отобразить цвет фона над фоновым эффектом.
   backgroundImage: Фоновое изображение
@@ -1332,7 +1428,7 @@ setting:
     cardColor: Цвет карточки
     description: Изменить цвета в теме
     errorColor: Цвет ошибки
-    name: Цвет темы
+    name: Цвет темы и размытие
     primaryColor: Основной цвет
     secondaryColor: Вторичный цвет
     sideBarColor: Цвет боковой панели
@@ -1369,6 +1465,9 @@ setting:
   linuxTitlebar: Нативный заголовок окна
   linuxTitlebarDescription: Использовать нативный заголовок окна Linux для лаунчера.
   location: Место для хранения файлов лаунчера
+  manualUpdateHint: >-
+    Версия не может быть обновлена автоматически. Пожалуйста, скачайте пусковую
+    установку заново с официального сайта!
   maunalUpdateHint: >-
     Данная версия не может быть обновлена автоматически. Пожалуйста, скачайте
     лаунчер с сайта ещё раз!
@@ -1450,6 +1549,10 @@ setup:
     exists: >-
       Выбранный каталог не пуст. Это нормально, но убедитесь, что вы сделали
       резервную копию своих данных.
+    invalidChar: |-
+      Путь содержит неверные символы! 
+      Это может привести к тому, что Minecraft не может начать! 
+      PLAESE используют только английские персонажи и символ!
     noPermission: >-
       У лаунчера нет необходимых прав на доступ к выбранному каталогу!
       Пожалуйста, попробуйте другой.
@@ -1501,6 +1604,11 @@ shared:
   accept: Принять
   keepSelected: Сохранить выбранное
   skipForNow: Пропустить сейчас
+sortBy:
+  alphabetAsc: Сортировка по алфавиту (восходящее)
+  alphabetDesc: Сортировка по алфавиту (спуск)
+  timeAsc: Сортировать по времени модификации (восходящая)
+  timeDesc: Сортировать по времени модификации (спуск)
 store:
   explore: Исследовать
   latestMinecraft: Последняя версия Minecraft
@@ -1525,7 +1633,6 @@ task:
     running: Текущее соединение
     size: Общее количество
   connections: Сетевые подключения
-  defaultDescription: Внешний вид Minecraft по умолчанию
   delete:
     content: >-
       Это приведет к удалению файла текстурпака с диска, и мы не сможем его
@@ -1551,11 +1658,11 @@ task:
   showFile: Открыть текстурпак {file} в папке
   showInCurseforge: Показать {name} на curseforge
   unselected: Невыбранные текстурпаки
-  viewBackgroundMusic: Смотреть музыку
 theme:
   selectImage: Выберите изображение
   selectMusic: Выберите музыку
   selectVideo: Выберите видео
+  title: Flame Launcher
 title: Flame Launcher
 transportType:
   host: Хост-кандидат

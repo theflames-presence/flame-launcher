@@ -87,7 +87,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
   }
 
   private getCandidatePath(name: string) {
-    const candidate = this.getPathUnder(filenamify(name))
+    const candidate = this.getPathUnder(filenamify(name, { replacement: '_' }))
     if (!existsSync(candidate)) {
       return candidate
     } else {
@@ -128,7 +128,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     option.name = option.name.trim()
 
     const name = option.name
-    const expectPath = this.getPathUnder(filenamify(name))
+    const expectPath = this.getPathUnder(filenamify(name, { replacement: '_' }))
 
     try {
       if (this.isUnderManaged(path) && expectPath !== path && !existsSync(expectPath)) {
@@ -176,6 +176,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     instance.upstream = option.upstream
     instance.playtime = option.playtime
     instance.lastPlayedDate = option.lastPlayedDate
+    instance.prependCommand = option.prependCommand
 
     if (option.server) {
       instance.server = option.server
@@ -347,7 +348,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
         try {
           await rm(path, { recursive: true, force: true, maxRetries: 1 })
         } catch (e) {
-          if (isSystemError(e) && e.code === ENOENT_ERROR) {
+          if (isSystemError(e) && (e.code === ENOENT_ERROR || e.code === 'EPERM')) {
             this.warn(`Fail to remove instance ${path}`)
           } else {
             if ((e as any).name === 'Error') {
@@ -469,6 +470,23 @@ export class InstanceService extends StatefulService<InstanceState> implements I
       result.disableElybyAuthlib = options.disableElybyAuthlib
     }
 
+    if ('resolution' in options) {
+      // Compare resolution values
+      const currentRes = state.resolution
+      const newRes = options.resolution
+
+      if (!options.resolution) {
+        result.resolution = undefined
+      } else if ((currentRes === undefined && newRes !== undefined) ||
+        (currentRes !== undefined && newRes === undefined) ||
+        (currentRes && newRes &&
+          (currentRes.fullscreen !== newRes.fullscreen ||
+            currentRes.width !== newRes.width ||
+            currentRes.height !== newRes.height))) {
+        result.resolution = options.resolution
+      }
+    }
+
     if ('runtime' in options && options.runtime) {
       const runtime = options.runtime
       const currentRuntime = state.runtime
@@ -562,7 +580,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
   }
 
   async validateInstancePath(path: string) {
-    const err = await validateDirectory(this.app.platform, path)
+    const err = await validateDirectory(this.app.platform, path, true)
     if (err && err !== 'exists') {
       return err
     }
