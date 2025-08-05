@@ -49,12 +49,10 @@ jobs:
 
     - name: Install dependencies
       run: pnpm install
-    - name: Ensure terser is installed
-      run: pnpm add -D terser
     - name: Build all
       run: |
-        pnpm run --prefix xmcl-keystone-ui build
-        pnpm run --prefix xmcl-electron-app build:all
+        pnpm run --prefix=xmcl-electron-app build
+        pnpm run --prefix=xmcl-electron-app build:all
       env:
         BUILD_NUMBER: ${{ secrets.FMCL_VERSION }}
         NODE_OPTIONS: --max-old-space-size=32768
