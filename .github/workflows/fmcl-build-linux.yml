@@ -1,4 +1,4 @@
-name: Build Fmcl For Linux
+name: Build Fmcl For Windows
 
 on:
   push:
@@ -10,33 +10,44 @@ on:
       - 'xmcl-keystone-ui/**'
       - 'xmcl-electron-app/**'
       - 'package.json'
-      - '.github/**'     
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
 
 jobs:
 
-  build:
+  fmcl-build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: recursive
 
-    - uses: pnpm/action-setup@v2.0.1
-      with:
-        version: 9.3.0
-
-    - name: Fix node-gyp and Python
-      run: python3 -m pip install packaging setuptools
-
-    - name: Use Node.js 20
-      uses: actions/setup-node@v2
+    - name: Setup Node.js 20
+      uses: actions/setup-node@v4
       with:
         node-version: 20
-        cache: 'pnpm'
 
-    - name: Install
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v3
+      with:
+        version: 9.3.0
+        run_install: false
+
+    - name: Restore pnpm cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.local/share/pnpm/store/v3
+        key: pnpm-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          pnpm-${{ runner.os }}-
+
+    - name: Fix node-gyp and Python
+      run: |
+        python -m pip install --upgrade pip setuptools wheel packaging
+
+    - name: Install dependencies
       run: pnpm install
 
     - name: Build all
@@ -49,35 +60,41 @@ jobs:
         NODE_ENV: production
         CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_TOKEN }}
 
-    - name: FMCL-x64-Upload-Deb
-      uses: actions/upload-artifact@v4
+    - name: Fmcl-build-installer-x64
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
       with:
-        name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Deb
-        path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-amd64.deb
+        path: src/flamelauncher-build-x64.iss
+        options: /O+
 
-    - name: FMCL-x32-Upload-Deb
-      uses: actions/upload-artifact@v4
+    - name: Fmcl-build-installer-x32
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
       with:
-        name: FMCL-LINUX-x32-v${{ secrets.FMCL_VERSION }}-Deb
-        path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.deb
+        path: src/flamelauncher-build-x32.iss
+        options: /O+
 
-    - name: FMCL-x64-Upload-Appimage
+    - name: FMCL-x64-Upload-App
       uses: actions/upload-artifact@v4
       with:
-        name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Appimage
-        path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-x86_64.AppImage
+        name: FMCL-WINDOWS-x64-v${{ secrets.FMCL_VERSION }}-App
+        path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
 
-    - name: FMCL-x64-Upload-Zip
+    - name: FMCL-x32-Upload-App
       uses: actions/upload-artifact@v4
       with:
-        name: FMCL-LINUX-x64-v${{ secrets.FMCL_VERSION }}-Zip
-        path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-x64.tar.xz
+        name: FMCL-WINDOWS-x32-v${{ secrets.FMCL_VERSION }}-App
+        path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
 
-    - name: FMCL-x32-Upload-Zip
+    - name: FMCL-x64-Upload-Archive
       uses: actions/upload-artifact@v4
       with:
-        name: FMCL-LINUX-x32-v${{ secrets.FMCL_VERSION }}-Zip
-        path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.tar.xz
+        name: FMCL-WINDOWS-x64-v${{ secrets.FMCL_VERSION }}-Zip
+        path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
+
+    - name: FMCL-x32-Upload-Archive
+      uses: actions/upload-artifact@v4
+      with:
+        name: FMCL-WINDOWS-x32-v${{ secrets.FMCL_VERSION }}-Zip
+        path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-ia32.zip
 
     - name: Create Github Release
       id: create-new-release
@@ -88,52 +105,46 @@ jobs:
         tag_name: v${{ secrets.FMCL_VERSION }}
         release_name: v${{ secrets.FMCL_VERSION }}
 
-    - name: FMCL-x64-Upload Deb to Github
+    - name: FMCL-x64-Upload Archive to Github 
+      id: upload-release-x64-archive
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-new-release.outputs.upload_url }}
-        asset_path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-amd64.deb
-        asset_name: fmcl-${{ secrets.FMCL_VERSION }}-amd64.deb
-        asset_content_type: application/vnd.debian.binary-package
+        asset_path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
+        asset_name: fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
+        asset_content_type: application/zip
 
-    - name: FMCL-x32-Upload Deb to Github
+    - name: FMCL-x32-Upload Archive to Github 
+      id: upload-release-x32-archive
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-new-release.outputs.upload_url }}
-        asset_path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.deb
-        asset_name: fmcl-${{ secrets.FMCL_VERSION }}-arm64.deb
-        asset_content_type: application/vnd.debian.binary-package
+        asset_path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-ia32.zip
+        asset_name: fmcl-${{ secrets.FMCL_VERSION }}-win32-ia32.zip
+        asset_content_type: application/zip
 
-    - name: FMCL-x64-Upload AppImage to Github
+    - name: FMCL-x64-Upload App to Github 
+      id: upload-release-x64-app
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-new-release.outputs.upload_url }}
-        asset_path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-x86_64.AppImage
-        asset_name: fmcl-${{ secrets.FMCL_VERSION }}-x86_64.AppImage
-        asset_content_type: application/octet-stream
+        asset_path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
+        asset_name: Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
+        asset_content_type: application/vnd.microsoft.portable-executable
 
-    - name: FMCL-x64-Upload Zip to Github
+    - name: FMCL-x32-Upload App to Github 
+      id: upload-release-x32-app
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-new-release.outputs.upload_url }}
-        asset_path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-x64.tar.xz
-        asset_name: fmcl-${{ secrets.FMCL_VERSION }}-x64.tar.xz
-        asset_content_type: application/x-xz
-
-    - name: FMCL-x32-Upload Zip to Github
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create-new-release.outputs.upload_url }}
-        asset_path: xmcl-electron-app/build/output/fmcl-${{ secrets.FMCL_VERSION }}-arm64.tar.xz
-        asset_name: fmcl-${{ secrets.FMCL_VERSION }}-arm64.tar.xz
-        asset_content_type: application/x-xz
+        asset_path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
+        asset_name: Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x32.exe
+        asset_content_type: application/vnd.microsoft.portable-executable
