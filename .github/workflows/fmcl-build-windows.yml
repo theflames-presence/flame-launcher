@@ -10,8 +10,9 @@ on:
       - 'xmcl-keystone-ui/**'
       - 'xmcl-electron-app/**'
       - 'package.json'
+      - 'pnpm-lock.yaml'
   workflow_dispatch:
-  
+
 jobs:
 
   fmcl-build:
@@ -22,16 +23,18 @@ jobs:
     - uses: actions/checkout@v3
       with:
         submodules: recursive
-    - uses: pnpm/action-setup@v2.0.1
-      with:
-        version: 9.3.0
-    - name: Fix node-gyp and Python
-      run: python3 -m pip install packaging setuptools
-    - name: Use Node.js 20
-      uses: actions/setup-node@v2
+
+    # ✅ Setup Node.js and pnpm with proper cache
+    - name: Setup Node.js 20 with pnpm cache
+      uses: actions/setup-node@v3
       with:
         node-version: 20
         cache: 'pnpm'
+
+    # ✅ Fix Python/node-gyp support
+    - name: Fix node-gyp and Python
+      run: |
+        python -m pip install --upgrade pip setuptools wheel packaging
 
     - name: Install dependencies
       run: pnpm install
@@ -45,7 +48,7 @@ jobs:
         NODE_OPTIONS: --max-old-space-size=32768
         NODE_ENV: production
         CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_TOKEN }}
-      
+
     - name: Fmcl-build-installer-x64
       uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
       with:
@@ -75,14 +78,13 @@ jobs:
       with:
         name: FMCL-WINDOWS-x64-v${{ secrets.FMCL_VERSION }}-Zip
         path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
-      
+
     - name: FMCL-x32-Upload-Archive
       uses: actions/upload-artifact@v4
       with:
         name: FMCL-WINDOWS-x32-v${{ secrets.FMCL_VERSION }}-Zip
         path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-ia32.zip
-    
-    
+
     - name: Create Github Release
       id: create-new-release
       uses: actions/create-release@v1
@@ -91,7 +93,7 @@ jobs:
       with:
         tag_name: v${{ secrets.FMCL_VERSION }}
         release_name: v${{ secrets.FMCL_VERSION }}
-    
+
     - name: FMCL-x64-Upload Archive to Github 
       id: upload-release-x64-archive
       uses: actions/upload-release-asset@v1
@@ -102,7 +104,7 @@ jobs:
         asset_path: xmcl-electron-app\build\output\fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
         asset_name: fmcl-${{ secrets.FMCL_VERSION }}-win32-x64.zip
         asset_content_type: application/zip
-    
+
     - name: FMCL-x32-Upload Archive to Github 
       id: upload-release-x32-archive
       uses: actions/upload-release-asset@v1
@@ -124,7 +126,7 @@ jobs:
         asset_path: src\output\Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
         asset_name: Flame-Launcher.-v${{ secrets.FMCL_VERSION }}.-setup-x64.exe
         asset_content_type: application/vnd.microsoft.portable-executable
-    
+
     - name: FMCL-x32-Upload App to Github 
       id: upload-release-x32-app
       uses: actions/upload-release-asset@v1
